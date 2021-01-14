@@ -10,8 +10,9 @@
  {% set title = page.content.h1 %}
 {% endif %}
 
-{% import view('/component/macro.html.twig') as helper %}
 
+{% block card %}
+    {% import view('/component/macro.html.twig') as helper %}
 <article class="overflow-hidden rounded-lg shadow-lg">
 
     {% if image is defined and image is not null %}
@@ -29,3 +30,4 @@
     </header>
 
 </article>
+{% endblock %}
