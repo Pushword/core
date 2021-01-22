@@ -8,6 +8,7 @@ use Pushword\Core\Entity\MediaInterface;
 use Pushword\Core\Utils\Filepath;
 use Spatie\ImageOptimizer\OptimizerChain;
 use Spatie\ImageOptimizer\OptimizerChainFactory;
+use Symfony\Component\Filesystem\Filesystem;
 
 class ImageManager
 {
@@ -81,12 +82,21 @@ class ImageManager
 
         $quality = $filters[$filterName]['quality'] ?? 90;
 
+        $this->createFilterDir(\dirname($this->getFilterPath($media, $filterName)));
+
         $image->save($this->getFilterPath($media, $filterName), $quality);
         $image->save($this->getFilterPath($media, $filterName, 'webp'), $quality, 'webp');
 
         $this->getFilterPath($media, $filterName);
 
         return $image;
+    }
+
+    private function createFilterDir(string $path): void
+    {
+        if (! file_exists($path)) {
+            (new Filesystem())->mkdir($path);
+        }
     }
 
     public function optimize(MediaInterface $media)
