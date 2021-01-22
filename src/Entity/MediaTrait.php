@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use InvertColor\Color;
 use Pushword\Core\Entity\SharedTrait\TimestampableTrait;
 use Pushword\Core\Utils\Filepath;
-use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -71,7 +71,7 @@ trait MediaTrait
      *     dimensions="dimensions"
      * )
      *
-     * @var File
+     * @var UploadedFile
      */
     protected $mediaFile;
 
@@ -207,7 +207,7 @@ trait MediaTrait
         return $this->slug;
     }
 
-    public function setMediaFile(?File $media = null): void
+    public function setMediaFile(?UploadedFile $media = null): void
     {
         $this->mediaFile = $media;
 
@@ -216,7 +216,7 @@ trait MediaTrait
         }
     }
 
-    public function getMediaFile(): ?File
+    public function getMediaFile(): ?UploadedFile
     {
         return $this->mediaFile;
     }

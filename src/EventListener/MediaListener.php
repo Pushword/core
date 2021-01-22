@@ -91,7 +91,7 @@ class MediaListener
      */
     protected function checkIfThereIsAName(MediaInterface $media): void
     {
-        if (null === $media->getName() || empty($media->getName())) {
+        if (empty($media->getName())) {
             $media->setName(preg_replace('/\\.[^.\\s]{3,4}$/', '', $media->getMediaFile()->getClientOriginalName()));
         }
     }

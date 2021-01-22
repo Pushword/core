@@ -46,31 +46,46 @@ class Configuration implements ConfigurationInterface
         'height_300' => [
             'quality' => 82,
             'filters' => [
-                'heighten_notupsize' => 300,
+                'heighten' => [
+                    300,
+                    'constraint' => '$constraint->upsize();',
+                ],
             ],
         ],
         'xs' => [
             'quality' => 85,
             'filters' => [
-                'widen_notupsize' => 576,
+                'widen' => [
+                    576,
+                    'constraint' => '$constraint->upsize();',
+                ],
             ],
         ],
         'sm' => [
             'quality' => 85,
             'filters' => [
-                'widen_notupsize' => 768,
+                'widen' => [
+                    768,
+                    'constraint' => '$constraint->upsize();',
+                ],
             ],
         ],
         'md' => [
             'quality' => 85,
             'filters' => [
-                'widen_notupsize' => 992,
+                'widen' => [
+                    992,
+                    'constraint' => '$constraint->upsize();',
+                ],
             ],
         ],
         'lg' => [
             'quality' => 85,
             'filters' => [
-                'widen_notupsize' => 1200,
+                'widen' => [
+                    1200,
+                    'constraint' => '$constraint->upsize();',
+                ],
             ],
         ],
         'xl' => [

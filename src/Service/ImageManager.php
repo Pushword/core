@@ -28,6 +28,11 @@ class ImageManager
         $this->optimizer = OptimizerChainFactory::create(); // todo make optimizer bin path configurable
     }
 
+    public function setFilters(array $filters): void
+    {
+        $this->filterSets = $filters;
+    }
+
     /**
      * @param MediaInterface|string $media
      */
@@ -53,19 +58,28 @@ class ImageManager
 
     /**
      * @param MediaInterface|string $media
+     * @param string|array          $filter
      */
-    private function generateFilteredCache($media, string $filterName, ?Image $originalImage = null): Image
+    public function generateFilteredCache($media, $filter, ?Image $originalImage = null): Image
     {
+        if (\is_array($filter)) {
+            $filterName = array_keys($filter)[0];
+            $filters = $filter;
+        } else {
+            $filters = $this->filterSets;
+            $filterName = $filter;
+        }
+
         $image = null === $originalImage ? $this->getImage($media)
             : ('default' == $filterName ? $originalImage : clone $originalImage); // don't clone if default for speed perf
 
-        foreach ($this->filterSets[$filterName]['filters'] as $filter => $parameters) {
+        foreach ($filters[$filterName]['filters'] as $filter => $parameters) {
             $parameters = \is_array($parameters) ? $parameters : [$parameters];
             $this->normalizeFilter($filter, $parameters);
             \call_user_func_array([$image, $filter], $parameters);
         }
 
-        $quality = $this->filterSets[$filterName]['quality'] ?? 90;
+        $quality = $filters[$filterName]['quality'] ?? 90;
 
         $image->save($this->getFilterPath($media, $filterName), $quality);
         $image->save($this->getFilterPath($media, $filterName, 'webp'), $quality, 'webp');
@@ -107,13 +121,6 @@ class ImageManager
             $filter = 'resize';
         }
 
-        if (str_ends_with($filter, '_notupsize')) {
-            $parameters[] = function ($constraint) {
-                $constraint->upsize();
-            };
-            $filter = str_replace('_notupsize', '', $filter);
-        }
-
         if (isset($parameters['constraint']) && \is_string($parameters['constraint'])) {
             $parameters[] = eval("return function(\$constraint) {{$parameters['constraint']}};");
             unset($parameters['constraint']);
@@ -123,10 +130,10 @@ class ImageManager
     /**
      * @param MediaInterface|string $media
      */
-    public function getFilterPath($media, string $filterName = null, ?string $extension = null, $browserPath = false): string
+    public function getFilterPath($media, string $filterName, ?string $extension = null, $browserPath = false): string
     {
         /** @var string $media */
-        $media = $media instanceof MediaInterface ? $media->getMedia() : $media;
+        $media = $media instanceof MediaInterface ? $media->getMedia() : Filepath::filename($media);
 
         $fileName = null === $extension ? $media : Filepath::removeExtension($media).'.'.$extension;
 
@@ -156,9 +163,8 @@ class ImageManager
      */
     public function remove($media): void
     {
-        if ($media instanceof MediaInterface) {
-            $media = $media->getMedia();
-        }
+        /** @var string $media */
+        $media = $media instanceof MediaInterface ? $media->getMedia() : Filepath::filename($media);
 
         $filterNames = array_keys($this->filterSets);
         foreach ($filterNames as $filterName) {
