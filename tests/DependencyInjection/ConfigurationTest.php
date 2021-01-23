@@ -14,7 +14,7 @@ class ConfigurationTest extends TestCase
     {
         $config = $this->process([]);
 
-        $this->assertSame($config['default_locale'], '%kernel.default_locale%');
+        $this->assertSame($config['locale'], '%kernel.default_locale%');
     }
 
     protected function process($configs): array
