@@ -33,6 +33,3 @@ exec('php bin/console doctrine:schema:create -q && php bin/console doctrine:fixt
 // Symlink assets
 exec('php bin/console assets:install --symlink --relative -q');
 \Pushword\Installer\PostInstall::dumpFile('public/build/manifest.json', '{}');
-unlink('package.json');
-\Pushword\Installer\PostInstall::remove('assets');
-\Pushword\Installer\PostInstall::mirror('vendor/pushword/skeleton/assets', 'assets');
