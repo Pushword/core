@@ -23,18 +23,7 @@ class NewCommand extends Command
     {
         $this
             ->setName('pushword:new')
-            ->setDescription('Add a new website.');
-    }
-
-    protected function getMedias(InputInterface $input)
-    {
-        $repo = $this->em->getRepository($this->mediaClass);
-
-        if ($input->getArgument('media')) {
-            return $repo->findBy(['media' => $input->getArgument('media')]);
-        }
-
-        return $repo->findAll();
+            ->setDescription('Add a new website into your config file (config/packages/pushword.yaml).');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
