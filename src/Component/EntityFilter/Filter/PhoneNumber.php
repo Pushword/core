@@ -1,13 +1,20 @@
 <?php
 
-namespace Pushword\Core\Component\Filter\Filters;
+namespace Pushword\Core\Component\EntityFilter\Filter;
 
 use Pushword\Core\Twig\PhoneNumberTwigTrait;
 
-class PhoneNumber extends ShortCode
+class PhoneNumber extends AbstractFilter
 {
     use PhoneNumberTwigTrait;
+    use RequiredAppTrait;
+    use RequiredTwigTrait;
 
+    /**
+     * @param string $string
+     *
+     * @return string
+     */
     public function apply($string)
     {
         $string = $this->convertPhoneNumber($string);
@@ -15,7 +22,7 @@ class PhoneNumber extends ShortCode
         return $string;
     }
 
-    public function convertPhoneNumber($body)
+    private function convertPhoneNumber(string $body): string
     {
         $rgx = '/ (?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4} /iU';
         preg_match_all($rgx, $body, $matches);

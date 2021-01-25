@@ -1,6 +1,6 @@
 <?php
 
-namespace Pushword\Core\Tests\Extension;
+namespace Pushword\Core\Tests\Component;
 
 use Pushword\Core\Component\Router\Router;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

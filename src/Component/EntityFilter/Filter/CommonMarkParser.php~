@@ -1,8 +1,7 @@
 <?php
 
-namespace Pushword\Core\Component\Filter;
+namespace Pushword\Core\Component\EntityFilter\Filter;
 
-use Knp\Bundle\MarkdownBundle\MarkdownParserInterface;
 use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\Environment;
 use League\CommonMark\Extension\Attributes\AttributesExtension;
@@ -13,7 +12,7 @@ use League\CommonMark\Extension\Table\TableExtension;
 /**
  * TODO: missing https://michelf.ca/projects/php-markdown/extra/#markdown-attr to switch to commonmark.
  */
-class CommonMarkParser implements MarkdownParserInterface
+class CommonMarkParser
 {
     protected Environment $env;
 
@@ -40,7 +39,7 @@ class CommonMarkParser implements MarkdownParserInterface
         return $this->converter;
     }
 
-    public function transformMarkdown($text)
+    public function transform($text)
     {
         return $this->getConverter()->convertToHtml($text);
     }

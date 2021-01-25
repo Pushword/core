@@ -2,7 +2,6 @@
 
 namespace Pushword\Core\Entity;
 
-use Pushword\Core\Component\Filter\FilterInterface;
 use Pushword\Core\Entity\SharedTrait\CustomPropertiesInterface;
 use Pushword\Core\Entity\SharedTrait\HostInterface;
 use Pushword\Core\Entity\SharedTrait\IdInterface;
@@ -52,8 +51,6 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
     public function getTitle();
 
     public function getName();
-
-    public function setContent(FilterInterface $mainContentManager);
 
     // PageI18n
     public function getLocale();

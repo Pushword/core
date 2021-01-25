@@ -1,21 +1,26 @@
 <?php
 
-namespace Pushword\Core\Component\Filter\Filters;
+namespace Pushword\Core\Component\EntityFilter\Filter;
 
-class Date extends ShortCode
+class Date extends AbstractFilter
 {
+    use RequiredAppTrait;
+
+    /**
+     * @param string $string
+     *
+     * @return string
+     */
     public function apply($string)
     {
-        $string = $this->convertDateShortCode($string, $this->app->getDefaultLocale());
-
-        return $string;
+        return $this->convertDateShortCode($string, $this->getApp()->getDefaultLocale());
     }
 
-    public function convertDateShortCode($string, $locale = null)
+    private function convertDateShortCode(string $string, ?string $locale = null): string
     {
         //var_dump($string); exit;
         if ($locale) {
-            setlocale(\LC_TIME, self::convertLocale($locale));
+            setlocale(\LC_TIME, $this->convertLocale($locale));
         }
 
         //$string = preg_replace('/date\([\'"]?([a-z% ]+)[\'"]?\)/i',
@@ -28,7 +33,7 @@ class Date extends ShortCode
         return $string;
     }
 
-    public static function convertLocale($locale)
+    private function convertLocale($locale)
     {
         if ('fr' == $locale) {
             return 'fr_FR';
