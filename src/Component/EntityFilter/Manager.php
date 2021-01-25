@@ -4,32 +4,37 @@ namespace Pushword\Core\Component\EntityFilter;
 
 use Exception;
 use Pushword\Core\Component\App\AppConfig;
-use Pushword\Core\Component\EntityFilter\Filter\FilterInterface;
 use Pushword\Core\Component\App\AppPool;
+use Pushword\Core\Component\EntityFilter\Filter\FilterInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment as Twig;
 
 class Manager
 {
-
     private $entity;
     private AppConfig $app;
     private AppPool $apps;
     private Twig $twig;
-    private array $filters;
+    private EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
         AppPool $apps,
         Twig $twig,
+        EventDispatcherInterface $eventDispatcher,
         $entity
-    )
-    {
+    ) {
         $this->apps = $apps;
         $this->twig = $twig;
         $this->entity = $entity;
+        $this->eventDispatcher = $eventDispatcher;
         $this->app = method_exists($entity, 'getHost') ? $this->apps->get($entity->getHost()) : $apps->get();
     }
 
-    public
+    public function getEntity(): object
+    {
+        return $this->entity;
+    }
+
     /**
      * Magic getter for Entity properties.
      *
@@ -44,7 +49,12 @@ class Manager
         $returnValue = $arguments ? \call_user_func_array([$this->entity, $method], $arguments)
             : \call_user_func([$this->entity, $method]);
 
-        return $this->filter(substr($method, 3), $returnValue);
+        $returnValue = $this->filter(substr($method, 3), $returnValue);
+
+        $event = new AfterFilterEvent($this, substr($method, 3));
+        $this->eventDispatcher->dispatch($event, AfterFilterEvent::NAME);
+
+        return $returnValue;
     }
 
     /**

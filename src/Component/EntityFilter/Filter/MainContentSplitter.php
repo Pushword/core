@@ -19,11 +19,9 @@ class MainContentSplitter extends AbstractFilter
     private string $toc = '';
     private string $content = '';
     private string $postContent = '';
-    private bool $splitted = false;
+    private array $contentPart = [];
 
     /**
-     * @param string $string
-     *
      * @return self
      */
     public function apply($string)
@@ -33,12 +31,8 @@ class MainContentSplitter extends AbstractFilter
         return $this;
     }
 
-    private function split(string $mainContent): void
+    private function split($mainContent): void
     {
-        if (true === $this->splitted) {
-            return;
-        }
-
         $this->content = (string) $mainContent;
 
         $parsedContent = explode('<!--break-->', $this->content);

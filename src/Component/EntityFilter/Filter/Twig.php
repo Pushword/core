@@ -10,8 +10,6 @@ class Twig extends AbstractFilter
     use RequiredTwigTrait;
 
     /**
-     * @param string $string
-     *
      * @return string
      */
     public function apply($string)

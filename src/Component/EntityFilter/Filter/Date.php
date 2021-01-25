@@ -7,8 +7,6 @@ class Date extends AbstractFilter
     use RequiredAppTrait;
 
     /**
-     * @param string $string
-     *
      * @return string
      */
     public function apply($string)

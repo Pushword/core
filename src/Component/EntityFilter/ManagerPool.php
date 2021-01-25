@@ -3,6 +3,7 @@
 namespace Pushword\Core\Component\EntityFilter;
 
 use Pushword\Core\Component\App\AppPool;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment as Twig;
 
 class ManagerPool implements ManagerPoolInterface
@@ -13,6 +14,9 @@ class ManagerPool implements ManagerPoolInterface
     /** @required */
     public Twig $twig;
 
+    /** @required */
+    public EventDispatcherInterface $eventDispatcher;
+
     private array $entityFilterManagers = [];
 
     public function getManager(object $entity): Manager
@@ -21,7 +25,7 @@ class ManagerPool implements ManagerPoolInterface
             return $this->entityFilterManagers[$entity->getId()];
         }
 
-        $this->entityFilterManagers[$entity->getId()] = new Manager($this->apps, $this->twig, $entity);
+        $this->entityFilterManagers[$entity->getId()] = new Manager($this->apps, $this->twig, $this->eventDispatcher, $entity);
 
         return $this->entityFilterManagers[$entity->getId()];
     }

@@ -7,8 +7,6 @@ use Pushword\Core\Utils\HtmlBeautifer;
 class Punctuation extends AbstractFilter
 {
     /**
-     * @param string $string
-     *
      * @return string
      */
     public function apply($string)
