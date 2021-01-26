@@ -128,7 +128,7 @@ class AppPool
 
     public function getApp(?string $key = null, string $host = '')
     {
-        if (null === $host) {
+        if (! $host) {
             $host = $this->currentApp;
         }
 
