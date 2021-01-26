@@ -8,9 +8,10 @@ use Symfony\Contracts\EventDispatcher\Event;
  * The order.placed event is dispatched each time an order is created
  * in the system.
  */
-class AfterFilterEvent extends Event
+class FilterEvent extends Event
 {
-    public const NAME = 'entity_filter.after_filtering';
+    public const NAME_BEFORE = 'entity_filter.before_filtering';
+    public const NAME_AFTER = 'entity_filter.after_filtering';
 
     private Manager $manager;
     private string $property;
@@ -21,7 +22,7 @@ class AfterFilterEvent extends Event
         $this->property = $property;
     }
 
-    public function getManager(): manager
+    public function getManager(): Manager
     {
         return $this->manager;
     }
