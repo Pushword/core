@@ -24,10 +24,10 @@ class Configuration implements ConfigurationInterface
     const DEFAULT_ENTITY_CAN_OVERRIDE_FILTERS = true;
 
     const DEFAULT_FILTERS = [
-        'main_content' => 'twig,date,email,encryptedLink,image,phoneNumber,punctuation,markdown,unprose,mainContentSplitter',
-        'name' => 'twig,date,name',
-        'title' => 'twig,date,elseH1',
-        'string' => 'twig,date,email,encryptedLink,phoneNumber',
+        'main_content' => 'twig,date,email,encryptedLink,image,phoneNumber,punctuation,markdown,unprose,mainContentSplitter,extended',
+        'name' => 'twig,date,name,extended',
+        'title' => 'twig,date,elseH1,extended',
+        'string' => 'twig,date,email,encryptedLink,phoneNumber,extended',
     ];
 
     const DEFAULT_ASSETS = [

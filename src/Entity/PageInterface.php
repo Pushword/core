@@ -56,4 +56,9 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
     public function getLocale();
 
     public function setLocale($locale);
+
+    // Page Extended
+    public function getExtendedPage(): ?self;
+
+    public function setExtendPage(?self $extendedPage): self;
 }

@@ -14,20 +14,21 @@ class Manager
     private $entity;
     private AppConfig $app;
     private AppPool $apps;
+    private ManagerPool $managerPool;
     private Twig $twig;
     private EventDispatcherInterface $eventDispatcher;
 
     public function __construct(
-        AppPool $apps,
-        Twig $twig,
+        ManagerPool $managerPool,
         EventDispatcherInterface $eventDispatcher,
         $entity
     ) {
-        $this->apps = $apps;
-        $this->twig = $twig;
+        $this->managerPool = $managerPool;
+        $this->apps = $managerPool->apps;
+        $this->twig = $managerPool->twig;
         $this->entity = $entity;
         $this->eventDispatcher = $eventDispatcher;
-        $this->app = method_exists($entity, 'getHost') ? $this->apps->get($entity->getHost()) : $apps->get();
+        $this->app = method_exists($entity, 'getHost') ? $this->apps->get($entity->getHost()) : $this->apps->get();
     }
 
     public function getEntity(): object
@@ -75,7 +76,7 @@ class Manager
             $filters = $this->getFilters('string');
         }
 
-        return $filters ? $this->applyFilters($propertyValue ?: '', $filters) : $propertyValue;
+        return $filters ? $this->applyFilters($property, $propertyValue ?: '', $filters) : $propertyValue;
     }
 
     private function camelCaseToSnakeCase(string $string): string
@@ -127,17 +128,25 @@ class Manager
             $filterClass->setManager($this);
         }
 
+        if (method_exists($filterClass, 'setManagerPool')) {
+            $filterClass->setManagerPool($this->managerPool);
+        }
+
         // todo autowire
         return $filterClass;
     }
 
-    private function applyFilters($propertyValue, array $filters)
+    private function applyFilters(string $property, $propertyValue, array $filters)
     {
         foreach ($filters as $filter) {
             if (\in_array($this->entity->getCustomProperty('filter_'.$this->className($filter)), [0, false], true)) {
                 continue;
             }
             $filterClass = $this->getFilterClass($filter);
+
+            if (method_exists($filterClass, 'setProperty')) {
+                $filterClass->setProperty($property);
+            }
 
             $propertyValue = $filterClass->apply($propertyValue);
         }

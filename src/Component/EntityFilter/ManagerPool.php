@@ -25,7 +25,7 @@ class ManagerPool implements ManagerPoolInterface
             return $this->entityFilterManagers[$entity->getId()];
         }
 
-        $this->entityFilterManagers[$entity->getId()] = new Manager($this->apps, $this->twig, $this->eventDispatcher, $entity);
+        $this->entityFilterManagers[$entity->getId()] = new Manager($this, $this->eventDispatcher, $entity);
 
         return $this->entityFilterManagers[$entity->getId()];
     }

@@ -17,7 +17,7 @@ trait PageExtendedTrait
         return $this->extendedPage;
     }
 
-    public function setExtendPage(?PageInterface $extendedPage): self
+    public function setExtendPage(?PageInterface $extendedPage): PageInterface
     {
         $this->extendedPage = $extendedPage;
 
