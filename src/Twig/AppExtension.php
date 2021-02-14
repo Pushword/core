@@ -15,6 +15,7 @@ use Pushword\Core\Entity\MediaInterface;
 use Pushword\Core\Entity\PageInterface as Page;
 use Pushword\Core\Repository\Repository;
 use Pushword\Core\Service\ImageManager;
+use Pushword\Core\Utils\FilesizeFormatter;
 use Pushword\Core\Utils\HtmlBeautifer;
 use Pushword\Core\Utils\MarkdownParser;
 use Twig\Environment as Twig;
@@ -100,6 +101,7 @@ class AppExtension extends AbstractExtension
             new TwigFunction('pages', [$this, 'getPublishedPages'], self::options()),
             new TwigFunction('class', [$this, 'getHtmlClass'], self::options()),
             new TwigFunction('pw', [$this->entityFilterManagerPool, 'getProperty'], self::options()),
+            new TwigFunction('filesize', [FilesizeFormatter::class, 'formatBytes'], self::options()),
         ];
     }
 
