@@ -116,7 +116,6 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('entity_page')->defaultValue('App\Entity\Page')->cannotBeEmpty()->end()
             ->scalarNode('entity_media')->defaultValue('App\Entity\Media')->cannotBeEmpty()->end()
             ->scalarNode('entity_user')->defaultValue('App\Entity\User')->cannotBeEmpty()->end()
-            ->scalarNode('entity_pagehasmedia')->defaultValue('App\Entity\PageHasMedia')->cannotBeEmpty()->end()
             ->scalarNode('media_dir')
                 ->defaultValue('%kernel.project_dir%/media')->cannotBeEmpty()
                 ->info('Dir where files will be uploaded when using admin.')

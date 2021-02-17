@@ -77,10 +77,10 @@ class AppExtension extends AbstractExtension
     public function getFunctions()
     {
         return [
-            new TwigFunction('view', [$this, 'getView'], ['needs_environment' => true]),
+            new TwigFunction('view', [$this, 'getView'], ['needs_environment' => false]),
             new TwigFunction('is_current_page', [$this, 'isCurrentPage']), // used ?
             new TwigFunction('is_internal_image', [self::class, 'isInternalImage']), // used ?
-            new TwigFunction('img_to_media', [self::class, 'transformInlineImageToMedia']), // used ?
+            new TwigFunction('media_from_string', [$this, 'transformStringToMedia']), // used ?
             // loaded from trait
             new TwigFunction('jslink', [$this, 'renderEncryptedLink'], self::options()),
             new TwigFunction('link', [$this, 'renderEncryptedLink'], self::options()),
@@ -94,10 +94,7 @@ class AppExtension extends AbstractExtension
             new TwigFunction('video', [$this, 'renderVideo'], self::options()),
             new TwigFunction('url_to_embed', [$this, 'getEmbedCode']),
             new TwigFunction('pager', [$this, 'renderPager'], self::options(true)),
-            new TwigFunction('list', [$this, 'renderPagesList'], self::options(true)),
-            new TwigFunction('card_list', [$this, 'renderPagesListCard'], self::options(true)),
-            new TwigFunction('children', [$this, 'renderChildrenList'], self::options(true)),
-            new TwigFunction('card_children', [$this, 'renderChildrenListCard'], self::options(true)),
+            new TwigFunction('pages_list', [$this, 'renderPagesList'], self::options(true)),
             new TwigFunction('pages', [$this, 'getPublishedPages'], self::options()),
             new TwigFunction('class', [$this, 'getHtmlClass'], self::options()),
             new TwigFunction('pw', [$this->entityFilterManagerPool, 'getProperty'], self::options()),
@@ -110,9 +107,10 @@ class AppExtension extends AbstractExtension
         return Repository::getPageRepository($this->em, $this->pageClass)->getPublishedPages($host, $where, $orderBy, $limit);
     }
 
-    public function getView(Twig $twig, $path)
+    public function getView(string $path, ?string $fallback = null)
     {
-        return $this->apps->get()->getView($path, $twig);
+        return $fallback ? $this->apps->get()->getView($path, $fallback)
+            : $this->apps->get()->getView($path);
     }
 
     public static function options($needsEnv = false, $isSafe = ['html'])
@@ -125,10 +123,23 @@ class AppExtension extends AbstractExtension
         return 0 === strpos($media, '/media/default/');
     }
 
-    public static function transformInlineImageToMedia($src): MediaInterface
+    /**
+     * Convert the source path (often /media/default/... or just ...) in a Media Object
+     * /!\ No search in db.
+     *
+     * @param string|MediaInterface $src
+     */
+    public function transformStringToMedia($src, string $name = ''): MediaInterface
     {
         if (\is_string($src) && self::isInternalImage($src)) {
-            return Media::loadFromSrc($src);
+            $media = Media::loadFromSrc($src);
+            $media->setName($name);
+
+            return $media;
+        }
+
+        if (\is_string($src) && false !== $this->imageManager->cacheExternalImage($src)) {
+            return $this->imageManager->importExternal($src, $name);
         }
 
         if (! $src instanceof MediaInterface) {
@@ -138,7 +149,7 @@ class AppExtension extends AbstractExtension
         return $src;
     }
 
-    public function isCurrentPage(string $uri, ?Page $currentPage)
+    public function isCurrentPage(string $uri, ?Page $currentPage): bool
     {
         return
             null === $currentPage || $uri != $this->router->generate($currentPage->getRealSlug())
