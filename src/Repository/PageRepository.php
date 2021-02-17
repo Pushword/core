@@ -118,12 +118,16 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         $qb = $this->createQueryBuilder('p');
 
         $or = $qb->expr()->orX();
-        $or->add($qb->expr()->like('p.mainContent', '%"'.$media.'"%')); // catch: 'example.jpg'
-         $or->add($qb->expr()->like('p.mainContent', "%'".$media."'%")); // catch: "example.jpg'
-         $or->add($qb->expr()->like('p.mainContent', '%/media/default/'.$media.'%')); // catch: media/default/example.jpg
-         $or->add($qb->expr()->like('p.mainContent', '%/media/thumb/'.$media.'%'));
-        $or->add($qb->expr()->like('p.mainContent', '%/media/xl/'.$media.'%'));
-        $query = $qb->where($or)->getQuery();
+        $or->add($qb->expr()->like('p.mainContent', ':apostrophMedia')); // catch: 'example.jpg'
+        $or->add($qb->expr()->like('p.mainContent', ':quotedMedia')); // catch: "example.jpg'
+        $or->add($qb->expr()->like('p.mainContent', ':defaultMedia')); // catch: media/default/example.jpg
+        $or->add($qb->expr()->like('p.mainContent', ':thumbMedia'));
+        $query = $qb->where($or)->setParameters([
+            'apostrophMedia' => '%\''.$media.'\'%',
+            'quotedMedia' => '%"'.$media.'"%',
+            'defaultMedia' => '/media/default/'.$media.'%',
+            'thumbMedia' => '/media/thumb/'.$media.'%',
+        ])->getQuery();
 
         return $query->getResult();
     }

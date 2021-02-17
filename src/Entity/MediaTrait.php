@@ -142,7 +142,7 @@ trait MediaTrait
      */
     public static function loadFromSrc(string $src): self
     {
-        $src = substr($src, \strlen('/media/default/'));
+        $src = false !== strpos($src, '/') ? substr($src, \strlen('/media/default/')) : $src;
 
         $media = new self();
         $media->setMedia($src);

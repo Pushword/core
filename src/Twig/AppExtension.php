@@ -120,7 +120,7 @@ class AppExtension extends AbstractExtension
 
     public static function isInternalImage(string $media): bool
     {
-        return 0 === strpos($media, '/media/default/');
+        return 0 === strpos($media, '/media/default/') || false === strpos($media, '/');
     }
 
     /**

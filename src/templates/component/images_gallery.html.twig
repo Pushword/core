@@ -3,6 +3,7 @@
 {#
     @var string gallery_container_class
     @var string gallery_class
+    @var string image_filter
     @var array images where key is name (facultative) and value is path or internale "name"
 #}
 
@@ -14,7 +15,7 @@
             <ul class="{{ gallery_class|default('grid sm:grid-cols-' ~ grid_cols ~ ' gap-1 md:gap-3 list-none unprose max-w-2xl mx-auto') }}">
                 {# sm:grid-cols-2 sm:grid-cols-3 sm:grid-cols-4 #}
                 {% for name, image in images %}
-                    <li>{{ _self.gallery_part(media_from_string(image, name), gallery_id, page ?? null) }}</li>
+                    <li>{{ _self.gallery_part(media_from_string(image, name), gallery_id, page ?? null, image_filter ?? 'thumb') }}</li>
                 {% endfor %}
             </ul>
         </div>
