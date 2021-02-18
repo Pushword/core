@@ -3,7 +3,7 @@
 namespace Pushword\Core\Tests\Component;
 
 use DateTime;
-use Pushword\Core\Component\EntityFilter\Filter\EncryptedLink;
+use Pushword\Core\Component\EntityFilter\Filter\HtmlEncryptedLink;
 use Pushword\Core\Component\EntityFilter\ManagerPool;
 use Pushword\Core\Entity\Page;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -24,7 +24,7 @@ class EntityFilterTest extends KernelTestCase
     {
         self::bootKernel();
 
-        $filter = new EncryptedLink();
+        $filter = new HtmlEncryptedLink();
         $filter->setApp(self::$kernel->getContainer()->get('pushword.apps')->getApp());
         $filter->setTwig(self::$kernel->getContainer()->get('twig'));
         $this->assertSame(

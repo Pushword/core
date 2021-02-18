@@ -24,7 +24,7 @@ class EncryptedLink extends AbstractFilter
         return $string;
     }
 
-    public function convertEncryptedLink($body)
+    public function convertEncryptedLink($body): string
     {
         return $this->convertMarkdownEncryptedLink($body);
     }
@@ -40,18 +40,7 @@ class EncryptedLink extends AbstractFilter
         return $this->replaceEncryptedLink($body, $matches);
     }
 
-    public function convertHtmlRelEncryptedLink(string $body): string
-    {
-        preg_match_all(self::HTML_REGEX, $body, $matches);
-
-        if (! isset($matches[1])) {
-            return $body;
-        }
-
-        return $this->replaceEncryptedLink($body, $matches, self::HTML_REGEX_HREF_KEY, self::HTML_REGEX_ANCHOR_KEY);
-    }
-
-    private function replaceEncryptedLink(string $body, array $matches, int $hrefKey = 2, int $anchorKey = 1): string
+    protected function replaceEncryptedLink(string $body, array $matches, int $hrefKey = 2, int $anchorKey = 1): string
     {
         $nbrMatch = \count($matches[0]);
         for ($k = 0; $k < $nbrMatch; ++$k) {
