@@ -2,14 +2,11 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
-use Pushword\Core\Twig\EncryptedLinkTwigTrait;
-
 final class HtmlEncryptedLink extends EncryptedLink
 {
     const HTML_REGEX = '/<a\s+(?:[^>]*?\s+)?href=(["\'])(.*?)\1(?:[^>]*?\s+)?rel=(["\'])encrypt\1(?:[^>]*?\s+)?>(((?!<\/a>).)*)<\/a>/i';
     const HTML_REGEX_HREF_KEY = 2;
     const HTML_REGEX_ANCHOR_KEY = 4;
-
 
     public function convertEncryptedLink($body): string
     {
