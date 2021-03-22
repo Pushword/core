@@ -1,14 +1,3 @@
-{# <header class="absolute top-0 left-0 right-0 z-50 flex flex-col items-center justify-between p-4 border-b-2 border-gray-200 sm:flex-row ">
-    <span class="block mr-1 font-mono text-4xl">
-        <a class="font-bold text-primary hover:opacity-75" href="{{ homepage() }}">{{ app_name }}</a>
-    </span>
-    <nav class="nav">
-        <ul class="flex space-x-4">
-            <li><a class="text-primary hover:opacity-75" href="https://pushword.piedweb.com">Code &amp; docs</a></li>
-        </ul>
-    </nav>
-</header> #}
-
 {#
     @params array       logo {class, href, alt},
     @params array       navbar_items {attr:{href...}, anchor, items: [...]} // todo remove next realse the bc break items
@@ -18,6 +7,7 @@
     @params string      navbar_nav_item_class
     @params string      navbar_nav_item_class_active
     @param bool         navbar_toggler
+    @param string       navbar_heigh
 #}
 
 {% set navbar_items = navbar_items ?? [
@@ -64,7 +54,7 @@
 {% block navbar_extrastyle %}
 <style>
     body {
-        margin-top: 100px;
+        margin-top: {{ navbar_heigh|default('100px') }};
     }
 </style>
 {% endblock %}
