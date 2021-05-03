@@ -1,15 +1,6 @@
 module.exports = {
     mode: "jit",
-    purge: {
-        mode: "all",
-        content: [
-            "./src/templates/**/*.html.twig",
-            "./src/templates/*.html.twig",
-            "./../conversation/src/templates/*.html.twig",
-            "./../admin-block-editor/src/templates/block/*.html.twig",
-        ],
-        defaultExtractor: (content) => content.match(/[\w-/:]+(?<!:)/g) || [],
-    }, // directly in webpack
+    purge: {}, // directly in webpack
     theme: {
         minHeight: {
             0: "0",
@@ -26,7 +17,7 @@ module.exports = {
                 DEFAULT: {
                     css: {
                         color: "#333",
-                        a: {
+                        "a, span[data-rot]": {
                             color: "var(--primary)",
                             "&:hover": {
                                 opacity: ".75",
