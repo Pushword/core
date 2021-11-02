@@ -113,10 +113,19 @@ class MediaListener
         $media->setName(preg_replace('/\\.[^.\\s]{3,4}$/', '', $media->getMediaFileName()));
     }
 
+    private function getMediaString(MediaInterface $media): string
+    {
+        if ($media->getMedia()) {
+            return $media->getMedia();
+        }
+        $extension = $media->getMediaFile()->guessExtension();
+
+        return $media->getName().($extension ? '.'.$extension : '');
+    }
+
     private function renameIfMediaExists(MediaInterface $media): void
     {
-        $extension = $media->getMediaFile()->guessExtension();
-        $mediaString = $media->getName().($extension ? '.'.$extension : '');
+        $mediaString = $this->getMediaString($media);
 
         $sameName = $this->em->getRepository(\get_class($media))->findOneBy(['name' => $media->getName()]);
         $sameMedia = $this->em->getRepository(\get_class($media))->findOneBy(['media' => $mediaString]);
