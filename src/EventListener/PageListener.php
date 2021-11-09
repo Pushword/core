@@ -2,7 +2,6 @@
 
 namespace Pushword\Core\EventListener;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Pushword\Core\Entity\PageInterface;
 use Symfony\Component\Security\Core\Security;
 
@@ -10,12 +9,9 @@ final class PageListener
 {
     private Security $security;
 
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(Security $security, EntityManagerInterface $entityManager)
+    public function __construct(Security $security)
     {
         $this->security = $security;
-        $this->entityManager = $entityManager;
     }
 
     public function preRemove(PageInterface $page): void

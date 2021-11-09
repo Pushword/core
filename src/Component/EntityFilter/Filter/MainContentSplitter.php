@@ -27,8 +27,6 @@ class MainContentSplitter extends AbstractFilter
 
     private string $intro = '';
 
-    private string $toc = '';
-
     private string $content = '';
 
     private string $originalContent = '';
