@@ -56,7 +56,7 @@ final class AppPool
 
     public function get(?string $host = ''): AppConfig
     {
-        $host = ! $host ? $this->currentApp : $host;
+        $host = \in_array($host, [null, ''], true) ? $this->currentApp : $host;
         if (isset($this->apps[$host])) {
             return $this->apps[$host];
         }
@@ -133,7 +133,7 @@ final class AppPool
 
     public function getApp(string $host = ''): AppConfig
     {
-        if (! $host) {
+        if ('' === $host) {
             $host = $this->currentApp;
         }
 

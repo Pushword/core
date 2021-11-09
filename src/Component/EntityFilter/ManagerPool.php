@@ -34,7 +34,7 @@ final class ManagerPool implements ManagerPoolInterface
     {
         $manager = $this->getManager($entity);
 
-        if (! $property) {
+        if ('' === $property) {
             return $manager;
         }
 
