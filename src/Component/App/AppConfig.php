@@ -104,6 +104,7 @@ final class AppConfig
         return false;
     }
 
+    /** @return mixed */
     public function get(string $key)
     {
         $camelCaseKey = static::normalizePropertyName($key);
