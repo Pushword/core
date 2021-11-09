@@ -10,12 +10,12 @@ final class PageListener
 {
     private Security $security;
 
-    private EntityManagerInterface $entityManager;
+    //private EntityManagerInterface $entityManager;
 
-    public function __construct(Security $security, EntityManagerInterface $entityManager)
+    public function __construct(Security $security) //EntityManagerInterface $entityManager
     {
         $this->security = $security;
-        $this->entityManager = $entityManager;
+        //$this->entityManager = $entityManager;
     }
 
     public function preRemove(PageInterface $page): void

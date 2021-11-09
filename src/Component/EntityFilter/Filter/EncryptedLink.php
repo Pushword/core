@@ -17,9 +17,7 @@ class EncryptedLink extends AbstractFilter
      */
     public function apply($propertyValue)
     {
-        $propertyValue = $this->convertEncryptedLink($propertyValue);
-
-        return $propertyValue;
+        return $this->convertEncryptedLink($propertyValue);
     }
 
     public function convertEncryptedLink($body): string

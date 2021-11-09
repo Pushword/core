@@ -11,8 +11,6 @@ class Punctuation extends AbstractFilter
      */
     public function apply($propertyValue)
     {
-        $propertyValue = HtmlBeautifer::punctuationBeautifer($propertyValue);
-
-        return $propertyValue;
+        return HtmlBeautifer::punctuationBeautifer($propertyValue);
     }
 }

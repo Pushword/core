@@ -11,9 +11,7 @@ class Markdown extends AbstractFilter
      */
     public function apply($propertyValue)
     {
-        $propertyValue = $this->render($propertyValue);
-
-        return $propertyValue;
+        return $this->render($propertyValue);
     }
 
     private function render(string $string): string

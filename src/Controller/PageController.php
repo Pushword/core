@@ -164,13 +164,11 @@ final class PageController extends AbstractController
     {
         $requestedLocale = rtrim($request->getLocale(), '/');
 
-        $pages = $this->getPageRepository()->getIndexablePagesQuery(
+        return $this->getPageRepository()->getIndexablePagesQuery(
             $this->apps->getMainHost(),
             $requestedLocale ?: (string) $this->params->get('kernel.default_locale'),
             $limit
         )->getQuery()->getResult();
-
-        return $pages;
     }
 
     /**
