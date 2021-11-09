@@ -13,14 +13,13 @@ trait UserTrait
     protected $createdAt;
 
     /**
-     * @var string
      * @ORM\Column(type="string", length=180, unique=true)
      * @Assert\Email(
      *     message="user.email.invalid",
      *     mode="strict"
      * )
      */
-    protected $email;
+    protected string $email = '';
 
     /**
      * @ORM\Column(type="string", length=150, nullable=true)
@@ -49,7 +48,7 @@ trait UserTrait
      */
     private $password;
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->email;
     }

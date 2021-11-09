@@ -24,14 +24,14 @@ trait PageTrait
      *
      * @ORM\Column(type="text")
      */
-    protected $mainContent = '';
+    protected string $mainContent = '';
 
     /**
      * @ORM\Column(type="datetime", options={"default": "CURRENT_TIMESTAMP"})
      */
     protected DateTimeInterface $publishedAt;
 
-    public function __toString()
+    public function __toString(): string
     {
         return trim($this->host.'/'.$this->getSlug().' ');
     }

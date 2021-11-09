@@ -6,7 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Pushword\Core\Entity\PageInterface;
 use Symfony\Component\Security\Core\Security;
 
-class PageListener
+final class PageListener
 {
     private Security $security;
 
@@ -18,7 +18,7 @@ class PageListener
         $this->entityManager = $entityManager;
     }
 
-    public function preRemove(PageInterface $page)
+    public function preRemove(PageInterface $page): void
     {
         // method_exists($page, 'getChildrenPages') &&
         if (! $page->getChildrenPages()->isEmpty()) {
@@ -50,15 +50,15 @@ class PageListener
 
         /*
         HUGE BUG: une fois la page mise à jour avec ce code, impossible d'afficher la page d'édition
-        de Admin sans être déconnecté *
+        de Admin sans être déconnecté */
 
         if (null === $page->getCreatedBy()) {
             $page->setCreatedBy($user);
         }
 
-        if (!$page->getEditedBy() || $page->getEditedBy() !== $user)
+        if (! $page->getEditedBy() || $page->getEditedBy() !== $user) {
             $page->setEditedBy($user);
-        /**/
+        }
 
         //$this->entityManager->flush();
         //$pageHasEditor = (new PageHasEditor())->setPage($page)->setEditor($user)->setEditedAt(new \DateTime());

@@ -14,4 +14,6 @@ interface UserInterface extends PasswordAuthenticatedUserInterface, BaseUserInte
     public function getPlainPassword();
 
     public function setPassword(string $password);
+
+    public function __toString(): string;
 }
