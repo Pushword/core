@@ -11,7 +11,7 @@ use DateTime;
  */
 class LastTime
 {
-    protected $filePath;
+    protected string $filePath;
 
     public function __construct(string $filePath)
     {
@@ -22,7 +22,7 @@ class LastTime
     {
         $previous = $this->get();
 
-        if (false === $previous || $previous->add($interval) < new DateTime('now')) {
+        if (null === $previous || $previous->add($interval) < new DateTime('now')) {
             return false;
         }
 
@@ -33,16 +33,16 @@ class LastTime
      * Return false if never runned else last datetime it was runned.
      * If $default is set, return $default time if never runned.
      */
-    public function get($default = false)
+    public function get(?string $default = null): ?Datetime
     {
         if (! file_exists($this->filePath)) {
-            return false === $default ? false : new DateTime($default);
+            return null === $default ? null : new DateTime($default);
         }
 
         return new DateTime('@'.filemtime($this->filePath));
     }
 
-    public function setWasRun($datetime = 'now', $setIfNotExist = true): void
+    public function setWasRun(string $datetime = 'now', bool $setIfNotExist = true): void
     {
         if (! file_exists($this->filePath)) {
             if (false === $setIfNotExist) {
@@ -57,7 +57,7 @@ class LastTime
     /**
      * alias for set was run.
      */
-    public function set($datetime = 'now')
+    public function set(string $datetime = 'now'): void
     {
         $this->setWasRun($datetime);
     }

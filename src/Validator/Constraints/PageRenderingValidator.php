@@ -16,13 +16,14 @@ class PageRenderingValidator extends ConstraintValidator
         $this->pageController = $pageController;
     }
 
-    /**
-     * @param PageInterface $value
-     */
     public function validate($value, Constraint $constraint): void
     {
         if (! $constraint instanceof PageRendering) {
             throw new UnexpectedTypeException($constraint, PageRendering::class);
+        }
+
+        if (! $value instanceof PageInterface) {
+            throw new UnexpectedTypeException($value, PageInterface::class);
         }
 
         if (false !== $value->getRedirection()) { // si c'est une redir, on check rien

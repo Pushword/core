@@ -36,19 +36,22 @@ trait PageListTwigTrait
         return $this->requestStack->getCurrentRequest();
     }
 
+    /**
+     * @return array<string, string|null>
+     */
     private function getPagerRouteParams(): array
     {
         $params = [];
-        if ($this->getCurrentRequest() && $this->getCurrentRequest()->get('slug')) {
+        if (null !== $this->getCurrentRequest() && \is_string($this->getCurrentRequest()->get('slug'))) {
             $params['slug'] = rtrim($this->getCurrentRequest()->get('slug'), '/');
-        } elseif ($this->apps->getCurrentPage()) {
+        } elseif (null !== $this->apps->getCurrentPage()) {
             // normally, only used in admin
             $params['slug'] = $this->apps->getCurrentPage()->getSlug();
             $params['host'] = $this->apps->getCurrentPage()->getHost();
         }
 
-        if ($this->getCurrentRequest() && $this->getCurrentRequest()->get('host')) {
-            $params['host'] = $this->requestStack->getCurrentRequest()->get('host');
+        if (null !== $this->apps->getCurrentPage() && null !== $this->getCurrentRequest()->get('host')) {
+            $params['host'] = \strval($this->requestStack->getCurrentRequest()->get('host'));
         }
 
         return $params;
@@ -56,8 +59,8 @@ trait PageListTwigTrait
 
     private function getPagerRouteName(): string
     {
-        $pagerRouter = $this->getCurrentRequest() ? $this->getCurrentRequest()->get('_route') : 'pushword_page';
-        $pagerRouter .= $this->getCurrentRequest() && '' === $this->getCurrentRequest()->get('slug') ? '_homepage' : '';
+        $pagerRouter = null !== $this->getCurrentRequest() ? $this->getCurrentRequest()->get('_route') : 'pushword_page';
+        $pagerRouter .= null !== $this->getCurrentRequest() && '' === $this->getCurrentRequest()->get('slug') ? '_homepage' : '';
         $pagerRouter .= '_pager';
 
         return $pagerRouter;
@@ -65,6 +68,8 @@ trait PageListTwigTrait
 
     /**
      * TODO: documenter.
+     *
+     * @return array<mixed>
      */
     private function stringToSearch(string $search): array
     {
@@ -91,6 +96,9 @@ trait PageListTwigTrait
         return $where;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function simpleStringToSearch(string $search): array
     {
         if ('children' == strtolower($search) && $this->apps->getCurrentPage()) {
@@ -113,8 +121,11 @@ trait PageListTwigTrait
     }
 
     /**
-     * @param int|array $max if max is int => max result,
-     *                       if max is array => paginate where 0 => item per page and 1 (fac) maxPage
+     * @param string|array $search
+     * @param string|array $order
+     * @param string       $host
+     * @param int|array    $max    if max is int => max result,
+     *                             if max is array => paginate where 0 => item per page and 1 (fac) maxPage
      */
     public function renderPagesList(
         Twig $twig,
@@ -135,7 +146,7 @@ trait PageListTwigTrait
 
         $queryBuilder = Repository::getPageRepository($this->em, $this->pageClass)
             ->getPublishedPageQueryBuilder(
-                $host ?: [$this->getApp()->getMainHost(), ''],
+                '' !== $host ? $host : [$this->getApp()->getMainHost(), ''],
                 $search,
                 $order,
                 $this->getLimit($max)
