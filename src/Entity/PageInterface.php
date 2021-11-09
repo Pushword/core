@@ -35,7 +35,7 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
     public function setParentPage(?self $parentPage): self;
 
     /**
-     * @return ArrayCollection|PageInterface[]
+     * @return ArrayCollection|PageInterface[]|null
      */
     public function getChildrenPages();
 

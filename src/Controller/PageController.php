@@ -5,6 +5,7 @@ namespace Pushword\Core\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\App\AppPool;
+use Pushword\Core\Entity\PageInterface;
 use Pushword\Core\Entity\PageInterface as Page;
 use Pushword\Core\Repository\Repository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -57,6 +58,13 @@ final class PageController extends AbstractController
             return $this->redirect($page->getRedirection(), $page->getRedirectionCode());
         }
 
+        $request->setLocale($page->getLocale()); // TODO: move it to event (onRequest + onPageLoad)
+
+        return $this->showPage($page);
+    }
+
+    public function showPage(PageInterface $page): Response
+    {
         $params = array_merge(['page' => $page], $this->app->getParamsForRendering());
 
         $view = $this->getView($page->getTemplate() ?: '/page/page.html.twig');
@@ -68,8 +76,6 @@ final class PageController extends AbstractController
                 $response->headers->set($header[0], $header[1]);
             }
         }
-
-        $request->setLocale($page->getLocale()); // TODO: move it to event (onRequest + onPageLoad)
 
         return $this->render($view, $params, $response);
     }
@@ -179,7 +185,7 @@ final class PageController extends AbstractController
         return Repository::getPageRepository($this->em, (string) $this->params->get('pw.entity_page'));
     }
 
-    private function setApp($host): void
+    public function setApp($host): void
     {
         $this->app = $this->apps->switchCurrentApp($host)->get();
     }

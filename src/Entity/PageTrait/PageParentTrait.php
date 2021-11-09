@@ -48,7 +48,7 @@ trait PageParentTrait
     }
 
     /**
-     * @return ArrayCollection|PageInterface[]
+     * @return ArrayCollection|PageInterface[]|null
      */
     public function getChildrenPages()
     {
