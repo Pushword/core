@@ -36,8 +36,9 @@ final class AppConfig
     private static function normalizePropertyName(string $string): string
     {
         $string = str_replace('_', '', ucwords(strtolower($string), '_'));
+        $string = lcfirst($string);
 
-        return lcfirst($string);
+        return $string;
     }
 
     public function __construct(ParameterBagInterface $params, $properties, $isFirstApp = false)

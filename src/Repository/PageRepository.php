@@ -48,13 +48,15 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
 
     private function buildPublishedPageQuery(string $alias = 'p'): QueryBuilder
     {
-        //$this->andNotRedirection($queryBuilder);
-
-        return $this->createQueryBuilder($alias)
+        $queryBuilder = $this->createQueryBuilder($alias)
             ->andWhere($alias.'.publishedAt <=  :nwo')
             ->setParameter('nwo', new \DateTime())
             ->orderBy($alias.'.priority', 'DESC')
             ->addOrderBy($alias.'.publishedAt', 'DESC');
+
+        //$this->andNotRedirection($queryBuilder);
+
+        return $queryBuilder;
     }
 
     public function getPage(string $slug, string $host, bool $checkId = true): ?PageInterface

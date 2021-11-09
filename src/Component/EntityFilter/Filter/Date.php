@@ -16,9 +16,6 @@ class Date extends AbstractFilter
         return $this->convertDateShortCode($propertyValue, $this->getApp()->getDefaultLocale());
     }
 
-    /**
-     * @noRector
-     */
     private function convertDateShortCode(string $string, ?string $locale = null): string
     {
         //var_dump($string); exit;
@@ -31,8 +28,9 @@ class Date extends AbstractFilter
         $string = preg_replace('/date\([\'"]?%?Y[\'"]?\)/i', strftime('%Y'), $string);
         $string = preg_replace('/date\([\'"]?%?(B|M)[\'"]?\)/i', strftime('%B'), $string);
         $string = preg_replace('/date\([\'"]?%?A[\'"]?\)/i', strftime('%A'), $string);
+        $string = preg_replace('/date\([\'"]?%?e[\'"]?\)/i', strftime('%e'), $string);
 
-        return preg_replace('/date\([\'"]?%?e[\'"]?\)/i', strftime('%e'), $string);
+        return $string;
     }
 
     private function convertLocale($locale)

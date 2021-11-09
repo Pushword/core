@@ -62,8 +62,9 @@ trait PageTrait
     {
         $slugifier = new Slugify(['regexp' => '/[^A-Za-z0-9_\/\.]+/']);
         $slug = $slugifier->slugify($slug);
+        $slug = trim($slug, '/');
 
-        return trim($slug, '/');
+        return $slug;
     }
 
     public function setSlug($slug, $set = false): self
@@ -79,6 +80,7 @@ trait PageTrait
         return $this;
     }
 
+    /** @return string */
     public function getMainContent(): string
     {
         return $this->mainContent;

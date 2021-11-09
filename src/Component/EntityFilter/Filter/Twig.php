@@ -16,7 +16,9 @@ class Twig extends AbstractFilter
      */
     public function apply($propertyValue)
     {
-        return $this->render($propertyValue);
+        $propertyValue = $this->render($propertyValue);
+
+        return $propertyValue;
     }
 
     protected function render(string $string): string
@@ -26,7 +28,8 @@ class Twig extends AbstractFilter
         }
 
         $tmpl = $this->twig->createTemplate($string);
+        $string = $tmpl->render($this->entity instanceof PageInterface ? ['page' => $this->entity] : []);
 
-        return $tmpl->render($this->entity instanceof PageInterface ? ['page' => $this->entity] : []);
+        return $string;
     }
 }

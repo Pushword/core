@@ -23,5 +23,6 @@ class MarkdownParser extends MarkdownExtra
 
     public function _initDetab()
     {
+        return;
     }
 }

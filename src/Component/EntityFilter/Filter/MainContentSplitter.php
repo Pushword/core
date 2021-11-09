@@ -9,21 +9,25 @@ use Pushword\Core\AutowiringTrait\RequiredTwigTrait;
 use TOC\MarkupFixer;
 use TOC\TocGenerator;
 
-final class MainContentSplitter extends AbstractFilter
+class MainContentSplitter extends AbstractFilter
 {
     use RequiredAppTrait;
     use RequiredEntityTrait;
     use RequiredTwigTrait;
 
-    /**
-     * content before the first *delimiter*.
-     */
+    // delimiter <!--break-->
+    private array $parts = [
+        'chapeau', // content before the first *delimiter*
+        'intro', // when toc is active, content between the first delimiter (or from the begining) to the first hN
+        'toc',  // Table of Content
+        'content',
+    ];
+
     private string $chapeau = '';
 
-    /**
-     * when toc is active, content between the first delimiter (or from the begining) to the first hN.
-     */
     private string $intro = '';
+
+    private string $toc = '';
 
     private string $content = '';
 
