@@ -3,7 +3,9 @@
 namespace Pushword\Core\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Pushword\Core\Entity\UserInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -12,22 +14,22 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class UserCreateCommand extends Command
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $em;
+    private EntityManagerInterface $em;
 
     /**
-     * @var string
+     * @var class-string
      */
-    private $userClass;
+    private string $userClass;
 
     private UserPasswordHasherInterface $passwordEncoder;
 
+    /**
+     * @param class-string $userClass
+     */
     public function __construct(
         EntityManagerInterface $em,
         UserPasswordHasherInterface $passwordEncoder,
-        $userClass
+        string $userClass
     ) {
         $this->em = $em;
         $this->passwordEncoder = $passwordEncoder;
@@ -36,7 +38,7 @@ final class UserCreateCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('pushword:user:create')
@@ -46,8 +48,9 @@ final class UserCreateCommand extends Command
             ->addArgument('role', InputArgument::OPTIONAL);
     }
 
-    protected function createUser($email, $password, $role)
+    protected function createUser(string $email, string $password, string $role): void
     {
+        /** @var UserInterface $userClass */
         $userClass = $this->userClass;
         $user = new $userClass();
         $user->setEmail($email);
@@ -71,27 +74,28 @@ final class UserCreateCommand extends Command
         return 0;
     }
 
-    private function getOrAskIfNotSetted(InputInterface $input, OutputInterface $output, string $argument, $default = null)
+    private function getOrAskIfNotSetted(InputInterface $input, OutputInterface $output, string $argument, string $default = ''): string
     {
+        /** @var QuestionHelper $helper */
         $helper = $this->getHelper('question');
         $argumentValue = $input->getArgument($argument);
 
         if (null !== $argumentValue) {
-            return $argumentValue;
+            return \strval($argumentValue);
         }
 
-        $question = new Question($argument.(null !== $default ? ' (default: '.$default.')' : '').':', $default);
+        $question = new Question($argument.('' !== $default ? ' (default: '.$default.')' : '').':', $default);
         if ('password' == $argument) {
             $question->setHidden(true);
         }
         $argumentValue = $helper->ask($input, $output, $question);
 
         if (null === $argumentValue) {
-            $output->writeln('<error>'.$argument.' is required. Command will probably failed.</error>');
+            $output->writeln('<error>'.$argument.' is required.</error>');
 
-            return false;
+            return $this->getOrAskIfNotSetted($input, $output, $argument, $default);
         }
 
-        return $argumentValue;
+        return \strval($argumentValue);
     }
 }

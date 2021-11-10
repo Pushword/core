@@ -13,6 +13,7 @@ use League\ColorExtractor\Palette;
 use Pushword\Core\Entity\MediaInterface;
 use Pushword\Core\Service\ImageManager;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -47,7 +48,7 @@ class MediaListener
         $this->em = $em;
         $this->filesystem = $filesystem;
         $this->imageManager = $imageManager;
-        if ($requestStack->getCurrentRequest()) {
+        if (null !== $requestStack->getCurrentRequest() && method_exists($requestStack->getSession(), 'getFlashBag')) {
             $this->flashBag = $requestStack->getSession()->getFlashBag();
         }
         $this->translator = $translator;
@@ -56,19 +57,19 @@ class MediaListener
     /**
      * Check if name exist.
      */
-    public function onVichUploaderPreUpload(Event $event)
+    public function onVichUploaderPreUpload(Event $event): void
     {
         $media = $event->getObject();
         $this->beforeToImportAndStore($media);
     }
 
-    public function beforeToImportAndStore(MediaInterface $media)
+    public function beforeToImportAndStore(MediaInterface $media): void
     {
         $this->setNameIfEmpty($media);
         $this->renameIfMediaExists($media);
     }
 
-    public function postLoad(MediaInterface $media)
+    public function postLoad(MediaInterface $media): void
     {
         $media->setProjectDir($this->projectDir);
     }
@@ -76,7 +77,7 @@ class MediaListener
     /**
      * renameMediaOnMediaNameUpdate.
      */
-    public function preUpdate(MediaInterface $media, PreUpdateEventArgs $event)
+    public function preUpdate(MediaInterface $media, PreUpdateEventArgs $event): void
     {
         if ($event->hasChangedField('media')) {
             $this->renameIfMediaExists($media);
@@ -99,7 +100,7 @@ class MediaListener
         }
     }
 
-    public function preRemove(MediaInterface $media)
+    public function preRemove(MediaInterface $media): void
     {
         if (0 === strpos($media->getStoreIn(), $this->projectDir)) {
             $this->filesystem->remove($media->getStoreIn().'/'.$media->getMedia());
@@ -110,11 +111,11 @@ class MediaListener
 
     private function setNameIfEmpty(MediaInterface $media): void
     {
-        if (! empty($media->getName())) {
+        if ('' === $media->getName()) {
             return;
         }
 
-        $media->setName(preg_replace('/\\.[^.\\s]{3,4}$/', '', $media->getMediaFileName()));
+        $media->setName(\strval(preg_replace('/\\.[^.\\s]{3,4}$/', '', $media->getMediaFileName())));
     }
 
     private function getMediaString(MediaInterface $media): string
@@ -122,9 +123,11 @@ class MediaListener
         if ($media->getMedia()) {
             return $media->getMedia();
         }
-        $extension = $media->getMediaFile()->guessExtension();
 
-        return $media->getName().($extension ? '.'.$extension : '');
+        $extension = $media->getMediaFile() instanceof UploadedFile
+            ? (string) $media->getMediaFile()->guessExtension() : '';
+
+        return $media->getName().('' !== $extension ? '.'.$extension : '');
     }
 
     private function renameIfMediaExists(MediaInterface $media): void
@@ -134,8 +137,8 @@ class MediaListener
         $sameName = $this->em->getRepository(\get_class($media))->findOneBy(['name' => $media->getName()]);
         $sameMedia = $this->em->getRepository(\get_class($media))->findOneBy(['media' => $mediaString]);
 
-        if (! ($sameName && $media->getId() != $sameName->getId())
-            && ! ($sameMedia && $media->getId() != $sameMedia->getId())
+        if (! (null !== $sameName && $media->getId() != $sameName->getId())
+            && ! (null !== $sameMedia && $media->getId() != $sameMedia->getId())
         ) {
             return;
         }
@@ -156,8 +159,9 @@ class MediaListener
     /**
      * Update storeIn.
      */
-    public function onVichUploaderPostUpload(Event $event)
+    public function onVichUploaderPostUpload(Event $event): void
     {
+        /** @var MediaInterface */
         $media = $event->getObject();
         $mapping = $event->getMapping();
 
@@ -168,7 +172,7 @@ class MediaListener
             $this->imageManager->remove($media);
             $this->imageManager->generateCache($media);
             $thumb = $this->imageManager->getLastThumb();
-            $this->updateMainColor($media, $thumb ?: null);
+            $this->updateMainColor($media, null !== $thumb ? $thumb : null);
             //exec('cd ../ && php bin/console pushword:image:cache '.$media->getMedia().' > /dev/null 2>/dev/null &');
         }
     }
@@ -183,7 +187,7 @@ class MediaListener
         $color = $imageForPalette->limitColors(1)->pickColor(0, 0, 'hex');
         $imageForPalette->destroy();
 
-        $media->setMainColor($color);
+        $media->setMainColor(\strval($color));
     }
 
     /*  Palette was good, but not ready for PHP 8

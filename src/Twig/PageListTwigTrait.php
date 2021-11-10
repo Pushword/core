@@ -50,7 +50,7 @@ trait PageListTwigTrait
             $params['host'] = $this->apps->getCurrentPage()->getHost();
         }
 
-        if (null !== $this->apps->getCurrentPage() && null !== $this->getCurrentRequest()->get('host')) {
+        if (null !== $this->getCurrentRequest() && null !== $this->getCurrentRequest()->get('host')) {
             $params['host'] = \strval($this->requestStack->getCurrentRequest()->get('host'));
         }
 

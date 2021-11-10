@@ -250,7 +250,7 @@ trait MediaTrait
 
     public function getName(): string
     {
-        return $this->name;
+        return '' === $this->name && null !== $this->getMediaFile() ? $this->getMediaFileName() : $this->name;
     }
 
     public function getNameLocalized($getLocalized = null, $onlyLocalized = false): string

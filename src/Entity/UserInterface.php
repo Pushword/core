@@ -11,9 +11,14 @@ interface UserInterface extends PasswordAuthenticatedUserInterface, BaseUserInte
 
     public const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
 
-    public function getPlainPassword();
+    public function getPlainPassword(): ?string;
 
-    public function setPassword(string $password);
+    public function setPassword(string $password): self;
+
+    public function setEmail(string $email): self;
+
+    /** @param string[] $roles */
+    public function setRoles(array $roles): self;
 
     public function __toString(): string;
 }

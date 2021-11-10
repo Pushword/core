@@ -9,12 +9,15 @@ final class AppConfig
 {
     private bool $isFirstApp = false;
 
+    /** @var string[] */
     private array $hosts;
 
+    /** @var array<(string|int), mixed> */
     private array $customProperties;
 
     private string $locale;
 
+    /** @var string|array<string> */
     private $locales;
 
     private string $baseUrl;
@@ -23,15 +26,33 @@ final class AppConfig
 
     private string $template;
 
+    /** @var Class-string[] */
     private array $filters;
 
     private bool $entityCanOverrideFilters;
 
+    /** @var array<string, array<string>> */
     private array $assets;
 
     private Twig $twig;
 
     private ParameterBagInterface $params;
+
+    /** @param array<string, mixed> $properties */
+    public function __construct(ParameterBagInterface $params, array $properties, bool $isFirstApp = false)
+    {
+        $this->params = $params;
+
+        foreach ($properties as $prop => $value) {
+            $this->setCustomProperty($prop, $value);
+
+            // TODO: solve hy when i remove this, falt_import_dir disappear
+            $prop = static::normalizePropertyName($prop);
+            $this->$prop = $value;
+        }
+
+        $this->isFirstApp = $isFirstApp;
+    }
 
     private static function normalizePropertyName(string $string): string
     {
@@ -40,23 +61,12 @@ final class AppConfig
         return lcfirst($string);
     }
 
-    public function __construct(ParameterBagInterface $params, $properties, $isFirstApp = false)
-    {
-        $this->params = $params;
-
-        foreach ($properties as $prop => $value) {
-            $prop = static::normalizePropertyName($prop);
-            $this->$prop = $value;
-        }
-
-        $this->isFirstApp = $isFirstApp;
-    }
-
-    public function setTwig(Twig $twig)
+    public function setTwig(Twig $twig): void
     {
         $this->twig = $twig;
     }
 
+    /** @return array<string, mixed> */
     public function getParamsForRendering(): array
     {
         return [
@@ -79,12 +89,13 @@ final class AppConfig
      *
      * @return bool
      */
-    public function isMainHost($host)
+    public function isMainHost(?string $host)
     {
         return $this->getMainHost() === $host;
     }
 
-    public function getHosts()
+    /** @return string[] */
+    public function getHosts(): array
     {
         return $this->hosts;
     }
@@ -111,24 +122,32 @@ final class AppConfig
         $method = 'get'.ucfirst($camelCaseKey);
 
         if (method_exists($this, $method)) {
-            return $this->$method();
+            return $this->$method(); // @phpstan-ignore-line
         }
 
-        if (isset($this->$camelCaseKey)) {
-            return $this->$camelCaseKey;
+        if (isset($this->$camelCaseKey)) { // @phpstan-ignore-line
+            return $this->$camelCaseKey; // @phpstan-ignore-line
         }
 
         return $this->getCustomProperty($key);
     }
 
-    // useful for test
+    /**
+     * @param mixed $value
+     */
     public function setCustomProperty(string $key, $value): self
     {
+        $camelCaseKey = static::normalizePropertyName($key);
+        if (property_exists($this, $camelCaseKey)) {
+            $this->$camelCaseKey = $value; // @phpstan-ignore-line
+        }
+
         $this->customProperties[$key] = $value;
 
         return $this;
     }
 
+    /** @return mixed */
     public function getCustomProperty(string $key)
     {
         return isset($this->customProperties[$key]) ? $this->customProperties[$key] : null;
@@ -139,11 +158,13 @@ final class AppConfig
         return $this->template;
     }
 
+    /** @return Class-string[] */
     public function getFilters(): array
     {
         return $this->filters;
     }
 
+    /** @param Class-string[] $filters */
     public function setFilters(array $filters): void
     {
         $this->filters = $filters;
@@ -154,11 +175,13 @@ final class AppConfig
         return $this->entityCanOverrideFilters;
     }
 
+    /** @return array<string, array<string>> */
     public function getAssets(): array
     {
         return $this->assets;
     }
 
+    /** @return array<string, array<string>> */
     public function getAssetsVersionned(): array
     {
         $assetsVersionned = ['javascripts' => [], 'stylesheets' => []];
@@ -167,7 +190,7 @@ final class AppConfig
                 continue;
             }
             foreach ($this->assets[$row] as $key => $asset) {
-                $filepath = $this->params->get('pw.public_dir').$asset;
+                $filepath = \strval($this->params->get('pw.public_dir')).$asset;
                 $assetsVersionned[$row][$key] = $asset.
                     (file_exists($filepath) ? '?'.substr(md5(filemtime($filepath).$filepath), 2, 9) : '');
             }
@@ -179,7 +202,7 @@ final class AppConfig
     /**
      * @psalm-suppress InternalMethod
      */
-    public function getView(?string $path = null, $fallback = '@Pushword')
+    public function getView(?string $path = null, string $fallback = '@Pushword'): string
     {
         if (null === $path) {
             return $this->template.'/page/page.html.twig';
@@ -204,9 +227,9 @@ final class AppConfig
         try {
             $this->twig->load($name);
 
-            return $name;
+            return $name; // @phpstan-ignore-line
         } finally {
-            return $fallback.$path;
+            return $fallback.$path; // @phpstan-ignore-line
         }
     }
 
@@ -234,7 +257,7 @@ final class AppConfig
         return null;
     }
 
-    private function isFullPath($path)
+    private function isFullPath(string $path): bool
     {
         return 0 === strpos($path, '@') && false !== strpos($path, '/');
     }
@@ -247,18 +270,20 @@ final class AppConfig
     /**
      * Get the value of locale.
      */
-    public function getLocale()
+    public function getLocale(): string
     {
         return $this->locale;
     }
 
-    public function getDefaultLocale()
+    public function getDefaultLocale(): string
     {
         return $this->locale;
     }
 
     /**
      * Get the value of locales.
+     *
+     * @return string[]
      */
     public function getLocales(): array
     {
@@ -272,7 +297,7 @@ final class AppConfig
     /**
      * Get the value of name.
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }

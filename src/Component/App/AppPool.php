@@ -9,7 +9,7 @@ use Twig\Environment as Twig;
 
 final class AppPool
 {
-    /** @var array */
+    /** @var array<string, AppConfig> */
     private $apps = [];
 
     /** @var string */
@@ -21,16 +21,13 @@ final class AppPool
      *  @var PageInterface */
     private $currentPage;
 
-    private ParameterBagInterface $params;
-
+    /** @param array<string, array<string, mixed>> $rawApps */
     public function __construct(array $rawApps, Twig $twig, ParameterBagInterface $params)
     {
-        $this->params = $params;
-
-        $firstHost = array_key_first($rawApps);
+        $firstHost = \strval(array_key_first($rawApps));
 
         foreach ($rawApps as $mainHost => $app) {
-            $this->apps[$mainHost] = new AppConfig($this->params, $app, $firstHost == $mainHost ? true : false);
+            $this->apps[$mainHost] = new AppConfig($params, $app, $firstHost == $mainHost ? true : false);
             $this->apps[$mainHost]->setTwig($twig);
         }
 
@@ -63,22 +60,25 @@ final class AppPool
 
         $apps = array_reverse($this->apps, true);
         foreach ($apps as $app) {
-            if (\in_array($host, $app->getHosts())) {
+            if (\in_array($host, $app->getHosts(), true)) {
                 return $app;
             }
         }
 
-        return $app; //throw new Exception('No AppConfig found (`'.$host.'`)');
+        if (! isset($app)) {
+            throw new Exception('No AppConfig found (`'.$host.'`)');
+        }
+
+        return $app;
     }
 
+    /** @return string[] */
     public function getHosts(): array
     {
         return array_keys($this->apps);
     }
 
-    /**
-     * Get the value of apps.
-     */
+    /** @return array<string, AppConfig> */
     public function getApps(): array
     {
         return $this->apps;
@@ -89,6 +89,7 @@ final class AppPool
         return $this->currentPage;
     }
 
+    /** @param string|array<string>|null $host */
     public function isFirstApp($host = null): bool
     {
         $firstApp = array_key_first($this->apps);
@@ -118,7 +119,7 @@ final class AppPool
         return $this->currentApp;
     }
 
-    public function sameHost($host): bool
+    public function sameHost(?string $host): bool
     {
         if ($this->isFirstApp() && null === $host) {
             return true;
@@ -140,7 +141,8 @@ final class AppPool
         return $this->get($host);
     }
 
-    public function getAppValue(?string $key = null, string $host = '')
+    /** @return mixed */
+    public function getAppValue(string $key, string $host = '')
     {
         return $this->getApp($host)->get($key);
     }
