@@ -36,7 +36,7 @@ class Unprose extends AbstractFilter
         $propertyValue = str_replace(
             [$closeEncryptedTag, $openEncryptedTag],
             ['</div>', '<div class="'.$this->getClass($this->entity, 'prose').'">'],
-            $propertyValue
+            \strval($propertyValue)
         );
 
         return $propertyValue;

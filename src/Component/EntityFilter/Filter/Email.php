@@ -17,7 +17,7 @@ class Email extends AbstractFilter
      */
     public function apply($propertyValue)
     {
-        return $this->convertEmail($propertyValue);
+        return $this->convertEmail(\strval($propertyValue));
     }
 
     public function convertEmail(string $body): string

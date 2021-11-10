@@ -13,6 +13,6 @@ class ElseH1 extends AbstractFilter
     /** @return ?string */
     public function apply($propertyValue)
     {
-        return $propertyValue ?: $this->entityFilterManager->getH1();
+        return '' !== \strval($propertyValue) ? $propertyValue : $this->entityFilterManager->getEntity()->getH1();
     }
 }

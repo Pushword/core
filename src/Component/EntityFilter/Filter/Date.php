@@ -13,27 +13,27 @@ class Date extends AbstractFilter
      */
     public function apply($propertyValue)
     {
-        return $this->convertDateShortCode($propertyValue, $this->getApp()->getDefaultLocale());
+        return $this->convertDateShortCode(\strval($propertyValue), $this->getApp()->getDefaultLocale());
     }
 
     private function convertDateShortCode(string $string, ?string $locale = null): string
     {
         //var_dump($string); exit;
-        if ($locale) {
+        if (null !== $locale) {
             setlocale(\LC_TIME, $this->convertLocale($locale));
         }
 
         //$string = preg_replace('/date\([\'"]?([a-z% ]+)[\'"]?\)/i',
         //  strftime(strpos('\1', '%') ? '\1': '%\1'), $string);
-        $string = preg_replace('/date\([\'"]?%?Y[\'"]?\)/i', strftime('%Y'), $string);
-        $string = preg_replace('/date\([\'"]?%?(B|M)[\'"]?\)/i', strftime('%B'), $string);
-        $string = preg_replace('/date\([\'"]?%?A[\'"]?\)/i', strftime('%A'), $string);
-        $string = preg_replace('/date\([\'"]?%?e[\'"]?\)/i', strftime('%e'), $string);
+        $string = \strval(preg_replace('/date\([\'"]?%?Y[\'"]?\)/i', (string) strftime('%Y'), $string));
+        $string = \strval(preg_replace('/date\([\'"]?%?(B|M)[\'"]?\)/i', (string) strftime('%B'), $string));
+        $string = \strval(preg_replace('/date\([\'"]?%?A[\'"]?\)/i', (string) strftime('%A'), $string));
+        $string = \strval(preg_replace('/date\([\'"]?%?e[\'"]?\)/i', (string) strftime('%e'), $string));
 
         return $string;
     }
 
-    private function convertLocale($locale)
+    private function convertLocale(string $locale): string
     {
         if ('fr' == $locale) {
             return 'fr_FR';

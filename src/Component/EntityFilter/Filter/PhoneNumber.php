@@ -17,7 +17,7 @@ class PhoneNumber extends AbstractFilter
      */
     public function apply($propertyValue)
     {
-        return $this->convertPhoneNumber($propertyValue);
+        return $this->convertPhoneNumber(\strval($propertyValue));
     }
 
     private function convertPhoneNumber(string $body): string

@@ -17,10 +17,10 @@ class EncryptedLink extends AbstractFilter
      */
     public function apply($propertyValue)
     {
-        return $this->convertEncryptedLink($propertyValue);
+        return $this->convertEncryptedLink(\strval($propertyValue));
     }
 
-    public function convertEncryptedLink($body): string
+    public function convertEncryptedLink(string $body): string
     {
         return $this->convertMarkdownEncryptedLink($body);
     }
@@ -36,12 +36,15 @@ class EncryptedLink extends AbstractFilter
         return $this->replaceEncryptedLink($body, $matches);
     }
 
-    protected function replaceEncryptedLink(string $body, array $matches, $hrefKey = 2, $anchorKey = 1): string
+    /**
+     * @param array<int, array<int, string>> $matches
+     */
+    protected function replaceEncryptedLink(string $body, array $matches, int $hrefKey = 2, int $anchorKey = 1): string
     {
         $nbrMatch = \count($matches[0]);
         for ($k = 0; $k < $nbrMatch; ++$k) {
             $attr = $matches[3][$k] ?? null;
-            $attr = $attr ? [('#' == $attr ? 'id' : 'class') => substr($attr, 1)] : [];
+            $attr = null !== $attr ? [('#' == $attr ? 'id' : 'class') => substr($attr, 1)] : [];
             $link = $this->renderLink($matches[$anchorKey][$k], $matches[$hrefKey][$k], $attr);
             $body = str_replace($matches[0][$k], $link, $body);
         }

@@ -15,9 +15,6 @@ class Extended extends AbstractFilter
     use RequiredManagerPoolTrait;
     use RequiredPropertyTrait;
 
-    /**
-     * @return string
-     */
     public function apply($propertyValue)
     {
         return $this->loadExtendedValue($propertyValue);
@@ -25,11 +22,12 @@ class Extended extends AbstractFilter
 
     private function loadExtendedValue($propertyValue)
     {
-        if ($propertyValue || ! $this->entity instanceof PageInterface || ! $this->entity->getExtendedPage() instanceof PageInterface) {
+        if ('' !== $propertyValue || ! $this->entity instanceof PageInterface || ! $this->entity->getExtendedPage() instanceof PageInterface) {
             return $propertyValue;
         }
 
         $getter = 'get'.ucfirst($this->getProperty());
-        $this->entityFilterManagerPool->getManager($this->entity)->$getter();
+
+        return $this->entityFilterManagerPool->getManager($this->entity)->$getter(); // @phpstan-ignore-line
     }
 }

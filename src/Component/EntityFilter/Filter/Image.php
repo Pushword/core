@@ -15,7 +15,7 @@ class Image extends AbstractFilter
      */
     public function apply($propertyValue)
     {
-        return $this->convertMarkdownImage($propertyValue);
+        return $this->convertMarkdownImage(\strval($propertyValue));
     }
 
     public function convertMarkdownImage(string $body): string

@@ -10,7 +10,7 @@ final class HtmlEncryptedLink extends EncryptedLink
 
     public const HTML_REGEX_ANCHOR_KEY = 'anchor';
 
-    public function convertEncryptedLink($body): string
+    public function convertEncryptedLink(string $body): string
     {
         return $this->convertHtmlRelEncryptedLink($body);
     }
@@ -28,15 +28,20 @@ final class HtmlEncryptedLink extends EncryptedLink
 
     private function extractClass(string $openingTag): string
     {
-        return preg_match('/class=\"([^"]*)\"/i', $openingTag, $match) ? $match[1] : '';
+        return 1 === preg_match('/class=\"([^"]*)\"/i', $openingTag, $match) ? $match[1] : '';
     }
 
+    /**
+     * @param array<int, array<int, string>> $matches
+     * @param (int|string) $hrefKey
+     * @param (int|string) $anchorKey
+     */
     private function replaceRelEncryptedLink(string $body, array $matches, $hrefKey = 2, $anchorKey = 1): string
     {
         $nbrMatch = \count($matches[0]);
         for ($k = 0; $k < $nbrMatch; ++$k) {
             $attr = $this->extractClass($matches[1][$k]);
-            $attr = $attr ? ['class' => $attr] : [];
+            $attr = '' !== $attr ? ['class' => $attr] : [];
             $link = $this->renderLink($matches[$anchorKey][$k], $matches[$hrefKey][$k], $attr);
             $body = str_replace($matches[0][$k],  $link, $body);
         }

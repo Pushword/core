@@ -16,12 +16,12 @@ class Twig extends AbstractFilter
      */
     public function apply($propertyValue)
     {
-        return $this->render($propertyValue);
+        return $this->render(\strval($propertyValue));
     }
 
     protected function render(string $string): string
     {
-        if (! $string || false === strpos($string, '{')) {
+        if (false === strpos($string, '{')) {
             return $string;
         }
 
