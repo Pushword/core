@@ -87,7 +87,7 @@ trait UserTrait
     }
 
     /**
-     * @see UserInterface
+     *  @return string[] The user roles
      */
     public function getRoles(): array
     {

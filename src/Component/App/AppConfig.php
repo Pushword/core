@@ -26,7 +26,7 @@ final class AppConfig
 
     private string $template;
 
-    /** @var Class-string[] */
+    /** @var class-string[] */
     private array $filters;
 
     private bool $entityCanOverrideFilters;
@@ -46,7 +46,7 @@ final class AppConfig
         foreach ($properties as $prop => $value) {
             $this->setCustomProperty($prop, $value);
 
-            // TODO: solve hy when i remove this, falt_import_dir disappear
+            // TODO: solve why when i remove this, falt_import_dir disappear
             $prop = static::normalizePropertyName($prop);
             $this->$prop = $value;
         }
@@ -158,13 +158,13 @@ final class AppConfig
         return $this->template;
     }
 
-    /** @return Class-string[] */
+    /** @return class-string[] */
     public function getFilters(): array
     {
         return $this->filters;
     }
 
-    /** @param Class-string[] $filters */
+    /** @param class-string[] $filters */
     public function setFilters(array $filters): void
     {
         $this->filters = $filters;

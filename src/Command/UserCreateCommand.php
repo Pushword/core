@@ -50,7 +50,7 @@ final class UserCreateCommand extends Command
 
     protected function createUser(string $email, string $password, string $role): void
     {
-        /** @var UserInterface $userClass */
+        /** @var class-string<UserInterface> $userClass */
         $userClass = $this->userClass;
         $user = new $userClass();
         $user->setEmail($email);
