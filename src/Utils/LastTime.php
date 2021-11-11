@@ -39,7 +39,7 @@ class LastTime
             return null === $default ? null : new DateTime($default);
         }
 
-        return new DateTime('@'.filemtime($this->filePath));
+        return new DateTime('@'.\Safe\filemtime($this->filePath));
     }
 
     public function setWasRun(string $datetime = 'now', bool $setIfNotExist = true): void
@@ -48,10 +48,10 @@ class LastTime
             if (false === $setIfNotExist) {
                 return;
             }
-            file_put_contents($this->filePath, '');
+            \Safe\file_put_contents($this->filePath, '');
         }
 
-        touch($this->filePath, (new DateTime($datetime))->getTimestamp());
+        \Safe\touch($this->filePath, (new DateTime($datetime))->getTimestamp());
     }
 
     /**

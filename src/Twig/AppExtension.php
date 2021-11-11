@@ -129,7 +129,7 @@ class AppExtension extends AbstractExtension
 
     public static function normalizeMediaPath(string $src): string
     {
-        if (preg_match('/^[a-z-]+$/', $src)) {
+        if (\Safe\preg_match('/^[a-z-]+$/', $src)) {
             return '/media/default/'.$src.'.jpg';
         }
 
@@ -166,6 +166,6 @@ class AppExtension extends AbstractExtension
 
     public static function pregReplace($subject, $pattern, $replacement)
     {
-        return preg_replace($pattern, $replacement, $subject);
+        return \Safe\preg_replace($pattern, $replacement, $subject);
     }
 }

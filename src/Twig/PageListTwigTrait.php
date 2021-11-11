@@ -107,13 +107,13 @@ trait PageListTwigTrait
         }
 
         if (0 === strpos($search, 'comment:')) {
-            $search = '<!--'.substr($search, \strlen('comment:')).'-->';
+            $search = '<!--'.\Safe\substr($search, \strlen('comment:')).'-->';
 
             return ['key' => 'mainContent', 'operator' => 'LIKE', 'value' => '%'.$search.'%'];
         }
 
         if (0 === strpos($search, 'slug:')) {
-            $search = substr($search, \strlen('slug:'));
+            $search = \Safe\substr($search, \strlen('slug:'));
 
             return ['key' => 'slug', 'operator' => 'LIKE', 'value' => $search];
         }

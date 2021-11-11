@@ -6,12 +6,12 @@ class HtmlBeautifer
 {
     public static function removeHtmlComments(string $content): string
     {
-        return (string) preg_replace('/<!--(.|\s)*?-->/', '', $content);
+        return (string) \Safe\preg_replace('/<!--(.|\s)*?-->/', '', $content);
     }
 
     public static function punctuationBeautifer(string $text): string
     {
-        $text = (string) preg_replace('# ([\!\?\:;])([^a-zA-Z]|$)#', '&nbsp;$1$2', $text);
+        $text = (string) \Safe\preg_replace('# ([\!\?\:;])([^a-zA-Z]|$)#', '&nbsp;$1$2', $text);
         // avoid to catch tailwind selector inside ""
 
         return str_replace(

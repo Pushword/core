@@ -8,11 +8,7 @@ class F
 {
     public static function file_get_contents(string $filename): string
     {
-        $content = file_get_contents($filename);
-
-        if (false === $content) {
-            throw new Exception('Impossible to get content from `'.$filename.'`');
-        }
+        $content = \Safe\file_get_contents($filename);
 
         return $content;
     }
@@ -26,7 +22,7 @@ class F
      */
     public static function preg_replace_str($pattern, $replacement, $subject, int $limit = -1, int &$count = 0) // @phpstan-ignore-line
     {
-        $return = preg_replace($pattern, $replacement, $subject, $limit, $count);
+        $return = \Safe\preg_replace($pattern, $replacement, $subject, $limit, $count);
 
         //if (\gettype($pattern) !== \gettype($return)) {
         if (! \is_string($return)) {

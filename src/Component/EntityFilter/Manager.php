@@ -53,17 +53,17 @@ final class Manager
      */
     public function __call(string $method, array $arguments = [])
     {
-        if (preg_match('/^get/', $method) < 1) {
+        if (\Safe\preg_match('/^get/', $method) < 1) {
             $method = 'get'.ucfirst($method);
         }
 
-        $event = new FilterEvent($this, substr($method, 3));
+        $event = new FilterEvent($this, \Safe\substr($method, 3));
         $this->eventDispatcher->dispatch($event, FilterEvent::NAME_BEFORE);
 
         $returnValue = [] !== $arguments ? \call_user_func_array([$this->entity, $method], $arguments) // @phpstan-ignore-line
             : \call_user_func([$this->entity, $method]);    // @phpstan-ignore-line
 
-        $returnValue = $this->filter(substr($method, 3), $returnValue);
+        $returnValue = $this->filter(\Safe\substr($method, 3), $returnValue);
 
         $this->eventDispatcher->dispatch($event, FilterEvent::NAME_AFTER);
 
@@ -93,7 +93,7 @@ final class Manager
 
     private function camelCaseToSnakeCase(string $string): string
     {
-        return strtolower((string) preg_replace('/[A-Z]/', '_\\0', lcfirst($string)));
+        return strtolower((string) \Safe\preg_replace('/[A-Z]/', '_\\0', lcfirst($string)));
     }
 
     /** @return string[] */
@@ -194,7 +194,7 @@ final class Manager
 
     private function className(string $name): string
     {
-        $name = substr($name, (int) strrpos($name, '/'));
+        $name = \Safe\substr($name, (int) strrpos($name, '/'));
 
         return lcfirst($name);
     }

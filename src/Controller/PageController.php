@@ -221,11 +221,11 @@ final class PageController extends AbstractController
         string $host,
         bool $throwException
     ): ?Page {
-        if (1 !== preg_match('#(/([1-9][0-9]*)|^([1-9][0-9]*))$#', $slug, $match)) {
+        if (1 !== \Safe\preg_match('#(/([1-9][0-9]*)|^([1-9][0-9]*))$#', $slug, $match)) {
             return null;
         }
 
-        $unpaginatedSlug = substr($slug, 0, -(\strlen($match[1])));
+        $unpaginatedSlug = \Safe\substr($slug, 0, -(\strlen($match[1])));
         $request->attributes->set('pager', (int) $match[2] >= 1 ? $match[2] : $match[3]);
         $request->attributes->set('slug', $unpaginatedSlug);
 

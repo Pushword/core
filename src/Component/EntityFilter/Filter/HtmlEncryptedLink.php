@@ -17,7 +17,7 @@ final class HtmlEncryptedLink extends EncryptedLink
 
     public function convertHtmlRelEncryptedLink(string $body): string
     {
-        preg_match_all(self::HTML_REGEX, $body, $matches);
+        \Safe\preg_match_all(self::HTML_REGEX, $body, $matches);
 
         if (! isset($matches[1])) {
             return $body;

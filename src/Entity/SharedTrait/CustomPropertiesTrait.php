@@ -170,7 +170,7 @@ trait CustomPropertiesTrait
             return; // avoid error with sonata
         }
 
-        if (1 === preg_match('/^get/', $method)) {
+        if (1 === \Safe\preg_match('/^get/', $method)) {
             $property = lcfirst(F::preg_replace_str('/^get/', '', $method));
             if (! property_exists(static::class, $property)) {
                 return $this->getCustomProperty($property) ?? null;

@@ -14,7 +14,7 @@ trait ImageImport
         $slug = (new Slugify())->slugify($slug);
 
         return ($slug ?: pathinfo($url, \PATHINFO_BASENAME))
-            .($hashInFilename ? '-'.substr(md5(sha1($url)), 0, 4) : '')
+            .($hashInFilename ? '-'.\Safe\substr(md5(sha1($url)), 0, 4) : '')
             .'.'.str_replace(['image/', 'jpeg'], ['', 'jpg'], $mimeType);
     }
 
@@ -41,7 +41,7 @@ trait ImageImport
             ->setProjectDir($this->projectDir)
                 ->setStoreIn($this->mediaDir)
                 ->setMimeType($imgSize['mime'])
-                ->setSize(filesize($imageLocalImport))
+                ->setSize(\Safe\filesize($imageLocalImport))
                 ->setDimensions([$imgSize[0], $imgSize[1]])
                 ->setMedia($fileName)
                 ->setName(str_replace(["\n", '"'], ' ', $name));
@@ -85,9 +85,7 @@ trait ImageImport
             return false;
         }
 
-        if (false === file_put_contents($filePath, $content)) {
-            throw new Exception('An error occured caching external resource in system tmp dir.');
-        }
+        \Safe\file_put_contents($filePath, $content);
 
         return $filePath;
     }

@@ -28,7 +28,7 @@ class Mozjpeg extends BaseOptimizer
             ->run();
 
         if (0 === $status) {
-            file_put_contents($this->imagePath, $process->getOutput());
+            \Safe\file_put_contents($this->imagePath, $process->getOutput());
         }
 
         return 'echo ""';

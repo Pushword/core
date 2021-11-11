@@ -20,7 +20,7 @@ class Image extends AbstractFilter
 
     public function convertMarkdownImage(string $body): string
     {
-        preg_match_all('/(?:!\[(.*?)\]\((.*?)\))/', $body, $matches);
+        \Safe\preg_match_all('/(?:!\[(.*?)\]\((.*?)\))/', $body, $matches);
 
         if (! isset($matches[1])) {
             return $body;

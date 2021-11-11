@@ -123,7 +123,7 @@ class MediaListener
             return;
         }
 
-        $media->setName(\strval(preg_replace('/\\.[^.\\s]{3,4}$/', '', $media->getMediaFileName())));
+        $media->setName(\strval(\Safe\preg_replace('/\\.[^.\\s]{3,4}$/', '', $media->getMediaFileName())));
     }
 
     private function getMediaString(MediaInterface $media): string
@@ -151,7 +151,7 @@ class MediaListener
             return;
         }
 
-        $newName = (1 === $this->iterate ? $media->getName() : preg_replace('/ \([0-9]+\)$/', '', $media->getName()))
+        $newName = (1 === $this->iterate ? $media->getName() : \Safe\preg_replace('/ \([0-9]+\)$/', '', $media->getName()))
             .' ('.$this->iterate.')';
         $media->setName($newName);
         $media->setMedia(null);

@@ -42,7 +42,7 @@ final class NewCommand extends Command
 
         $config = $this->initConfig($configFile, ['hosts' => [$mainDomain], 'locale' => $locale, 'locales' => $locales]);
 
-        file_put_contents($configFile, Yaml::dump($config, 4));
+        \Safe\file_put_contents($configFile, Yaml::dump($config, 4));
 
         $output->writeln('<info>Config updated with success. Want more set more configuration options ? Open `config/packages/pushword.yaml`</info>');
 

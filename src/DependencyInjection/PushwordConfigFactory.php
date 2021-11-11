@@ -173,7 +173,7 @@ final class PushwordConfigFactory
     private function setParameter(string $key, $value): void
     {
         if ($this->container->hasParameter($key)) {
-            throw new InvalidArgumentException(sprintf('Invalid "%s" name: parameter is ever registered.', $key));
+            throw new InvalidArgumentException(\Safe\sprintf('Invalid "%s" name: parameter is ever registered.', $key));
         }
 
         $this->container->setParameter($key, $value);
