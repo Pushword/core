@@ -18,8 +18,6 @@ class F
     }
 
     /**
-     * Undocumented function.
-     *
      * @param string|array $pattern
      * @param string|array $replacement
      * @param string|array $subject
