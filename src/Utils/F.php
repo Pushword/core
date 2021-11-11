@@ -18,9 +18,15 @@ class F
     }
 
     /**
+     * Undocumented function.
+     *
+     * @param string|array $pattern
+     * @param string|array $replacement
+     * @param string|array $subject
+     *
      * @return string|string[]
      */
-    public static function preg_replace(string|array $pattern, string|array $replacement, string|array $subject, int $limit = -1, int &$count = 0): string|array // @phpstan-ignore-line
+    public static function preg_replace($pattern, $replacement, $subject, int $limit = -1, int &$count = 0) // @phpstan-ignore-line
     {
         $return = preg_replace($pattern, $replacement, $subject, $limit, $count);
 
