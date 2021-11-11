@@ -303,7 +303,7 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
 
     protected function andLocale(QueryBuilder $queryBuilder, string $locale): QueryBuilder
     {
-        if (! $locale) {
+        if ('' === $locale || '0' === $locale) {
             return $queryBuilder;
         }
 

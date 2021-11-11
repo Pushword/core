@@ -24,7 +24,7 @@ final class AppPool
         $firstHost = \strval(array_key_first($rawApps));
 
         foreach ($rawApps as $mainHost => $app) {
-            $this->apps[$mainHost] = new AppConfig($parameterBag, $app, $firstHost == $mainHost ? true : false);
+            $this->apps[$mainHost] = new AppConfig($parameterBag, $app, $firstHost === $mainHost);
             $this->apps[$mainHost]->setTwig($twig);
         }
 
@@ -99,13 +99,7 @@ final class AppPool
             return $firstApp === $host;
         }
 
-        foreach ($host as $singleHost) {
-            if ($firstApp === $singleHost) {
-                return true;
-            }
-        }
-
-        return false;
+        return \in_array($firstApp, $host, true);
     }
 
     /**
@@ -122,11 +116,7 @@ final class AppPool
             return true;
         }
 
-        if ($host === $this->currentApp) {
-            return true;
-        }
-
-        return false;
+        return $host === $this->currentApp;
     }
 
     public function getApp(string $host = ''): AppConfig

@@ -89,14 +89,14 @@ trait PageI18nTrait
         if ($this->getTranslations()->contains($page)) {
             $this->getTranslations()->removeElement($page);
 
-            if (true === $recursive) {
+            if ($recursive) {
                 foreach ($this->getTranslations() as $otherTranslation) {
                     $page->removeTranslation($otherTranslation, false);
                 }
             }
         }
 
-        if (true === $recursive) {
+        if ($recursive) {
             $page->removeTranslation($this, false);
 
             foreach ($this->getTranslations() as $otherTranslation) {

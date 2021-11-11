@@ -57,7 +57,7 @@ final class PageController extends AbstractController
 
         // SEO redirection if we are not on the good URI (for exemple /fr/tagada instead of /tagada)
         if (
-            ('' !== $host && $host == $request->getHost()) // avoid redir when using custom_host route
+            ('' !== $host && $host === $request->getHost()) // avoid redir when using custom_host route
             && false !== $redirect = $this->checkIfUriIsCanonical($request, $page)) {
             return $this->redirect($redirect, 301);
         }
@@ -243,11 +243,11 @@ final class PageController extends AbstractController
         $slug = $this->noramlizeSlug($slug);
         $page = $this->getPageRepository()->getPage($slug, '' !== $host ? $host : [$this->apps->getMainHost(), ''], true);
 
-        if (null === $page && $extractPager) {
+        if (! $page instanceof \Pushword\Core\Entity\PageInterface && $extractPager) {
             $page = $this->extractPager($request, $slug, $host, $throwException);
         }
         // Check if page exist
-        if (null === $page) {
+        if (! $page instanceof \Pushword\Core\Entity\PageInterface) {
             if ($throwException) {
                 throw $this->createNotFoundException();
             } else {
@@ -289,7 +289,7 @@ final class PageController extends AbstractController
 
         $expected = $this->generateUrl('pushword_page', ['slug' => $page->getRealSlug()]);
 
-        if ($requestUri != $expected) {
+        if ($requestUri !== $expected) {
             return $request->getBasePath().$expected;
         }
 

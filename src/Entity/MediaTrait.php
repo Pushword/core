@@ -221,7 +221,7 @@ trait MediaTrait
 
     public function getMediaFileName(): string
     {
-        if (null === $this->mediaFile) {
+        if (! $this->mediaFile instanceof \Symfony\Component\HttpFoundation\File\File) {
             throw new Exception('MediaFile is not setted');
         }
         if ($this->mediaFile instanceof UploadedFile) {

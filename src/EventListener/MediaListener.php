@@ -145,8 +145,8 @@ class MediaListener
         $sameName = $this->em->getRepository(\get_class($media))->findOneBy(['name' => $media->getName()]);
         $sameMedia = $this->em->getRepository(\get_class($media))->findOneBy(['media' => $mediaString]);
 
-        if (! (null !== $sameName && $media->getId() != $sameName->getId())
-            && ! (null !== $sameMedia && $media->getId() != $sameMedia->getId())
+        if (! (null !== $sameName && $media->getId() !== $sameName->getId())
+            && ! (null !== $sameMedia && $media->getId() !== $sameMedia->getId())
         ) {
             return;
         }
@@ -180,14 +180,14 @@ class MediaListener
             $this->imageManager->remove($media);
             $this->imageManager->generateCache($media);
             $image = $this->imageManager->getLastThumb();
-            $this->updateMainColor($media, null !== $image ? $image : null);
+            $this->updateMainColor($media, $image);
             //exec('cd ../ && php bin/console pushword:image:cache '.$media->getMedia().' > /dev/null 2>/dev/null &');
         }
     }
 
     private function updateMainColor(MediaInterface $media, ?Image $image = null): void
     {
-        if (null === $image) {
+        if (! $image instanceof \Intervention\Image\Image) {
             return;
         }
 

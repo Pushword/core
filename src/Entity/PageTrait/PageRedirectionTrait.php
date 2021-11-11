@@ -46,7 +46,7 @@ trait PageRedirectionTrait
             $this->manageRedirection();
         }
 
-        return false === $this->redirectionUrl ? false : true;
+        return false !== $this->redirectionUrl;
     }
 
     /** @psalm-suppress InvalidNullableReturnType */

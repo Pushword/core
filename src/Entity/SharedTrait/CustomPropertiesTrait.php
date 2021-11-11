@@ -178,8 +178,7 @@ trait CustomPropertiesTrait
 
             return $this->$property; // may keep that ?! @phpstan-ignore-line
         } else {
-            $vars = array_keys(get_object_vars($this));
-            if (\in_array($method, $vars, true) && \is_callable($getter = [$this, 'get'.ucfirst($method)])) {
+            if (\array_key_exists($method, get_object_vars($this)) && \is_callable($getter = [$this, 'get'.ucfirst($method)])) {
                 return \call_user_func_array($getter, $arguments);
             }
 

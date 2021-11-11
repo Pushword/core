@@ -22,18 +22,16 @@ class LastTime
     {
         $dateTime = $this->get();
 
-        if (null === $dateTime || $dateTime->add($dateInterval) < new DateTime('now')) {
-            return false;
-        }
-
-        return true;
+        return null !== $dateTime && $dateTime->add($dateInterval) >= new DateTime('now');
     }
 
     /**
      * Return false if never runned else last datetime it was runned.
      * If $default is set, return $default time if never runned.
+     *
+     * @return \DateTime|\DateTimeImmutable|null
      */
-    public function get(?string $default = null): ?Datetime
+    public function get(?string $default = null): ?\DateTimeInterface
     {
         if (! file_exists($this->filePath)) {
             return null === $default ? null : new DateTime($default);
@@ -45,7 +43,7 @@ class LastTime
     public function setWasRun(string $datetime = 'now', bool $setIfNotExist = true): void
     {
         if (! file_exists($this->filePath)) {
-            if (false === $setIfNotExist) {
+            if (! $setIfNotExist) {
                 return;
             }
             \Safe\file_put_contents($this->filePath, '');

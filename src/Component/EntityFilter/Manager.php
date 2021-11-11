@@ -118,8 +118,8 @@ final class Manager
      */
     private function isFilter(string $className)
     {
-        $filterClass = ! class_exists($className) ? 'Pushword\Core\Component\EntityFilter\Filter\\'.ucfirst($className)
-            : $className;
+        $filterClass = class_exists($className) ? $className
+            : 'Pushword\Core\Component\EntityFilter\Filter\\'.ucfirst($className);
 
         if (! class_exists($filterClass)) {
             return false;

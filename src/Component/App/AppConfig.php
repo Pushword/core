@@ -107,11 +107,7 @@ final class AppConfig
 
     public function has(string $key): bool
     {
-        if (null !== $this->get($key)) {
-            return true;
-        }
-
-        return false;
+        return null !== $this->get($key);
     }
 
     /** @return mixed */

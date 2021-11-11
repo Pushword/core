@@ -8,9 +8,7 @@ class F
 {
     public static function file_get_contents(string $filename): string
     {
-        $content = \Safe\file_get_contents($filename);
-
-        return $content;
+        return \Safe\file_get_contents($filename);
     }
 
     /**

@@ -26,7 +26,7 @@ final class Router implements RouterInterface
     ) {
         $this->router = $sfRouter;
         $this->apps = $appPool;
-        $this->currentHost = $requestStack->getCurrentRequest() ? $requestStack->getCurrentRequest()->getHost() : '';
+        $this->currentHost = null !== $requestStack->getCurrentRequest() ? $requestStack->getCurrentRequest()->getHost() : '';
     }
 
     /**
@@ -39,7 +39,7 @@ final class Router implements RouterInterface
         $homepage = (new Page())->setSlug('');
 
         if (null !== $page) {
-            if ($page->getLocale() != $this->apps->get()->getDefaultLocale()) {
+            if ($page->getLocale() !== $this->apps->get()->getDefaultLocale()) {
                 $homepage->setSlug($page->getLocale());
             }
             $homepage->setHost($page->getHost());

@@ -128,8 +128,8 @@ final class PushwordConfigFactory
 
         foreach ($fallbackProperties as $fallbackProperty) {
             if (! isset($app[$fallbackProperty])) {
-                $app[$fallbackProperty] = ! \is_string($this->config[$fallbackProperty]) ? $this->config[$fallbackProperty]
-                    : str_replace('%main_host%', $app['hosts'][0], $this->config[$fallbackProperty]); // @phpstan-ignore-line
+                $app[$fallbackProperty] = \is_string($this->config[$fallbackProperty]) ? str_replace('%main_host%', $app['hosts'][0], $this->config[$fallbackProperty])
+                    : $this->config[$fallbackProperty]; // @phpstan-ignore-line
             } elseif ('custom_properties' == $fallbackProperty) {
                 $app['custom_properties'] = array_merge($this->config['custom_properties'], $app['custom_properties']); // @phpstan-ignore-line
             }
@@ -155,7 +155,7 @@ final class PushwordConfigFactory
             }
 
             if (\is_array($value)
-            && ! \in_array($key, ['image_filter_sets'], true)
+            && 'image_filter_sets' !== $key
                 && IsAssociativeArray::test($value)
                 ) {
                 $this->loadToParameters($value, $prefix.$key.'.');

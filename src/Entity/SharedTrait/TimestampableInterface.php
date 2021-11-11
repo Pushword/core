@@ -4,8 +4,9 @@ namespace Pushword\Core\Entity\SharedTrait;
 
 interface TimestampableInterface
 {
-    /** @return $this */
-    public function setCreatedAt(\DateTime $createdAt);
+    /** @return $this
+     * @param \DateTime|\DateTimeImmutable $createdAt */
+    public function setCreatedAt(\DateTimeInterface $createdAt);
 
     /**
      * @return \DateTimeInterface
@@ -14,8 +15,10 @@ interface TimestampableInterface
 
     /**
      * @return $this
+     *
+     * @param \DateTime|\DateTimeImmutable $updatedAt
      */
-    public function setUpdatedAt(\DateTime $updatedAt);
+    public function setUpdatedAt(\DateTimeInterface $updatedAt);
 
     /**
      * @return \DateTimeInterface

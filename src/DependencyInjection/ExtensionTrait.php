@@ -32,7 +32,7 @@ trait ExtensionTrait
         $finder = Finder::create()->files()->name('*.yaml')->in($this->getConfigFolder().'/packages');
         foreach ($finder as $singleFinder) {
             $configs = $parser->parse(F::file_get_contents($singleFinder->getRealPath())); // @phpstan-ignore-line
-            if (false === \is_array($configs)) {
+            if (! \is_array($configs)) {
                 throw new Exception($singleFinder->getRealPath().' is malformed');
             }
             $this->prependExtensionConfigs($configs, $container);
@@ -54,7 +54,7 @@ trait ExtensionTrait
             if ('services' == $name) {
                 continue;
             }
-            if (false === \is_array($config)) {
+            if (! \is_array($config)) {
                 throw new Exception('Malformed config named `'.$name.'`');
             }
             $container->prependExtensionConfig($name, $config);

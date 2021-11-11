@@ -53,7 +53,7 @@ final class AppsConfigParser
     private static function getParameterArray(ContainerBuilder $containerBuilder, string $parameterName): array
     {
         $return = $containerBuilder->getParameter($parameterName);
-        if (false === \is_array($return)) {
+        if (! \is_array($return)) {
             throw new LogicException('Parameter '.$parameterName.' must be an array');
         }
 
