@@ -22,20 +22,20 @@ final class ManagerPool implements ManagerPoolInterface
     /** @var array<(string|int), Manager> */
     private array $entityFilterManagers = [];
 
-    public function getManager(IdInterface $entity): Manager
+    public function getManager(IdInterface $id): Manager
     {
-        if (null !== $entity->getId() && isset($this->entityFilterManagers[$entity->getId()])) {
-            return $this->entityFilterManagers[$entity->getId()];
+        if (null !== $id->getId() && isset($this->entityFilterManagers[$id->getId()])) {
+            return $this->entityFilterManagers[$id->getId()];
         }
 
-        $this->entityFilterManagers[$entity->getId()] = new Manager($this, $this->eventDispatcher, $entity);
+        $this->entityFilterManagers[$id->getId()] = new Manager($this, $this->eventDispatcher, $id);
 
-        return $this->entityFilterManagers[$entity->getId()];
+        return $this->entityFilterManagers[$id->getId()];
     }
 
-    public function getProperty(IdInterface $entity, string $property = '')
+    public function getProperty(IdInterface $id, string $property = '')
     {
-        $manager = $this->getManager($entity);
+        $manager = $this->getManager($id);
 
         if ('' === $property) {
             return $manager;

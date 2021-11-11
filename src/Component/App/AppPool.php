@@ -19,12 +19,12 @@ final class AppPool
     private ?\Pushword\Core\Entity\PageInterface $currentPage = null;
 
     /** @param array<string, array<string, mixed>> $rawApps */
-    public function __construct(array $rawApps, Twig $twig, ParameterBagInterface $params)
+    public function __construct(array $rawApps, Twig $twig, ParameterBagInterface $parameterBag)
     {
         $firstHost = \strval(array_key_first($rawApps));
 
         foreach ($rawApps as $mainHost => $app) {
-            $this->apps[$mainHost] = new AppConfig($params, $app, $firstHost == $mainHost ? true : false);
+            $this->apps[$mainHost] = new AppConfig($parameterBag, $app, $firstHost == $mainHost ? true : false);
             $this->apps[$mainHost]->setTwig($twig);
         }
 
@@ -99,8 +99,8 @@ final class AppPool
             return $firstApp === $host;
         }
 
-        foreach ($host as $h) {
-            if ($firstApp === $h) {
+        foreach ($host as $singleHost) {
+            if ($firstApp === $singleHost) {
                 return true;
             }
         }

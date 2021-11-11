@@ -25,8 +25,8 @@ class Twig extends AbstractFilter
             return $string;
         }
 
-        $tmpl = $this->twig->createTemplate($string);
+        $templateWrapper = $this->twig->createTemplate($string);
 
-        return $tmpl->render($this->entity instanceof PageInterface ? ['page' => $this->entity] : []);
+        return $templateWrapper->render($this->entity instanceof PageInterface ? ['page' => $this->entity] : []);
     }
 }

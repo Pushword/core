@@ -18,11 +18,11 @@ class LastTime
         $this->filePath = $filePath;
     }
 
-    public function wasRunSince(DateInterval $interval): bool
+    public function wasRunSince(DateInterval $dateInterval): bool
     {
-        $previous = $this->get();
+        $dateTime = $this->get();
 
-        if (null === $previous || $previous->add($interval) < new DateTime('now')) {
+        if (null === $dateTime || $dateTime->add($dateInterval) < new DateTime('now')) {
             return false;
         }
 

@@ -57,15 +57,15 @@ final class Manager
             $method = 'get'.ucfirst($method);
         }
 
-        $event = new FilterEvent($this, \Safe\substr($method, 3));
-        $this->eventDispatcher->dispatch($event, FilterEvent::NAME_BEFORE);
+        $filterEvent = new FilterEvent($this, \Safe\substr($method, 3));
+        $this->eventDispatcher->dispatch($filterEvent, FilterEvent::NAME_BEFORE);
 
         $returnValue = [] !== $arguments ? \call_user_func_array([$this->entity, $method], $arguments) // @phpstan-ignore-line
             : \call_user_func([$this->entity, $method]);    // @phpstan-ignore-line
 
         $returnValue = $this->filter(\Safe\substr($method, 3), $returnValue);
 
-        $this->eventDispatcher->dispatch($event, FilterEvent::NAME_AFTER);
+        $this->eventDispatcher->dispatch($filterEvent, FilterEvent::NAME_AFTER);
 
         return $returnValue;
     }
@@ -125,8 +125,8 @@ final class Manager
             return false;
         }
 
-        $class = new ReflectionClass($filterClass);
-        if (! $class->implementsInterface(FilterInterface::class)) {
+        $reflectionClass = new ReflectionClass($filterClass);
+        if (! $reflectionClass->implementsInterface(FilterInterface::class)) {
             return false;
         }
 

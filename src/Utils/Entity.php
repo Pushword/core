@@ -9,8 +9,8 @@ class Entity
      */
     public static function getProperties(object $object): array
     {
-        $reflClass = new \ReflectionClass(\get_class($object));
-        $properties = array_filter($reflClass->getProperties(), function (\ReflectionProperty $property) {
+        $reflectionClass = new \ReflectionClass(\get_class($object));
+        $properties = array_filter($reflectionClass->getProperties(), function (\ReflectionProperty $property) {
             if (false !== strpos((string) $property->getDocComment(), '@ORM\Column')) {
                 return true;
             }

@@ -32,7 +32,7 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
     // ParentTrait
     public function getParentPage(): ?self;
 
-    public function setParentPage(?self $parentPage): self;
+    public function setParentPage(?self $page): self;
 
     /**
      * @return PageInterface[]|Collection<int, PageInterface>|array
@@ -62,11 +62,11 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
     // Page Extended
     public function getExtendedPage(): ?self;
 
-    public function setExtendPage(?self $extendedPage): self;
+    public function setExtendPage(?self $page): self;
 
     public function getMetaRobots(): string;
 
-    public function setMainImage(?MediaInterface $mainImage): self;
+    public function setMainImage(?MediaInterface $media): self;
 
     public function __toString(): string;
 
@@ -75,7 +75,7 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
 
     public function setLocale(string $locale): self;
 
-    public function addTranslation(self $translation, bool $recursive = true): self;
+    public function addTranslation(self $page, bool $recursive = true): self;
 
-    public function removeTranslation(self $translation, bool $recursive = true): self;
+    public function removeTranslation(self $page, bool $recursive = true): self;
 }

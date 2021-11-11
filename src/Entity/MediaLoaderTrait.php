@@ -13,9 +13,9 @@ trait MediaLoaderTrait
         $src = false !== strpos($src, '/') ? \Safe\substr($src, \strlen('/media/default/')) : $src;
 
         /** @var MediaInterface $media */
-        $media = new self();
-        $media->setMedia($src);
+        $self = new self();
+        $self->setMedia($src);
 
-        return $media;
+        return $self;
     }
 }

@@ -78,9 +78,9 @@ trait PageListTwigTrait
 
         if (false !== strpos($search, ' OR ')) {
             $searchToParse = explode(' OR ', $search);
-            foreach ($searchToParse as $s) {
+            foreach ($searchToParse as $singleSearchToParse) {
                 //$where = array_merge($where, $this->stringToSearch($s), ['OR']);
-                $where[] = $this->simpleStringToSearch($s);
+                $where[] = $this->simpleStringToSearch($singleSearchToParse);
                 $where[] = 'OR';
             }
             array_pop($where);
@@ -164,11 +164,11 @@ trait PageListTwigTrait
                 $pages = \array_slice($pages, 0, $limit);
             }
 
-            $pager = (new Pagerfanta(new ArrayAdapter($pages)))
+            $pagerfanta = (new Pagerfanta(new ArrayAdapter($pages)))
                 ->setMaxNbPages($max[1] ?? 0)
                 ->setMaxPerPage($max[0])
                 ->setCurrentPage($this->getCurrentPage());
-            $pages = $pager->getCurrentPageResults();
+            $pages = $pagerfanta->getCurrentPageResults();
         } else {
             $pages = $queryBuilder->getQuery()->getResult();
         }
@@ -179,7 +179,7 @@ trait PageListTwigTrait
             'pager_route' => $this->getPagerRouteName(),
             'pager_route_params' => $this->getPagerRouteParams(),
             'pages' => $pages,
-            'pager' => $pager ?? null,
+            'pager' => $pagerfanta ?? null,
         ]);
     }
 

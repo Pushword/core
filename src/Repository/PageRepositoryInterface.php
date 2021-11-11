@@ -78,7 +78,7 @@ interface PageRepositoryInterface extends ServiceEntityRepositoryInterface, Obje
     /**
      * @param string|string[] $host
      */
-    public function andHost(QueryBuilder $qb, $host): QueryBuilder;
+    public function andHost(QueryBuilder $queryBuilder, $host): QueryBuilder;
 
     /**
      * @param string|string[] $host

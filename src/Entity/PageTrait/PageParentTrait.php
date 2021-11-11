@@ -38,13 +38,13 @@ trait PageParentTrait
         return null !== $parentPage->getParentPage() ? $this->validateParentPage($parentPage->getParentPage()) : true;
     }
 
-    public function setParentPage(?PageInterface $parentPage): self
+    public function setParentPage(?PageInterface $page): self
     {
-        if (null !== $parentPage && ! $this->validateParentPage($parentPage)) {
+        if (null !== $page && ! $this->validateParentPage($page)) {
             throw new LogicException('Current Page can\'t be it own parent page.');
         }
 
-        $this->parentPage = $parentPage;
+        $this->parentPage = $page;
 
         return $this;
     }

@@ -9,9 +9,9 @@ final class UserListener
 {
     private UserPasswordHasherInterface $passwordEncoder;
 
-    public function __construct(UserPasswordHasherInterface $passwordEncoder)
+    public function __construct(UserPasswordHasherInterface $userPasswordHasher)
     {
-        $this->passwordEncoder = $passwordEncoder;
+        $this->passwordEncoder = $userPasswordHasher;
     }
 
     /**

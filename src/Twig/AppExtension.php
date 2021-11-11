@@ -49,12 +49,12 @@ class AppExtension extends AbstractExtension
 
     private ManagerPoolInterface $entityFilterManagerPool;
 
-    public function __construct(EntityManagerInterface $em, string $pageClass, RouterInterface $router, AppPool $apps, Twig $twig, ImageManager $imageManager, ManagerPoolInterface $entityFilterManagerPool)
+    public function __construct(EntityManagerInterface $entityManager, string $pageClass, RouterInterface $router, AppPool $appPool, Twig $twig, ImageManager $imageManager, ManagerPoolInterface $entityFilterManagerPool)
     {
-        $this->em = $em;
+        $this->em = $entityManager;
         $this->router = $router;
         $this->pageClass = $pageClass;
-        $this->apps = $apps;
+        $this->apps = $appPool;
         $this->twig = $twig;
         $this->imageManager = $imageManager;
         $this->entityFilterManagerPool = $entityFilterManagerPool;

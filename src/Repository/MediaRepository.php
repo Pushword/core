@@ -18,11 +18,11 @@ class MediaRepository extends ServiceEntityRepository implements ObjectRepositor
      */
     public function getMimeTypes(): array
     {
-        $qb = $this->createQueryBuilder('m');
-        $qb->select('m.mimeType');
-        $qb->groupBy('m.mimeType');
-        $qb->orderBy('m.mimeType', Criteria::ASC);
+        $queryBuilder = $this->createQueryBuilder('m');
+        $queryBuilder->select('m.mimeType');
+        $queryBuilder->groupBy('m.mimeType');
+        $queryBuilder->orderBy('m.mimeType', Criteria::ASC);
 
-        return array_column($qb->getQuery()->getResult(), 'mimeType');
+        return array_column($queryBuilder->getQuery()->getResult(), 'mimeType');
     }
 }

@@ -12,11 +12,11 @@ final class AppsConfigParser
      *
      * @return array<array<mixed>>
      */
-    public static function parse(array $apps, ContainerBuilder $container): array
+    public static function parse(array $apps, ContainerBuilder $containerBuilder): array
     {
         $result = [];
         foreach ($apps as $app) {
-            $app = self::parseAppConfig($app, $container);
+            $app = self::parseAppConfig($app, $containerBuilder);
             $result[$app['hosts'][0]] = $app; // @phpstan-ignore-line
         }
 
@@ -28,18 +28,18 @@ final class AppsConfigParser
      *
      * @return array<mixed>
      */
-    private static function parseAppConfig(array $app, ContainerBuilder $container): array
+    private static function parseAppConfig(array $app, ContainerBuilder $containerBuilder): array
     {
-        $properties = $container->getParameter('pw.app_fallback_properties');
+        $properties = $containerBuilder->getParameter('pw.app_fallback_properties');
         if (\is_string($properties)) { // @phpstan-ignore-line
             $properties = explode(',', $properties);
         }
 
-        foreach ($properties as $p) {
-            if (! isset($app[$p])) {
-                $app[$p] = $container->getParameter('pw.'.$p); //'%'.'pw.'.$p.'%';
-            } elseif ('custom_properties' == $p) {
-                $app[$p] = array_merge(self::getParameterArray($container, 'pw.'.$p), $app[$p]); // @phpstan-ignore-line
+        foreach ($properties as $property) {
+            if (! isset($app[$property])) {
+                $app[$property] = $containerBuilder->getParameter('pw.'.$property); //'%'.'pw.'.$p.'%';
+            } elseif ('custom_properties' == $property) {
+                $app[$property] = array_merge(self::getParameterArray($containerBuilder, 'pw.'.$property), $app[$property]); // @phpstan-ignore-line
                 //var_dump($app[$p]); exit;
             }
         }
@@ -50,9 +50,9 @@ final class AppsConfigParser
     /**
      * @return array<mixed>
      */
-    private static function getParameterArray(ContainerBuilder $container, string $parameterName): array
+    private static function getParameterArray(ContainerBuilder $containerBuilder, string $parameterName): array
     {
-        $return = $container->getParameter($parameterName);
+        $return = $containerBuilder->getParameter($parameterName);
         if (false === \is_array($return)) {
             throw new LogicException('Parameter '.$parameterName.' must be an array');
         }

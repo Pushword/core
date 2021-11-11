@@ -36,14 +36,14 @@ final class PageController extends AbstractController
     private TranslatorInterface $translator;
 
     public function __construct(
-        ParameterBagInterface $params,
-        EntityManagerInterface $em,
-        AppPool $apps,
+        ParameterBagInterface $parameterBag,
+        EntityManagerInterface $entityManager,
+        AppPool $appPool,
         TranslatorInterface $translator
     ) {
-        $this->em = $em;
-        $this->params = $params;
-        $this->apps = $apps;
+        $this->em = $entityManager;
+        $this->params = $parameterBag;
+        $this->apps = $appPool;
 
         if (! $translator instanceof DataCollectorTranslator && ! $translator instanceof Translator) {
             throw new LogicException('A symfony codebase changed make this hack impossible (cf setLocale). Get `'.\get_class($translator).'`');
@@ -285,11 +285,11 @@ final class PageController extends AbstractController
      */
     private function checkIfUriIsCanonical(Request $request, Page $page)
     {
-        $real = $request->getRequestUri();
+        $requestUri = $request->getRequestUri();
 
         $expected = $this->generateUrl('pushword_page', ['slug' => $page->getRealSlug()]);
 
-        if ($real != $expected) {
+        if ($requestUri != $expected) {
             return $request->getBasePath().$expected;
         }
 

@@ -35,15 +35,15 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         $limit = 0,
         bool $withRedirection = true
     ) {
-        $qb = $this->getPublishedPageQueryBuilder($host, $where, $orderBy);
+        $queryBuilder = $this->getPublishedPageQueryBuilder($host, $where, $orderBy);
 
         if (! $withRedirection) {
-            $this->andNotRedirection($qb);
+            $this->andNotRedirection($queryBuilder);
         }
 
-        $this->limit($qb, $limit);
+        $this->limit($queryBuilder, $limit);
 
-        $query = $qb->getQuery();
+        $query = $queryBuilder->getQuery();
 
         return $query->getResult();
     }
@@ -142,12 +142,12 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
      */
     public function getPagesWithoutParent(): array
     {
-        $q = $this->createQueryBuilder('p')
+        $query = $this->createQueryBuilder('p')
             ->andWhere('p.parentPage is NULL')
             ->orderBy('p.slug', Criteria::DESC)
             ->getQuery();
 
-        return $q->getResult();
+        return $query->getResult();
     }
 
     /**
@@ -157,12 +157,12 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
     {
         $qb = $this->createQueryBuilder('p');
 
-        $or = $qb->expr()->orX();
-        $or->add($qb->expr()->like('p.mainContent', ':apostrophMedia')); // catch: 'example.jpg'
-        $or->add($qb->expr()->like('p.mainContent', ':quotedMedia')); // catch: "example.jpg'
-        $or->add($qb->expr()->like('p.mainContent', ':defaultMedia')); // catch: media/default/example.jpg
-        $or->add($qb->expr()->like('p.mainContent', ':thumbMedia'));
-        $query = $qb->where($or)->setParameters([
+        $orx = $qb->expr()->orX();
+        $orx->add($qb->expr()->like('p.mainContent', ':apostrophMedia')); // catch: 'example.jpg'
+        $orx->add($qb->expr()->like('p.mainContent', ':quotedMedia')); // catch: "example.jpg'
+        $orx->add($qb->expr()->like('p.mainContent', ':defaultMedia')); // catch: media/default/example.jpg
+        $orx->add($qb->expr()->like('p.mainContent', ':thumbMedia'));
+        $query = $qb->where($orx)->setParameters([
             'apostrophMedia' => '%\''.$media.'\'%',
             'quotedMedia' => '%"'.$media.'"%',
             'defaultMedia' => '/media/default/'.$media.'%',
@@ -172,9 +172,9 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         return $query->getResult();
     }
 
-    private function getRootAlias(QueryBuilder $qb): string
+    private function getRootAlias(QueryBuilder $queryBuilder): string
     {
-        $aliases = $qb->getRootAliases();
+        $aliases = $queryBuilder->getRootAliases();
 
         if (! isset($aliases[0])) {
             throw new \RuntimeException('No alias was set before invoking getRootAlias().');
@@ -195,48 +195,48 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
      *                     [['key'=>'title', 'operator' => 'LIKE', 'value' => '%this%'], 'OR', ['key'=>'slug', 'operator' => 'LIKE', 'value' => '%this%']] => works
      *                     See confusing parenthesis DQL doctrine https://symfonycasts.com/screencast/doctrine-queries/and-where-or-where#avoid-orwhere-and-where
      */
-    private function andWhere(QueryBuilder $qb, array $where): QueryBuilder
+    private function andWhere(QueryBuilder $queryBuilder, array $where): QueryBuilder
     {
         // Normalize array [']
         if (! empty($where) && (! isset($where[0]) || ! \is_array($where[0]))) {
             $where = [$where];
         }
         if (\in_array('OR', $where)) {
-            return $this->andWhereOr($qb, $where);
+            return $this->andWhereOr($queryBuilder, $where);
         }
 
-        foreach ($where as $w) {
-            if (! \is_array($w)) {
+        foreach ($where as $singleWhere) {
+            if (! \is_array($singleWhere)) {
                 throw new Exception('malformated where params');
             }
 
-            $this->simpleAndWhere($qb, $w);
+            $this->simpleAndWhere($queryBuilder, $singleWhere);
         }
 
-        return $qb;
+        return $queryBuilder;
     }
 
-    private function andWhereOr(QueryBuilder $qb, array $where): QueryBuilder
+    private function andWhereOr(QueryBuilder $queryBuilder, array $where): QueryBuilder
     {
-        $orX = $qb->expr()->orX();
+        $orX = $queryBuilder->expr()->orX();
 
-        foreach ($where as $w) {
-            if (! \is_array($w)) {
+        foreach ($where as $singleWhere) {
+            if (! \is_array($singleWhere)) {
                 continue;
             }
 
             $k = md5('a'.rand());
-            $orX->add($qb->expr()->like(($w['key_prefix'] ?? $w[4] ?? 'p.').($w['key'] ?? $w[0]), ':m'.$k));
-            $qb->setParameter('m'.$k, $w['value'] ?? $w[2]);
+            $orX->add($queryBuilder->expr()->like(($singleWhere['key_prefix'] ?? $singleWhere[4] ?? 'p.').($singleWhere['key'] ?? $singleWhere[0]), ':m'.$k));
+            $queryBuilder->setParameter('m'.$k, $singleWhere['value'] ?? $singleWhere[2]);
         }
 
-        return $qb->andWhere($orX);
+        return $queryBuilder->andWhere($orX);
     }
 
-    private function simpleAndWhere(QueryBuilder $qb, array $w): QueryBuilder
+    private function simpleAndWhere(QueryBuilder $queryBuilder, array $w): QueryBuilder
     {
         if (($w['value'] ?? $w[2]) === null) {
-            return $qb->andWhere(
+            return $queryBuilder->andWhere(
                 ($w['key_prefix'] ?? $w[4] ?? 'p.').($w['key'] ?? $w[0]).
                     ' '.($w['operator'] ?? $w[1]).' NULL'
             );
@@ -244,7 +244,7 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
 
         $k = md5('a'.rand());
 
-        return $qb->andWhere(
+        return $queryBuilder->andWhere(
             ($w['key_prefix'] ?? $w[4] ?? 'p.').($w['key'] ?? $w[0])
                         .' '.($w['operator'] ?? $w[1])
                         .' :m'.$k
@@ -254,20 +254,20 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
     /**
      * @param array $orderBy containing key,direction
      */
-    private function orderBy(QueryBuilder $qb, array $orderBy): QueryBuilder
+    private function orderBy(QueryBuilder $queryBuilder, array $orderBy): QueryBuilder
     {
         if ([] === $orderBy) {
-            return $qb;
+            return $queryBuilder;
         }
 
         $keys = explode(',', $orderBy['key'] ?? $orderBy[0]);
         foreach ($keys as $i => $key) {
             $direction = $this->extractDirection($key, $orderBy);
             $orderByFunc = 0 === $i ? 'orderBy' : 'addOrderBy';
-            $qb->$orderByFunc($this->getRootAlias($qb).'.'.$key, $direction);
+            $queryBuilder->$orderByFunc($this->getRootAlias($queryBuilder).'.'.$key, $direction);
         }
 
-        return $qb;
+        return $queryBuilder;
     }
 
     private function extractDirection(&$key, $orderBy)
@@ -287,45 +287,45 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
      *
      * @param string|array $host
      */
-    public function andHost(QueryBuilder $qb, $host): QueryBuilder
+    public function andHost(QueryBuilder $queryBuilder, $host): QueryBuilder
     {
         if (! $host) {
-            return $qb;
+            return $queryBuilder;
         }
 
         if (\is_string($host)) {
             $host = [$host];
         }
 
-        return $qb->andWhere($this->getRootAlias($qb).'.host IN (:host)')
+        return $queryBuilder->andWhere($this->getRootAlias($queryBuilder).'.host IN (:host)')
             ->setParameter('host', $host);
     }
 
-    protected function andLocale(QueryBuilder $qb, string $locale): QueryBuilder
+    protected function andLocale(QueryBuilder $queryBuilder, string $locale): QueryBuilder
     {
         if (! $locale) {
-            return $qb;
+            return $queryBuilder;
         }
 
-        $alias = $this->getRootAlias($qb);
+        $alias = $this->getRootAlias($queryBuilder);
 
-        return $qb->andWhere($alias.'.locale LIKE :locale')
+        return $queryBuilder->andWhere($alias.'.locale LIKE :locale')
                 ->setParameter('locale', $locale);
     }
 
-    protected function andIndexable(QueryBuilder $qb): QueryBuilder
+    protected function andIndexable(QueryBuilder $queryBuilder): QueryBuilder
     {
-        $alias = $this->getRootAlias($qb);
+        $alias = $this->getRootAlias($queryBuilder);
 
-        return $qb->andWhere($alias.'.metaRobots IS NULL OR '.$alias.'.metaRobots NOT LIKE :noi2')
+        return $queryBuilder->andWhere($alias.'.metaRobots IS NULL OR '.$alias.'.metaRobots NOT LIKE :noi2')
             ->setParameter('noi2', '%noindex%');
     }
 
-    protected function andNotRedirection(QueryBuilder $qb): QueryBuilder
+    protected function andNotRedirection(QueryBuilder $queryBuilder): QueryBuilder
     {
-        $alias = $this->getRootAlias($qb);
+        $alias = $this->getRootAlias($queryBuilder);
 
-        return $qb->andWhere($alias.'.mainContent NOT LIKE :noi')
+        return $queryBuilder->andWhere($alias.'.mainContent NOT LIKE :noi')
             ->setParameter('noi', 'Location:%');
     }
 

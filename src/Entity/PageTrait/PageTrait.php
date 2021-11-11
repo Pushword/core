@@ -60,8 +60,8 @@ trait PageTrait
 
     public static function normalizeSlug(string $slug): string
     {
-        $slugifier = new Slugify(['regexp' => '/[^A-Za-z0-9_\/\.]+/']);
-        $slug = $slugifier->slugify($slug);
+        $slugify = new Slugify(['regexp' => '/[^A-Za-z0-9_\/\.]+/']);
+        $slug = $slugify->slugify($slug);
 
         return trim($slug, '/');
     }

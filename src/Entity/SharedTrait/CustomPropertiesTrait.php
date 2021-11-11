@@ -88,9 +88,9 @@ trait CustomPropertiesTrait
 
         // remove the standAlone which were removed
         $existingPropertyNames = array_keys($this->getCustomProperties());
-        foreach ($existingPropertyNames as $name) {
-            if ($this->isStandAloneCustomProperty($name) && ! isset($standAloneProperties[$name])) {
-                $this->removeCustomProperty($name);
+        foreach ($existingPropertyNames as $existingPropertyName) {
+            if ($this->isStandAloneCustomProperty($existingPropertyName) && ! isset($standAloneProperties[$existingPropertyName])) {
+                $this->removeCustomProperty($existingPropertyName);
             }
         }
 
@@ -111,16 +111,16 @@ trait CustomPropertiesTrait
     /**
      * @Assert\Callback
      */
-    public function validateStandAloneCustomProperties(ExecutionContextInterface $context): void
+    public function validateStandAloneCustomProperties(ExecutionContextInterface $executionContext): void
     {
         try {
             $this->mergeStandAloneCustomProperties();
         } catch (ParseException $exception) {
-            $context->buildViolation('page.customProperties.malformed') //'$exception->getMessage())
+            $executionContext->buildViolation('page.customProperties.malformed') //'$exception->getMessage())
                     ->atPath($this->buildValidationAtPath)
                     ->addViolation();
         } catch (CustomPropertiesException $exception) {
-            $context->buildViolation('page.customProperties.notStandAlone') //'$exception->getMessage())
+            $executionContext->buildViolation('page.customProperties.notStandAlone') //'$exception->getMessage())
                     ->atPath($this->buildValidationAtPath)
                     ->addViolation();
         }

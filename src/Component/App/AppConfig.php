@@ -39,9 +39,9 @@ final class AppConfig
     private ParameterBagInterface $params;
 
     /** @param array<string, mixed> $properties */
-    public function __construct(ParameterBagInterface $params, array $properties, bool $isFirstApp = false)
+    public function __construct(ParameterBagInterface $parameterBag, array $properties, bool $isFirstApp = false)
     {
-        $this->params = $params;
+        $this->params = $parameterBag;
 
         foreach ($properties as $prop => $value) {
             $this->setCustomProperty($prop, $value);

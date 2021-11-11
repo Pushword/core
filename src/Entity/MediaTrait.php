@@ -178,10 +178,10 @@ trait MediaTrait
     /**
      * @Assert\Callback
      */
-    public function validate(ExecutionContextInterface $context): void
+    public function validate(ExecutionContextInterface $executionContext): void
     {
         if (null !== $this->getMimeType() && null !== $this->mediaFile && $this->mediaFile->getMimeType() != $this->getMimeType()) {
-            $context
+            $executionContext
                 ->buildViolation('Attention ! Vous essayez de remplacer un fichier d\'un type ('
                     .$this->getMimeType().') par un fichier d\'une autre type ('.$this->mediaFile->getMimeType().')')
                 ->atPath('fileName')
@@ -205,11 +205,11 @@ trait MediaTrait
         return $this->slug;
     }
 
-    public function setMediaFile(?File $media = null): void
+    public function setMediaFile(?File $file = null): void
     {
-        $this->mediaFile = $media;
+        $this->mediaFile = $file;
 
-        if (null !== $media) {
+        if (null !== $file) {
             $this->updatedAt = new \DateTimeImmutable();
         }
     }

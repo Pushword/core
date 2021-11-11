@@ -23,11 +23,11 @@ trait ImageCommandTrait
      * @param class-string $mediaClass
      */
     public function __construct(
-        EntityManagerInterface $em,
+        EntityManagerInterface $entityManager,
         ImageManager $imageManager,
         string $mediaClass
     ) {
-        $this->em = $em;
+        $this->em = $entityManager;
         $this->mediaClass = $mediaClass;
         $this->imageManager = $imageManager;
 

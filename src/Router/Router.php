@@ -20,12 +20,12 @@ final class Router implements RouterInterface
     private string $currentHost;
 
     public function __construct(
-        SfRouterInterface $router,
-        AppPool $apps,
+        SfRouterInterface $sfRouter,
+        AppPool $appPool,
         RequestStack $requestStack
     ) {
-        $this->router = $router;
-        $this->apps = $apps;
+        $this->router = $sfRouter;
+        $this->apps = $appPool;
         $this->currentHost = $requestStack->getCurrentRequest() ? $requestStack->getCurrentRequest()->getHost() : '';
     }
 

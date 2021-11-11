@@ -15,13 +15,13 @@ final class UserController extends AbstractController
         }
 
         // get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
+        $authenticationException = $authenticationUtils->getLastAuthenticationError();
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render('@Pushword/user/login.html.twig', [
             'last_username' => $lastUsername,
-            'error' => $error,
+            'error' => $authenticationException,
         ]);
     }
 

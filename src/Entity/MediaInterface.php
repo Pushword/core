@@ -46,7 +46,7 @@ interface MediaInterface extends IdInterface, TimestampableInterface, CustomProp
 
     public function setName(string $name): self;
 
-    public function setMediaFile(?File $media = null): void;
+    public function setMediaFile(?File $file = null): void;
 
     public function getMimeType(): ?string;
 

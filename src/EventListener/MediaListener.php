@@ -39,14 +39,14 @@ class MediaListener
     /** @psalm-suppress  UndefinedInterfaceMethod */
     public function __construct(
         string $projectDir,
-        EntityManagerInterface $em,
+        EntityManagerInterface $entityManager,
         FileSystem $filesystem,
         ImageManager $imageManager,
         RequestStack $requestStack,
         TranslatorInterface $translator
     ) {
         $this->projectDir = $projectDir;
-        $this->em = $em;
+        $this->em = $entityManager;
         $this->filesystem = $filesystem;
         $this->imageManager = $imageManager;
         if (null !== $requestStack->getCurrentRequest() && method_exists($requestStack->getSession(), 'getFlashBag')) {
@@ -81,9 +81,9 @@ class MediaListener
     /**
      * renameMediaOnMediaNameUpdate.
      */
-    public function preUpdate(MediaInterface $media, PreUpdateEventArgs $event): void
+    public function preUpdate(MediaInterface $media, PreUpdateEventArgs $preUpdateEventArgs): void
     {
-        if ($event->hasChangedField('media')) {
+        if ($preUpdateEventArgs->hasChangedField('media')) {
             $this->renameIfMediaExists($media);
 
             if (file_exists($media->getPath())) {
@@ -171,16 +171,16 @@ class MediaListener
     {
         /** @var MediaInterface */
         $media = $event->getObject();
-        $mapping = $event->getMapping();
+        $propertyMapping = $event->getMapping();
 
-        $absoluteDir = $mapping->getUploadDestination().'/'.$mapping->getUploadDir($media);
+        $absoluteDir = $propertyMapping->getUploadDestination().'/'.$propertyMapping->getUploadDir($media);
         $media->setProjectDir($this->projectDir)->setStoreIn($absoluteDir);
 
         if ($this->imageManager->isImage($media)) {
             $this->imageManager->remove($media);
             $this->imageManager->generateCache($media);
-            $thumb = $this->imageManager->getLastThumb();
-            $this->updateMainColor($media, null !== $thumb ? $thumb : null);
+            $image = $this->imageManager->getLastThumb();
+            $this->updateMainColor($media, null !== $image ? $image : null);
             //exec('cd ../ && php bin/console pushword:image:cache '.$media->getMedia().' > /dev/null 2>/dev/null &');
         }
     }

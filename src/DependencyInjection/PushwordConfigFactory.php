@@ -21,12 +21,12 @@ final class PushwordConfigFactory
 
     /** @param array<mixed> $configs */
     public function __construct(
-        ContainerBuilder $container,
+        ContainerBuilder $containerBuilder,
         array $configs,
         ?ConfigurationInterface $configuration = null,
         string $prefix = ''
     ) {
-        $this->container = $container;
+        $this->container = $containerBuilder;
         $this->config = $configs;
         $this->prefix = 'pw.'.('' !== $prefix ? $prefix.'.' : '');
         $this->configuration = $configuration;
@@ -122,15 +122,15 @@ final class PushwordConfigFactory
         $fallbackProperties = $this->getAppFallbackConfig();
 
         if (null !== $this->configuration) {
-            $configTree = $this->configuration->getConfigTreeBuilder()->buildTree();
-            $configTree->finalize($app); // it will check value
+            $node = $this->configuration->getConfigTreeBuilder()->buildTree();
+            $node->finalize($app); // it will check value
         }
 
-        foreach ($fallbackProperties as $p) {
-            if (! isset($app[$p])) {
-                $app[$p] = ! \is_string($this->config[$p]) ? $this->config[$p]
-                    : str_replace('%main_host%', $app['hosts'][0], $this->config[$p]); // @phpstan-ignore-line
-            } elseif ('custom_properties' == $p) {
+        foreach ($fallbackProperties as $fallbackProperty) {
+            if (! isset($app[$fallbackProperty])) {
+                $app[$fallbackProperty] = ! \is_string($this->config[$fallbackProperty]) ? $this->config[$fallbackProperty]
+                    : str_replace('%main_host%', $app['hosts'][0], $this->config[$fallbackProperty]); // @phpstan-ignore-line
+            } elseif ('custom_properties' == $fallbackProperty) {
                 $app['custom_properties'] = array_merge($this->config['custom_properties'], $app['custom_properties']); // @phpstan-ignore-line
             }
         }

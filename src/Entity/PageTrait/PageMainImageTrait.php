@@ -21,14 +21,14 @@ trait PageMainImageTrait
         return $this->mainImage;
     }
 
-    public function setMainImage(?MediaInterface $mainImage): self
+    public function setMainImage(?MediaInterface $media): self
     {
         // TODO: Déplacer en Assert pour éviter une erreur dégueu ?!
-        if (null !== $mainImage && null === $mainImage->getWidth()) {
+        if (null !== $media && null === $media->getWidth()) {
             throw new \Exception('mainImage must be an Image. Media imported is not an image');
         }
 
-        $this->mainImage = $mainImage;
+        $this->mainImage = $media;
 
         return $this;
     }

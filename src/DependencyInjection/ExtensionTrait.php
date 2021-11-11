@@ -30,17 +30,17 @@ trait ExtensionTrait
         // Load configurations for other package
         $parser = new Parser();
         $finder = Finder::create()->files()->name('*.yaml')->in($this->getConfigFolder().'/packages');
-        foreach ($finder as $file) {
-            $configs = $parser->parse(F::file_get_contents($file->getRealPath())); // @phpstan-ignore-line
+        foreach ($finder as $singleFinder) {
+            $configs = $parser->parse(F::file_get_contents($singleFinder->getRealPath())); // @phpstan-ignore-line
             if (false === \is_array($configs)) {
-                throw new Exception($file->getRealPath().' is malformed');
+                throw new Exception($singleFinder->getRealPath().' is malformed');
             }
             $this->prependExtensionConfigs($configs, $container);
         }
 
         $finder = Finder::create()->files()->name('*.php')->in($this->getConfigFolder().'/packages');
-        foreach ($finder as $file) {
-            $configs = @include $file->getRealPath();
+        foreach ($finder as $singleFinder) {
+            $configs = @include $singleFinder->getRealPath();
             $this->prependExtensionConfigs($configs, $container);
         }
     }

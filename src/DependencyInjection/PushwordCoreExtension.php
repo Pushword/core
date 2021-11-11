@@ -28,18 +28,18 @@ final class PushwordCoreExtension extends ConfigurableExtension implements Prepe
         $this->loadService($container);
     }
 
-    private function setPathParameters(ContainerBuilder $container): void
+    private function setPathParameters(ContainerBuilder $containerBuilder): void
     {
-        if (file_exists($container->getParameter('kernel.project_dir').'/vendor/pushword')) {
+        if (file_exists($containerBuilder->getParameter('kernel.project_dir').'/vendor/pushword')) {
             // false !== strpos(__DIR__, '/vendor/')) {
-            $container->setParameter('pw.package_dir', '%kernel.project_dir%/vendor/pushword');
-            $container->setParameter('vendor_dir', '%kernel.project_dir%/vendor');
+            $containerBuilder->setParameter('pw.package_dir', '%kernel.project_dir%/vendor/pushword');
+            $containerBuilder->setParameter('vendor_dir', '%kernel.project_dir%/vendor');
 
             return;
         }
 
-        $container->setParameter('vendor_dir', '%kernel.project_dir%/../../vendor');
-        $container->setParameter('pw.package_dir', '%kernel.project_dir%/..');
+        $containerBuilder->setParameter('vendor_dir', '%kernel.project_dir%/../../vendor');
+        $containerBuilder->setParameter('pw.package_dir', '%kernel.project_dir%/..');
     }
 
     public function getAlias()
