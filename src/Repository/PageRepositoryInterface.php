@@ -11,13 +11,20 @@ use Pushword\Core\Entity\PageInterface;
 /**
  * @template T as PageInterface
  * @template TEntityClass as PageInterface
- * @psalm-template PageInterface
  * @extends Selectable<int, PageInterface>
  * @extends ObjectRepository<PageInterface>
  */
 interface PageRepositoryInterface extends ServiceEntityRepositoryInterface, ObjectRepository, Selectable
 {
-    //public function createQueryBuilder($alias, $indexBy = null);
+    /**
+     * Creates a new QueryBuilder instance that is prepopulated for this entity name.
+     *
+     * @param string $alias
+     * @param string $indexBy the index for the from
+     *
+     * @return QueryBuilder
+     */
+    public function createQueryBuilder($alias, $indexBy = null);
 
     /**
      * Can be used via a twig function.

@@ -138,7 +138,7 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
     /**
      * Used in admin PageCrudController.
      *
-     * @return Page[]
+     * @return PageInterface[]
      */
     public function getPagesWithoutParent(): array
     {
