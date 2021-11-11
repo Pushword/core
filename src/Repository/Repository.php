@@ -3,6 +3,7 @@
 namespace Pushword\Core\Repository;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Pushword\Core\Entity\MediaInterface;
 use Pushword\Core\Entity\PageInterface;
@@ -10,8 +11,8 @@ use Pushword\Core\Entity\PageInterface;
 class Repository
 {
     /**
-     * @param ManagerRegistry|EntityManager $doctrine
-     * @param class-string<PageInterface>   $pageEntity
+     * @param ManagerRegistry|EntityManagerInterface $doctrine
+     * @param class-string<PageInterface>            $pageEntity
      * @template T as PageInterface
      * @psalm-suppress InvalidReturnStatement
      * @psalm-suppress InvalidReturnType
