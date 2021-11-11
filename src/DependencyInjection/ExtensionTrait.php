@@ -3,6 +3,7 @@
 namespace Pushword\Core\DependencyInjection;
 
 use Exception;
+use Pushword\Core\Utils\F;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
@@ -21,7 +22,7 @@ trait ExtensionTrait
         return $this->configFolder;
     }
 
-    public function prepend(ContainerBuilder $container)
+    public function prepend(ContainerBuilder $container): void
     {
         if (! file_exists($this->getConfigFolder().'/packages')) {
             return;
@@ -30,7 +31,10 @@ trait ExtensionTrait
         $parser = new Parser();
         $finder = Finder::create()->files()->name('*.yaml')->in($this->getConfigFolder().'/packages');
         foreach ($finder as $file) {
-            $configs = $parser->parse(file_get_contents($file->getRealPath()));
+            $configs = $parser->parse(F::file_get_contents($file->getRealPath())); // @phpstan-ignore-line
+            if (false === \is_array($configs)) {
+                throw new Exception($file->getRealPath().' is malformed');
+            }
             $this->prependExtensionConfigs($configs, $container);
         }
 
@@ -41,11 +45,17 @@ trait ExtensionTrait
         }
     }
 
-    protected function prependExtensionConfigs(array $configs, ContainerBuilder $container)
+    /**
+     * @param array<mixed> $configs
+     */
+    protected function prependExtensionConfigs(array $configs, ContainerBuilder $container): void
     {
         foreach ($configs as $name => $config) {
             if ('services' == $name) {
                 continue;
+            }
+            if (false === \is_array($config)) {
+                throw new Exception('Malformed config named `'.$name.'`');
             }
             $container->prependExtensionConfig($name, $config);
         }
@@ -60,7 +70,7 @@ trait ExtensionTrait
         $this->loadService($container);
     }
 
-    protected function loadService(ContainerBuilder $container)
+    protected function loadService(ContainerBuilder $container): void
     {
         if (file_exists($this->getConfigFolder().'/services.yaml')) {
             $loader = new YamlFileLoader($container, new FileLocator($this->getConfigFolder()));

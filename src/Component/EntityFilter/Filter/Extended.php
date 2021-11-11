@@ -20,6 +20,11 @@ class Extended extends AbstractFilter
         return $this->loadExtendedValue($propertyValue);
     }
 
+    /**
+     * @param mixed $propertyValue
+     *
+     * @return mixed
+     */
     private function loadExtendedValue($propertyValue)
     {
         if ('' !== $propertyValue || ! $this->entity instanceof PageInterface || ! $this->entity->getExtendedPage() instanceof PageInterface) {

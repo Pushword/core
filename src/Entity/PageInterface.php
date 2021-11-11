@@ -3,7 +3,6 @@
 namespace Pushword\Core\Entity;
 
 use DateTimeInterface;
-use Doctrine\Common\Collections\ArrayCollection;
 use Pushword\Core\Entity\PageTrait\PageEditorInterface;
 use Pushword\Core\Entity\SharedTrait\CustomPropertiesInterface;
 use Pushword\Core\Entity\SharedTrait\HostInterface;
@@ -35,9 +34,11 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
     public function setParentPage(?self $parentPage): self;
 
     /**
-     * @return ArrayCollection|PageInterface[]|null
+     * @return PageInterface[]
      */
     public function getChildrenPages();
+
+    public function hasChildrenPages();
 
     public function getRedirection();
 
@@ -45,7 +46,7 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
 
     public function getCreatedAt();
 
-    public function getTemplate();
+    public function getTemplate(): ?string;
 
     public function getH1();
 

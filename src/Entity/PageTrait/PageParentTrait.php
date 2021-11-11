@@ -2,7 +2,6 @@
 
 namespace Pushword\Core\Entity\PageTrait;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use LogicException;
 use Pushword\Core\Entity\PageInterface;
@@ -48,10 +47,15 @@ trait PageParentTrait
     }
 
     /**
-     * @return ArrayCollection|PageInterface[]|null
+     * @return PageInterface[]
      */
     public function getChildrenPages()
     {
-        return $this->childrenPages;
+        return null !== $this->childrenPages ? $this->childrenPages : [];
+    }
+
+    public function hasChildrenPages(): bool
+    {
+        return null !== $this->childrenPages && false === $this->childrenPages->isEmpty();
     }
 }

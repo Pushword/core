@@ -12,7 +12,7 @@ final class AppPool
     /** @var array<string, AppConfig> */
     private $apps = [];
 
-    /** @var string */
+    /** @var ?string */
     private $currentApp;
 
     /**

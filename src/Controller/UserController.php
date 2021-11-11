@@ -10,7 +10,7 @@ final class UserController extends AbstractController
 {
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        if ($this->getUser()) {
+        if (null !== $this->getUser()) {
             return $this->redirectToRoute('pushword_admin_dashboard');
         }
 
@@ -25,7 +25,7 @@ final class UserController extends AbstractController
         ]);
     }
 
-    public function logout()
+    public function logout(): void
     {
         throw new \LogicException('This method can be blank');
     }

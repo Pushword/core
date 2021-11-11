@@ -7,6 +7,7 @@ use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Component\EntityFilter\Filter\FilterInterface;
 use Pushword\Core\Entity\SharedTrait\CustomPropertiesInterface;
+use ReflectionClass;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment as Twig;
 
@@ -60,8 +61,8 @@ final class Manager
         $event = new FilterEvent($this, substr($method, 3));
         $this->eventDispatcher->dispatch($event, FilterEvent::NAME_BEFORE);
 
-        $returnValue = [] !== $arguments ? \call_user_func_array([$this->entity, $method], $arguments)
-            : \call_user_func([$this->entity, $method]);
+        $returnValue = [] !== $arguments ? \call_user_func_array([$this->entity, $method], $arguments) // @phpstan-ignore-line
+            : \call_user_func([$this->entity, $method]);    // @phpstan-ignore-line
 
         $returnValue = $this->filter(substr($method, 3), $returnValue);
 
@@ -113,17 +114,35 @@ final class Manager
         return $filters ? $filters : null;
     }
 
-    private function getFilterClass(string $filter): FilterInterface
+    /**
+     * @return class-string<FilterInterface>|false
+     */
+    private function isFilter(string $className)
     {
-        $filterClass = $filter;
+        $filterClass = ! class_exists($className) ? 'Pushword\Core\Component\EntityFilter\Filter\\'.ucfirst($className)
+            : $className;
+
         if (! class_exists($filterClass)) {
-            $filterClass = 'Pushword\Core\Component\EntityFilter\Filter\\'.ucfirst($filter);
-            if (! class_exists($filterClass)) {
-                throw new Exception('Filter `'.$filter.'` not found');
-            }
+            return false;
         }
 
-        $filterClass = new $filterClass();
+        $class = new ReflectionClass($filterClass);
+        if (! $class->implementsInterface(FilterInterface::class)) {
+            return false;
+        }
+
+        // @var class-string<FilterInterface> $className
+        return $filterClass; //@phpstan-ignore-line
+    }
+
+    /** @param string $filter */
+    private function getFilterClass(string $filter): FilterInterface
+    {
+        if (false === ($filterClassName = $this->isFilter($filter))) {
+            throw new Exception('Filter `'.$filter.'` not found');
+        }
+
+        $filterClass = new $filterClassName();
 
         // Some kind of autoload ... move it to real autoload
         if (method_exists($filterClass, 'setEntity')) {
@@ -150,7 +169,8 @@ final class Manager
     }
 
     /**
-     * @param mixed $propertyValue
+     * @param mixed    $propertyValue
+     * @param string[] $filters
      *
      * @return mixed
      */

@@ -23,7 +23,10 @@ interface PageRepositoryInterface extends ServiceEntityRepositoryInterface, Obje
 
     public function getPublishedPageQueryBuilder($host = '', array $where = [], array $orderBy = [], int $limit = 0): QueryBuilder;
 
-    public function getPage(string $slug, string $host, bool $checkId = true): ?Page;
+    /**
+     * @param string|array $host
+     */
+    public function getPage(string $slug, $host, bool $checkId = true): ?Page;
 
     public function getIndexablePagesQuery(
         string $host,

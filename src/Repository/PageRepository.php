@@ -15,7 +15,7 @@ use Pushword\Core\Entity\PageInterface;
  */
 class PageRepository extends ServiceEntityRepository implements PageRepositoryInterface
 {
-    protected $hostCanBeNull = false;
+    protected bool $hostCanBeNull = false;
 
     public function getPublishedPages($host = '', array $where = [], array $orderBy = [], $limit = 0, bool $withRedirection = true)
     {
@@ -51,13 +51,16 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         //$this->andNotRedirection($queryBuilder);
 
         return $this->createQueryBuilder($alias)
-            ->andWhere($alias.'.publishedAt <=  :nwo')
-            ->setParameter('nwo', new \DateTime())
+            ->andWhere($alias.'.publishedAt <=  :now')
+            ->setParameter('now', new \DateTime(), 'datetime')
             ->orderBy($alias.'.priority', 'DESC')
             ->addOrderBy($alias.'.publishedAt', 'DESC');
     }
 
-    public function getPage(string $slug, string $host, bool $checkId = true): ?PageInterface
+    /**
+     * @param string|array $host
+     */
+    public function getPage(string $slug, $host, bool $checkId = true): ?PageInterface
     {
         $qb = $this->createQueryBuilder('p')
             ->andWhere('p.slug =  :slug')->setParameter('slug', $slug);
@@ -71,6 +74,9 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         return $qb->getQuery()->getResult()[0] ?? null;
     }
 
+    /**
+     * @return PageInterface[]
+     */
     public function findByHost(string $host): array
     {
         $qb = $this->createQueryBuilder('p');

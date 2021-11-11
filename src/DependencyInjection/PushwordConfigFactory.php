@@ -10,23 +10,21 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class PushwordConfigFactory
 {
-    /** @var ContainerBuilder */
-    private $container;
+    private ContainerBuilder $container;
 
-    /** @var string */
-    private $prefix;
+    private string $prefix;
 
-    /** @var array */
-    private $config;
+    /** @var array<mixed> */
+    private array $config;
 
-    /** @var ConfigurationInterface */
-    private $configuration;
+    private ?ConfigurationInterface $configuration;
 
+    /** @param array<mixed> $configs */
     public function __construct(ContainerBuilder $container, array $configs, ?ConfigurationInterface $configuration = null, string $prefix = '')
     {
         $this->container = $container;
         $this->config = $configs;
-        $this->prefix = 'pw.'.($prefix ? $prefix.'.' : '');
+        $this->prefix = 'pw.'.('' !== $prefix ? $prefix.'.' : '');
         $this->configuration = $configuration;
     }
 

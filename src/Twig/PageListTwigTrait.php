@@ -3,6 +3,7 @@
 namespace Pushword\Core\Twig;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Pagerfanta;
 use Pagerfanta\PagerfantaInterface;
@@ -206,6 +207,11 @@ trait PageListTwigTrait
 
     private function getCurrentPage(): int
     {
+        if (null === $this->requestStack->getCurrentRequest()) {
+            //throw new Exception('no current request'); // only in test ?!
+            return 1;
+        }
+
         return (int) $this->requestStack->getCurrentRequest()->attributes->get('pager', 1);
     }
 }

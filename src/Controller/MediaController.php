@@ -19,7 +19,7 @@ final class MediaController extends AbstractController
         $this->kernel = $kernel;
     }
 
-    public function download(string $media)
+    public function download(string $media): BinaryFileResponse
     {
         $projectDir = $this->kernel->getProjectDir();
         $pathToFile = $projectDir.'/'.$this->publicMediaDir.'/'.str_replace('..', '', $media);
