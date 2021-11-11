@@ -3,6 +3,7 @@
 namespace Pushword\Core\Entity;
 
 use DateTimeInterface;
+use Doctrine\Common\Collections\Collection;
 use Pushword\Core\Entity\PageTrait\PageEditorInterface;
 use Pushword\Core\Entity\SharedTrait\CustomPropertiesInterface;
 use Pushword\Core\Entity\SharedTrait\HostInterface;
@@ -34,7 +35,7 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
     public function setParentPage(?self $parentPage): self;
 
     /**
-     * @return PageInterface[]
+     * @return PageInterface[]|Collection<int, PageInterface>
      */
     public function getChildrenPages();
 
@@ -67,6 +68,8 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
     public function setExtendPage(?self $extendedPage): self;
 
     public function getMetaRobots(): string;
+
+    public function setMainImage(?MediaInterface $mainImage): self;
 
     public function __toString(): string;
 }

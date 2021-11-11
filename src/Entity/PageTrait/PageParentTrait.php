@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\Entity\PageTrait;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use LogicException;
 use Pushword\Core\Entity\PageInterface;
@@ -12,11 +13,13 @@ trait PageParentTrait
      * @ORM\ManyToOne(targetEntity="Pushword\Core\Entity\PageInterface", inversedBy="childrenPages")
      * TODO: assert parentPage is not currentPage
      */
-    protected $parentPage;
+    protected ?PageInterface $parentPage = null;
 
     /**
      * @ORM\OneToMany(targetEntity="Pushword\Core\Entity\PageInterface", mappedBy="parentPage")
      * @ORM\OrderBy({"publishedAt": "DESC", "priority": "DESC"})
+     *
+     * @var PageInterface[]|Collection<int, PageInterface>|null
      */
     protected $childrenPages;
 
@@ -47,7 +50,7 @@ trait PageParentTrait
     }
 
     /**
-     * @return PageInterface[]
+     * @return PageInterface[]|Collection<int, PageInterface>
      */
     public function getChildrenPages()
     {

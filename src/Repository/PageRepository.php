@@ -3,6 +3,7 @@
 namespace Pushword\Core\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use Pushword\Core\Entity\PageInterface;
@@ -53,8 +54,8 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         return $this->createQueryBuilder($alias)
             ->andWhere($alias.'.publishedAt <=  :now')
             ->setParameter('now', new \DateTime(), 'datetime')
-            ->orderBy($alias.'.priority', 'DESC')
-            ->addOrderBy($alias.'.publishedAt', 'DESC');
+            ->orderBy($alias.'.priority', Criteria::DESC)
+            ->addOrderBy($alias.'.publishedAt', Criteria::DESC);
     }
 
     /**
@@ -115,7 +116,7 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
     {
         $q = $this->createQueryBuilder('p')
             ->andWhere('p.parentPage is NULL')
-            ->orderBy('p.slug', 'DESC')
+            ->orderBy('p.slug', Criteria::DESC)
             ->getQuery();
 
         return $q->getResult();

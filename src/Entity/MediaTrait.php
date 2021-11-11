@@ -3,6 +3,7 @@
 namespace Pushword\Core\Entity;
 
 use Cocur\Slugify\Slugify;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use InvertColor\Color;
@@ -93,6 +94,8 @@ trait MediaTrait
      *     targetEntity="Pushword\Core\Entity\PageInterface",
      *     mappedBy="mainImage"
      * )
+     *
+     * @var PageInterface[]|Collection<int, PageInterface>
      */
     protected $mainImagePages;
 
