@@ -24,7 +24,7 @@ trait MediaTrait
     /**
      * @ORM\Column(type="string", length=50)
      */
-    protected ?string $mimeType;
+    protected ?string $mimeType = null;
 
     /**
      * @ORM\Column(type="string", length=255)
