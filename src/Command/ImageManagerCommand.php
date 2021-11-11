@@ -12,11 +12,11 @@ final class ImageManagerCommand extends Command
 {
     use ImageCommandTrait;
 
+    protected static $defaultName = 'pushword:image:cache';
+
     protected function configure(): void
     {
-        $this
-            ->setName('pushword:image:cache')
-            ->setDescription('Generate all images cache')
+        $this->setDescription('Generate all images cache')
             ->addArgument('media', InputArgument::OPTIONAL, 'Image name (eg: filename.jpg).');
     }
 

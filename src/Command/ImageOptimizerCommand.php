@@ -12,11 +12,11 @@ final class ImageOptimizerCommand extends Command
 {
     use ImageCommandTrait;
 
+    protected static $defaultName = 'pushword:image:optimize';
+
     protected function configure(): void
     {
-        $this
-            ->setName('pushword:image:optimize')
-            ->setDescription('Generate all images cache')
+        $this->setDescription('Generate all images cache')
             ->addArgument('media', InputArgument::OPTIONAL, 'Image name (eg: filename.jpg).');
     }
 

@@ -14,6 +14,8 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 final class UserCreateCommand extends Command
 {
+    protected static $defaultName = 'pushword:user:create';
+
     private EntityManagerInterface $em;
 
     /**
@@ -40,9 +42,7 @@ final class UserCreateCommand extends Command
 
     protected function configure(): void
     {
-        $this
-            ->setName('pushword:user:create')
-            ->setDescription('Create a new user')
+        $this->setDescription('Create a new user')
             ->addArgument('email', InputArgument::OPTIONAL)
             ->addArgument('password', InputArgument::OPTIONAL)
             ->addArgument('role', InputArgument::OPTIONAL);

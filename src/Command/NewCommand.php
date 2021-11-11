@@ -11,6 +11,8 @@ use Symfony\Component\Yaml\Yaml;
 
 final class NewCommand extends Command
 {
+    protected static $defaultName = 'pushword:new';
+
     private string $projectDir;
 
     public function __construct(
@@ -22,9 +24,7 @@ final class NewCommand extends Command
 
     protected function configure(): void
     {
-        $this
-            ->setName('pushword:new')
-            ->setDescription('Add a new website into your config file (config/packages/pushword.yaml).');
+        $this->setDescription('Add a new website into your config file (config/packages/pushword.yaml).');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
