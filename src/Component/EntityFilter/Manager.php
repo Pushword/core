@@ -13,8 +13,7 @@ use Twig\Environment as Twig;
 
 final class Manager
 {
-    /** @var object */
-    private $entity;
+    private object $entity;
 
     private AppConfig $app;
 

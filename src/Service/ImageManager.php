@@ -26,7 +26,7 @@ final class ImageManager
 
     private OptimizerChain $optimizer;
 
-    private ?Image $lastThumb;
+    private ?Image $lastThumb = null;
 
     private FileSystem $fileSystem;
 

@@ -148,7 +148,7 @@ trait MediaTrait
             throw new Exception('debug... thinking setSlug was only used by Vich ???');
         }
 
-        $filename = $filename ?? $this->getMediaFileName();
+        $filename ??= $this->getMediaFileName();
         if (! $filename) {
             throw new Exception('debug... '); //dd($this->mediaFile);
         }

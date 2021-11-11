@@ -12,14 +12,11 @@ final class AppPool
     /** @var array<string, AppConfig> */
     private $apps = [];
 
-    /** @var ?string */
-    private $currentApp;
+    private ?string $currentApp = null;
 
     /**
-     * Why there ? Because often, need to check current page don't override App Config.
-     *
-     *  @var PageInterface */
-    private $currentPage;
+     * Why there ? Because often, need to check current page don't override App Config. */
+    private ?\Pushword\Core\Entity\PageInterface $currentPage = null;
 
     /** @param array<string, array<string, mixed>> $rawApps */
     public function __construct(array $rawApps, Twig $twig, ParameterBagInterface $params)

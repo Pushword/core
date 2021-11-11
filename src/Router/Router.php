@@ -11,16 +11,13 @@ use Symfony\Component\Routing\RouterInterface as SfRouterInterface;
 
 final class Router implements RouterInterface
 {
-    /** @var SfRouterInterface */
-    private $router;
+    private SfRouterInterface $router;
 
-    private $useCustomHostPath = true; // TODO make it true on special request, same with absolute
+    private bool $useCustomHostPath = true;
 
-    /** @var AppPool */
-    private $apps;
+    private \Pushword\Core\Component\App\AppPool $apps;
 
-    /** @var string */
-    private $currentHost;
+    private string $currentHost;
 
     public function __construct(
         SfRouterInterface $router,

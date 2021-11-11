@@ -10,7 +10,7 @@ trait PageExtendedTrait
     /**
      * @ORM\ManyToOne(targetEntity="Pushword\Core\Entity\PageInterface")
      */
-    protected ?PageInterface $extendedPage;
+    protected ?PageInterface $extendedPage = null;
 
     public function getExtendedPage(): ?PageInterface
     {
