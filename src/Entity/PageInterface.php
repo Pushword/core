@@ -17,11 +17,11 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
 
     public function getRealSlug(): string;
 
-    public function setSlug($slug, $set = false): self;
+    public function setSlug(?string $slug): self;
 
     public function getMainContent(): string;
 
-    public function setMainContent($mainContent): self;
+    public function setMainContent(?string $mainContent): self;
 
     public function getPublishedAt(): DateTimeInterface;
 
@@ -35,32 +35,29 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
     public function setParentPage(?self $parentPage): self;
 
     /**
-     * @return PageInterface[]|Collection<int, PageInterface>
+     * @return PageInterface[]|Collection<int, PageInterface>|array
      */
     public function getChildrenPages();
 
-    public function hasChildrenPages();
+    public function hasChildrenPages(): bool;
 
-    public function getRedirection();
+    public function hasRedirection(): bool;
 
-    public function getRedirectionCode();
+    public function getRedirection(): string;
+
+    public function getRedirectionCode(): int;
 
     public function getCreatedAt();
 
     public function getTemplate(): ?string;
 
-    public function getH1();
+    public function getH1(): ?string;
 
-    public function getTitle();
+    public function getTitle(): ?string;
 
-    public function getName();
+    public function getName(): ?string;
 
     public function getPriority(): int;
-
-    // PageI18n
-    public function getLocale();
-
-    public function setLocale($locale);
 
     // Page Extended
     public function getExtendedPage(): ?self;
@@ -72,4 +69,13 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
     public function setMainImage(?MediaInterface $mainImage): self;
 
     public function __toString(): string;
+
+    // PageI18n
+    public function getLocale(): string;
+
+    public function setLocale(string $locale): self;
+
+    public function addTranslation(self $translation, bool $recursive = true): self;
+
+    public function removeTranslation(self $translation, bool $recursive = true): self;
 }

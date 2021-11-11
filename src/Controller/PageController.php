@@ -63,7 +63,7 @@ final class PageController extends AbstractController
         }
 
         // Maybe the page is a redirection
-        if ($page->getRedirection()) {
+        if ($page->hasRedirection()) {
             return $this->redirect($page->getRedirection(), $page->getRedirectionCode());
         }
 
@@ -79,8 +79,7 @@ final class PageController extends AbstractController
         $view = $this->getView(null !== $page->getTemplate() ? $page->getTemplate() : '/page/page.html.twig');
 
         $response = new Response();
-        if ($page->getCustomProperty('headers')) {
-            $headers = $page->getCustomProperty('headers');
+        if (\is_array($headers = $page->getCustomProperty('headers'))) {
             foreach ($headers as $header) {
                 $response->headers->set($header[0], $header[1]);
             }
@@ -105,7 +104,7 @@ final class PageController extends AbstractController
         $response = new Response();
         $response->headers->set('Content-Type', 'text/xml');
 
-        if (null === $page->getChildrenPages() || 0 === \count($page->getChildrenPages())) {
+        if (! $page->hasChildrenPages()) {
             throw $this->createNotFoundException();
         }
 
@@ -256,7 +255,7 @@ final class PageController extends AbstractController
             }
         }
 
-        if (! $page->getLocale()) { // avoid bc break
+        if ('' === $page->getLocale()) { // avoid bc break
             $page->setLocale($this->app->getDefaultLocale());
         }
 

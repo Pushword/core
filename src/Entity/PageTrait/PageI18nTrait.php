@@ -5,6 +5,7 @@ namespace Pushword\Core\Entity\PageTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Pushword\Core\Entity\PageInterface;
 
 trait PageI18nTrait
 {
@@ -16,23 +17,27 @@ trait PageI18nTrait
     protected string $locale = '';
 
     /**
-     * @var ArrayCollection
      * @ORM\ManyToMany(targetEntity="Pushword\Core\Entity\PageInterface")
+     *
+     * @var Collection<string, PageInterface>|null
      */
-    protected $translations;
+    protected ?Collection $translations = null;
 
     public function getLocale(): string
     {
         return $this->locale;
     }
 
-    public function setLocale($locale): self
+    public function setLocale(string $locale): self
     {
-        $this->locale = (string) $locale;
+        $this->locale = $locale;
 
         return $this;
     }
 
+    /**
+     * @param Collection<string, PageInterface> $translations
+     */
     public function setTranslations($translations): self
     {
         $this->translations = $translations;
@@ -40,19 +45,22 @@ trait PageI18nTrait
         return $this;
     }
 
+    /**
+     * @return Collection<string, PageInterface>
+     */
     public function getTranslations(): Collection
     {
-        return $this->translations ? $this->translations : new ArrayCollection();
+        return null !== $this->translations ? $this->translations : new ArrayCollection();
     }
 
-    public function addTranslation(self $translation, $recursive = true): self
+    public function addTranslation(PageInterface $translation, bool $recursive = true): self
     {
         if (! $this->getTranslations()->contains($translation) && $this != $translation) {
             $this->translations[] = $translation;
         }
 
         // Add the other ('ever exist') translations to the new added Translation
-        if (true === $recursive) {
+        if ($recursive) {
             foreach ($this->getTranslations() as $otherTranslation) {
                 $translation->addTranslation($otherTranslation, false);
             }
@@ -61,7 +69,7 @@ trait PageI18nTrait
         // Reversing the syncing
         // Add this Page to the translated Page
         // + Add the translated Page to the other translation
-        if (true === $recursive) {
+        if ($recursive) {
             $translation->addTranslation($this, false);
 
             foreach ($this->getTranslations() as $otherTranslation) {
@@ -76,7 +84,7 @@ trait PageI18nTrait
         return $this;
     }
 
-    public function removeTranslation(self $translation, $recursive = true): self
+    public function removeTranslation(PageInterface $translation, bool $recursive = true): self
     {
         if ($this->getTranslations()->contains($translation)) {
             $this->getTranslations()->removeElement($translation);

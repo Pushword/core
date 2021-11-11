@@ -34,7 +34,7 @@ final class Router implements RouterInterface
      * and / for YY page home if your default language is YY
      * X/Y may be en/fr/...
      */
-    public function generatePathForHomePage(?PageInterface $page = null, $canonical = false): string
+    public function generatePathForHomePage(?PageInterface $page = null, bool $canonical = false): string
     {
         $homepage = (new Page())->setSlug('');
 
@@ -50,7 +50,11 @@ final class Router implements RouterInterface
         return $this->generate($homepage, $canonical);
     }
 
-    public function generate($slug = 'homepage', $canonical = false, $pager = null): string
+    /**
+     * @param string|PageInterface $slug
+     * @param int|string|null      $pager
+     */
+    public function generate($slug = 'homepage', bool $canonical = false, $pager = null): string
     {
         $page = null;
 
@@ -78,7 +82,7 @@ final class Router implements RouterInterface
 
         $url = ($baseUrl ?? '').$this->router->generate(self::PATH, ['slug' => $slug]);
 
-        if ($pager && '1' !== (string) $pager) {
+        if (null !== $pager && '1' !== (string) $pager) {
             $url = rtrim($url, '/').'/'.$pager;
         }
 
@@ -96,12 +100,8 @@ final class Router implements RouterInterface
 
     /**
      * Set the value of isLive.
-     *
-     * @param bool $isLive
-     *
-     * @return self
      */
-    public function setUseCustomHostPath($useCustomHostPath)
+    public function setUseCustomHostPath(bool $useCustomHostPath = true): self
     {
         $this->useCustomHostPath = $useCustomHostPath;
 

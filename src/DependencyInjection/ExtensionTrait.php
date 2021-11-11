@@ -15,9 +15,9 @@ trait ExtensionTrait
 {
     private function getConfigFolder(): string
     {
-        if (! $this->configFolder) {
-            throw new Exception('You must define `configFolder` in class using '.self::class);
-        }
+        //if (! $this->configFolder) {
+        //    throw new Exception('You must define `configFolder` in class using '.self::class);
+        //}
 
         return $this->configFolder;
     }

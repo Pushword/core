@@ -27,12 +27,12 @@ class Date extends AbstractFilter
 
         //$string = preg_replace('/date\([\'"]?([a-z% ]+)[\'"]?\)/i',
         //  strftime(strpos('\1', '%') ? '\1': '%\1'), $string);
-        $string = F::preg_replace('/date\([\'"]?%?Y[\'"]?\)/i', (string) strftime('%Y'), $string);
-        $string = F::preg_replace('/date\([\'"]?%?(B|M)[\'"]?\)/i', (string) strftime('%B'), $string);
-        $string = F::preg_replace('/date\([\'"]?%?A[\'"]?\)/i', (string) strftime('%A'), $string);
-        $string = F::preg_replace('/date\([\'"]?%?e[\'"]?\)/i', (string) strftime('%e'), $string);
+        $string = F::preg_replace_str('/date\([\'"]?%?Y[\'"]?\)/i', (string) strftime('%Y'), $string);
+        $string = F::preg_replace_str('/date\([\'"]?%?(B|M)[\'"]?\)/i', (string) strftime('%B'), $string);
+        $string = F::preg_replace_str('/date\([\'"]?%?A[\'"]?\)/i', (string) strftime('%A'), $string);
+        $string = F::preg_replace_str('/date\([\'"]?%?e[\'"]?\)/i', (string) strftime('%e'), $string);
 
-        return \strval($string);
+        return $string;
     }
 
     private function convertLocale(string $locale): string

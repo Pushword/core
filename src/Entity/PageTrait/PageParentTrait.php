@@ -23,7 +23,7 @@ trait PageParentTrait
      */
     protected $childrenPages;
 
-    public function getParentPage(): ?self
+    public function getParentPage(): ?PageInterface
     {
         return $this->parentPage;
     }
@@ -35,12 +35,12 @@ trait PageParentTrait
             return false;
         }
 
-        return $parentPage->getParentPage() ? $this->validateParentPage($parentPage->getParentPage()) : true;
+        return null !== $parentPage->getParentPage() ? $this->validateParentPage($parentPage->getParentPage()) : true;
     }
 
     public function setParentPage(?PageInterface $parentPage): self
     {
-        if ($parentPage && ! $this->validateParentPage($parentPage)) {
+        if (null !== $parentPage && ! $this->validateParentPage($parentPage)) {
             throw new LogicException('Current Page can\'t be it own parent page.');
         }
 
@@ -50,7 +50,7 @@ trait PageParentTrait
     }
 
     /**
-     * @return PageInterface[]|Collection<int, PageInterface>
+     * @return PageInterface[]|Collection<int, PageInterface>|array
      */
     public function getChildrenPages()
     {

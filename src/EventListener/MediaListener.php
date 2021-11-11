@@ -10,6 +10,7 @@ use Intervention\Image\Image;
 use League\ColorExtractor\Color;
 use League\ColorExtractor\ColorExtractor;
 use League\ColorExtractor\Palette;
+use LogicException;
 use Pushword\Core\Entity\MediaInterface;
 use Pushword\Core\Service\ImageManager;
 use Symfony\Component\Filesystem\Filesystem;
@@ -60,6 +61,9 @@ class MediaListener
     public function onVichUploaderPreUpload(Event $event): void
     {
         $media = $event->getObject();
+        if (! $media instanceof MediaInterface) {
+            throw new LogicException();
+        }
         $this->beforeToImportAndStore($media);
     }
 
@@ -88,6 +92,10 @@ class MediaListener
                 throw new Exception('Impossible to rename '.$media->getMediaBeforeUpdate().' in '.$media->getMedia().'. File ever exist');
             }
 
+            if (! \is_string($media->getMediaBeforeUpdate())) {
+                throw new LogicException();
+            }
+
             $this->filesystem->rename(
                 $media->getStoreIn().'/'.$media->getMediaBeforeUpdate(),
                 $media->getStoreIn().'/'.$media->getMedia()
@@ -102,7 +110,7 @@ class MediaListener
 
     public function preRemove(MediaInterface $media): void
     {
-        if (0 === strpos($media->getStoreIn(), $this->projectDir)) {
+        if (0 === strpos((string) $media->getStoreIn(), $this->projectDir)) {
             $this->filesystem->remove($media->getStoreIn().'/'.$media->getMedia());
         }
 
@@ -120,8 +128,8 @@ class MediaListener
 
     private function getMediaString(MediaInterface $media): string
     {
-        if ($media->getMedia()) {
-            return $media->getMedia();
+        if (($return = $media->getMedia()) !== null) {
+            return $return;
         }
 
         $extension = $media->getMediaFile() instanceof UploadedFile

@@ -10,8 +10,13 @@ final class PushwordCoreExtension extends ConfigurableExtension implements Prepe
 {
     use ExtensionTrait;
 
-    private $configFolder = __DIR__.'/../Resources/config';
+    private string $configFolder = __DIR__.'/../Resources/config';
 
+    /**
+     * @param array<mixed> $mergedConfig
+     *
+     * @return void
+     */
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container)
     {
         $this->setPathParameters($container);

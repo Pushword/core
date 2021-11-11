@@ -103,14 +103,14 @@ final class Manager
             $filters = $this->entity->getCustomProperty($label.'_filters');
         }
 
-        if (! isset($filters) || ! $filters) {
+        if (! isset($filters) || \in_array($filters, [[], '', null], true)) {
             $appFilters = $this->app->getFilters();
             $filters = isset($appFilters[$label]) ? $appFilters[$label] : null;
         }
 
         $filters = \is_string($filters) ? explode(',', $filters) : $filters;
 
-        return $filters ? $filters : null;
+        return $filters ? $filters : null; // @phpstan-ignore-line
     }
 
     /**

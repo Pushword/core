@@ -26,7 +26,7 @@ class PageRenderingValidator extends ConstraintValidator
             throw new UnexpectedTypeException($value, PageInterface::class);
         }
 
-        if (false !== $value->getRedirection()) { // si c'est une redir, on check rien
+        if ($value->hasRedirection()) { // si c'est une redir, on check rien
             return;
         }
 

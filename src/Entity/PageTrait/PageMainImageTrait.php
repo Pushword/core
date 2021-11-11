@@ -14,7 +14,7 @@ trait PageMainImageTrait
      *     inversedBy="mainImagePages"
      * )
      */
-    protected $mainImage;
+    protected ?MediaInterface $mainImage = null;
 
     public function getMainImage(): ?MediaInterface
     {

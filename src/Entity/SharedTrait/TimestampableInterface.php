@@ -8,7 +8,7 @@ interface TimestampableInterface
     public function setCreatedAt(\DateTime $createdAt);
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
     public function getCreatedAt();
 
@@ -18,7 +18,7 @@ interface TimestampableInterface
     public function setUpdatedAt(\DateTime $updatedAt);
 
     /**
-     * @return \DateTime
+     * @return \DateTimeInterface
      */
     public function getUpdatedAt();
 }

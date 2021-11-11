@@ -36,11 +36,11 @@ final class PageListener
 
     private function updatePageEditor(PageInterface $page): void
     {
-        if (! $user = $this->security->getUser()) {
+        if (null === ($user = $this->security->getUser())) {
             return;
         }
 
-        if ($page->getSlug() && $user->getUserIdentifier()) {
+        if ('' !== $page->getSlug() && '' !== $user->getUserIdentifier()) {
             return;
         } // Remove this when fix bug, only to avoid psalm shouting
 
@@ -49,11 +49,11 @@ final class PageListener
         de Admin sans être déconnecté */
 
         if (null === $page->getCreatedBy()) {
-            $page->setCreatedBy($user);
+            $page->setCreatedBy($user); // @phpstan-ignore-line
         }
 
-        if (! $page->getEditedBy() || $page->getEditedBy() !== $user) {
-            $page->setEditedBy($user);
+        if ($page->getEditedBy() !== $user) {
+            $page->setEditedBy($user); // @phpstan-ignore-line
         }
 
         //$this->entityManager->flush();

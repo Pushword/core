@@ -50,12 +50,12 @@ trait PageTrait
 
     public function getSlug(): string
     {
-        return ! $this->slug ? (string) $this->id : $this->slug;
+        return '' === $this->slug ? (string) $this->id : $this->slug;
     }
 
     public function getRealSlug(): string
     {
-        return 'homepage' == $this->getSlug() ? '' : $this->getSlug();
+        return 'homepage' === $this->getSlug() ? '' : $this->getSlug();
     }
 
     public static function normalizeSlug(string $slug): string
@@ -66,14 +66,12 @@ trait PageTrait
         return trim($slug, '/');
     }
 
-    public function setSlug($slug, $set = false): self
+    public function setSlug(?string $slug): self
     {
-        if (true === $set) {
-            $this->slug = $slug;
-        } elseif (null === $slug) { // work around for disabled input in sonata admin
+        if (null === $slug) { // work around for disabled input in sonata admin
             //if ('' === $this->slug) throw new \ErrorException('slug cant be empty.');
         } else {
-            $this->slug = static::normalizeSlug($slug); //$this->setSlug(trim($slug, '/'), true);
+            $this->slug = static::normalizeSlug($slug);
         }
 
         return $this;
@@ -84,10 +82,7 @@ trait PageTrait
         return $this->mainContent;
     }
 
-    /**
-     * @param string $mainContent
-     */
-    public function setMainContent($mainContent): self
+    public function setMainContent(?string $mainContent): self
     {
         $this->mainContent = (string) $mainContent;
 

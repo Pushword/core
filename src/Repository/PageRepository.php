@@ -18,8 +18,23 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
 {
     protected bool $hostCanBeNull = false;
 
-    public function getPublishedPages($host = '', array $where = [], array $orderBy = [], $limit = 0, bool $withRedirection = true)
-    {
+    /**
+     * Can be used via a twig function.
+     *
+     * @param string|array<string> $host
+     * @param array<(string|int), string> $orderBy
+     * @param array<mixed>     $where
+     * @param int|array<mixed> $limit
+     *
+     * @return PageInterface[]
+     */
+    public function getPublishedPages(
+        $host = '',
+        array $where = [],
+        array $orderBy = [],
+        $limit = 0,
+        bool $withRedirection = true
+    ) {
         $qb = $this->getPublishedPageQueryBuilder($host, $where, $orderBy);
 
         if (! $withRedirection) {
@@ -33,7 +48,15 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         return $query->getResult();
     }
 
-    public function getPublishedPageQueryBuilder($host = '', array $where = [], array $orderBy = [], int $limit = 0): QueryBuilder
+    /**
+     * Can be used via a twig function.
+     *
+     * @param string|array<string> $host
+     * @param array<(string|int), string> $orderBy
+     * @param array<mixed>     $where
+     * @param int|array<mixed> $limit
+     */
+    public function getPublishedPageQueryBuilder($host = '', array $where = [], array $orderBy = [], $limit = 0): QueryBuilder
     {
         $qb = $this->buildPublishedPageQuery('p');
 
@@ -59,7 +82,7 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
     }
 
     /**
-     * @param string|array $host
+     * @param string|string[] $host
      */
     public function getPage(string $slug, $host, bool $checkId = true): ?PageInterface
     {
@@ -76,9 +99,11 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
     }
 
     /**
+     * @param string|string[] $host
+     *
      * @return PageInterface[]
      */
-    public function findByHost(string $host): array
+    public function findByHost($host): array
     {
         $qb = $this->createQueryBuilder('p');
         $this->andHost($qb, $host);
@@ -87,11 +112,12 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
     }
 
     /**
-     * Return page for sitemap and main Feed (PageController)
-     * $qb->getQuery()->getResult();.
+     * @param string|string[] $host
+     *                              Return page for sitemap and main Feed (PageController)
+     *                              $qb->getQuery()->getResult();
      */
     public function getIndexablePagesQuery(
-        string $host,
+        $host,
         string $locale,
         ?int $limit = null
     ): QueryBuilder {
@@ -111,6 +137,8 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
 
     /**
      * Used in admin PageCrudController.
+     *
+     * @return Page[]
      */
     public function getPagesWithoutParent(): array
     {
