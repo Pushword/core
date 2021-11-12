@@ -272,7 +272,7 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
 
     private function extractDirection(&$key, $orderBy)
     {
-        if (false === strpos($key, ' ')) {
+        if (! str_contains($key, ' ')) {
             return $orderBy['direction'] ?? $orderBy[1] ?? 'DESC';
         }
 

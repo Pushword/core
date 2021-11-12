@@ -38,7 +38,7 @@ trait LinkTwigTrait
         }
 
         if ($encrypt) {
-            if (false !== strpos($path, 'mailto:') && filter_var($anchor, \FILTER_VALIDATE_EMAIL)) {
+            if (str_contains($path, 'mailto:') && filter_var($anchor, \FILTER_VALIDATE_EMAIL)) {
                 return $this->renderEncodedMail($anchor);
             }
             $attr = array_merge($attr, ['data-rot' => self::encrypt($path)]);
@@ -55,11 +55,11 @@ trait LinkTwigTrait
 
     public static function encrypt(string $path): string
     {
-        if (0 === strpos($path, 'http://')) {
+        if (str_starts_with($path, 'http://')) {
             $path = '-'.\Safe\substr($path, 7);
-        } elseif (0 === strpos($path, 'https://')) {
+        } elseif (str_starts_with($path, 'https://')) {
             $path = '_'.\Safe\substr($path, 8);
-        } elseif (0 === strpos($path, 'mailto:')) {
+        } elseif (str_starts_with($path, 'mailto:')) {
             $path = '@'.\Safe\substr($path, 7);
         }
 
@@ -70,11 +70,11 @@ trait LinkTwigTrait
     {
         $path = str_rot13($string);
 
-        if (0 === strpos($path, '-')) {
+        if (str_starts_with($path, '-')) {
             $path = 'http://'.\Safe\substr($path, 1);
-        } elseif (0 === strpos($path, '_')) {
+        } elseif (str_starts_with($path, '_')) {
             $path = 'https://'.\Safe\substr($path, 1);
-        } elseif (0 === strpos($path, '@')) {
+        } elseif (str_starts_with($path, '@')) {
             $path = 'mailto:'.\Safe\substr($path, 1);
         }
 

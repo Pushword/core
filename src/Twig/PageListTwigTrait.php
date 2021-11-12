@@ -76,7 +76,7 @@ trait PageListTwigTrait
     {
         $where = [];
 
-        if (false !== strpos($search, ' OR ')) {
+        if (str_contains($search, ' OR ')) {
             $searchToParse = explode(' OR ', $search);
             foreach ($searchToParse as $singleSearchToParse) {
                 //$where = array_merge($where, $this->stringToSearch($s), ['OR']);
@@ -106,13 +106,13 @@ trait PageListTwigTrait
             return ['parentPage', '=', $this->apps->getCurrentPage()->getId()];
         }
 
-        if (0 === strpos($search, 'comment:')) {
+        if (str_starts_with($search, 'comment:')) {
             $search = '<!--'.\Safe\substr($search, \strlen('comment:')).'-->';
 
             return ['key' => 'mainContent', 'operator' => 'LIKE', 'value' => '%'.$search.'%'];
         }
 
-        if (0 === strpos($search, 'slug:')) {
+        if (str_starts_with($search, 'slug:')) {
             $search = \Safe\substr($search, \strlen('slug:'));
 
             return ['key' => 'slug', 'operator' => 'LIKE', 'value' => $search];

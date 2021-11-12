@@ -255,7 +255,7 @@ final class AppConfig
 
     private function isFullPath(string $path): bool
     {
-        return 0 === strpos($path, '@') && false !== strpos($path, '/');
+        return str_starts_with($path, '@') && str_contains($path, '/');
     }
 
     public function isFirstApp(): bool

@@ -21,7 +21,7 @@ class Twig extends AbstractFilter
 
     protected function render(string $string): string
     {
-        if (false === strpos($string, '{')) {
+        if (! str_contains($string, '{')) {
             return $string;
         }
 

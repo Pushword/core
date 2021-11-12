@@ -53,7 +53,7 @@ final class ImageManager
 
     public function isImage(MediaInterface $media): bool
     {
-        return false !== strpos($media->getMimeType(), 'image/')
+        return str_contains($media->getMimeType(), 'image/')
             && \in_array(strtolower(str_replace('image/', '', $media->getMimeType())), ['jpg', 'jpeg', 'png', 'gif']);
     }
 

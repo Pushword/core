@@ -110,7 +110,7 @@ class MediaListener
 
     public function preRemove(MediaInterface $media): void
     {
-        if (0 === strpos((string) $media->getStoreIn(), $this->projectDir)) {
+        if (str_starts_with((string) $media->getStoreIn(), $this->projectDir)) {
             $this->filesystem->remove($media->getStoreIn().'/'.$media->getMedia());
         }
 
