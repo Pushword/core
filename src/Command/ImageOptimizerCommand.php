@@ -12,6 +12,9 @@ final class ImageOptimizerCommand extends Command
 {
     use ImageCommandTrait;
 
+    /**
+     * @var string
+     */
     protected static $defaultName = 'pushword:image:optimize';
 
     protected function configure(): void

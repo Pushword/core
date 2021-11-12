@@ -17,7 +17,7 @@ class Repository
      * @psalm-suppress InvalidReturnStatement
      * @psalm-suppress InvalidReturnType
      */
-    public static function getPageRepository($doctrine, string $pageEntity): \Doctrine\ORM\EntityRepository // @phpstan-ignore-line
+    public static function getPageRepository($doctrine, string $pageEntity): PageRepository // @phpstan-ignore-line
     {
         return $doctrine->getRepository($pageEntity); // @phpstan-ignore-line
     }

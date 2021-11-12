@@ -11,6 +11,9 @@ use Symfony\Component\Yaml\Yaml;
 
 final class NewCommand extends Command
 {
+    /**
+     * @var string
+     */
     protected static $defaultName = 'pushword:new';
 
     private string $projectDir;

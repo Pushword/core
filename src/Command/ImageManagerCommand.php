@@ -12,6 +12,9 @@ final class ImageManagerCommand extends Command
 {
     use ImageCommandTrait;
 
+    /**
+     * @var string
+     */
     protected static $defaultName = 'pushword:image:cache';
 
     protected function configure(): void
