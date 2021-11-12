@@ -22,10 +22,7 @@ class Unprose extends AbstractFilter
     use RequiredEntityTrait;
     use UnproseTwigTrait;
 
-    /**
-     * @return string
-     */
-    public function apply($propertyValue)
+    public function apply($propertyValue): string
     {
         $closeEncryptedTag = $this->encryptTag('div');
         $openEncryptedTag = $this->encryptTag('/div');

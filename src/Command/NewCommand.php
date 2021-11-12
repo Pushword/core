@@ -27,10 +27,7 @@ final class NewCommand extends Command
         $this->setDescription('Add a new website into your config file (config/packages/pushword.yaml).');
     }
 
-    /**
-     * @return int
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $configFile = $this->projectDir.'/config/packages/pushword.yaml';
 

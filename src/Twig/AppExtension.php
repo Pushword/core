@@ -69,7 +69,7 @@ class AppExtension extends AbstractExtension
     /**
      * @return \Twig\TwigFilter[]
      */
-    public function getFilters()
+    public function getFilters(): array
     {
         return [
             new TwigFilter('html_entity_decode', 'html_entity_decode'),
@@ -85,7 +85,7 @@ class AppExtension extends AbstractExtension
     /**
      * @return \Twig\TwigFunction[]
      */
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('view', [$this, 'getView'], ['needs_environment' => false]),
@@ -123,10 +123,7 @@ class AppExtension extends AbstractExtension
             ->getPublishedPages($host, $where, $orderBy, $limit, (bool) $withRedirection);
     }
 
-    /**
-     * @return string
-     */
-    public function getView(string $path, ?string $fallback = null)
+    public function getView(string $path, ?string $fallback = null): string
     {
         return $fallback ? $this->apps->get()->getView($path, $fallback)
             : $this->apps->get()->getView($path);
@@ -135,7 +132,7 @@ class AppExtension extends AbstractExtension
     /**
      * @return array<string, mixed>
      */
-    public static function options($needsEnv = false, $isSafe = ['html'])
+    public static function options($needsEnv = false, $isSafe = ['html']): array
     {
         return ['is_safe' => $isSafe, 'needs_environment' => $needsEnv];
     }

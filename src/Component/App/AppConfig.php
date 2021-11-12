@@ -86,10 +86,8 @@ final class AppConfig
 
     /**
      * Used in Router Extension.
-     *
-     * @return bool
      */
-    public function isMainHost(?string $host)
+    public function isMainHost(?string $host): bool
     {
         return $this->getMainHost() === $host;
     }

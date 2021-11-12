@@ -209,7 +209,7 @@ final class PageController extends AbstractController
      * @psalm-suppress NullableReturnStatement
      * @psalm-suppress InvalidNullableReturnType
      */
-    private function getPageElse404(Request $request, ?string &$slug, string $host, bool $extractPager = false): Page
+    private function getPageElse404(Request $request, ?string &$slug, string $host, bool $extractPager = false): ?PageInterface
     {
         return $this->getPage($request, $slug, $host, true, $extractPager); // @phpstan-ignore-line
     }

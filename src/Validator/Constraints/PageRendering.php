@@ -12,18 +12,12 @@ class PageRendering extends Constraint
     //public $message = 'The page is not rendering as expected... You may done an error in the main content.';
     public string $message = 'page.pageRendering';
 
-    /**
-     * @return string
-     */
-    public function validatedBy()
+    public function validatedBy(): string
     {
         return 'page_rendering';
     }
 
-    /**
-     * @return string
-     */
-    public function getTargets()
+    public function getTargets(): string
     {
         return self::CLASS_CONSTRAINT;
     }

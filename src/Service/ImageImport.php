@@ -60,7 +60,7 @@ trait ImageImport
     }
 
     /**
-    .
+        .
      *
      * @return false|string
      */

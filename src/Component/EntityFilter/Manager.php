@@ -82,11 +82,11 @@ final class Manager
     {
         $filters = $this->getFilters($this->camelCaseToSnakeCase($property));
 
-        if (null === $filters && \is_string($propertyValue)) {
+        if ([] === $filters && \is_string($propertyValue)) {
             $filters = $this->getFilters('string');
         }
 
-        return null !== $filters
+        return [] !== $filters
             ? $this->applyFilters($property,  '' !== \strval($propertyValue) ? $propertyValue : '', $filters)
             : $propertyValue;
     }
@@ -97,7 +97,7 @@ final class Manager
     }
 
     /** @return string[] */
-    private function getFilters(string $label): ?array
+    private function getFilters(string $label): array
     {
         if ($this->app->entityCanOverrideFilters() && $this->entity instanceof CustomPropertiesInterface) {
             $filters = $this->entity->getCustomProperty($label.'_filters');
@@ -110,11 +110,11 @@ final class Manager
 
         $filters = \is_string($filters) ? explode(',', $filters) : $filters;
 
-        return $filters ? $filters : null; // @phpstan-ignore-line
+        return $filters ? $filters : []; // @phpstan-ignore-line
     }
 
     /**
-     * @return false|class-string<FilterInterface>
+     * @return false|class-string
      */
     private function isFilter(string $className)
     {

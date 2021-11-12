@@ -40,10 +40,7 @@ final class PushwordCoreExtension extends ConfigurableExtension implements Prepe
         $containerBuilder->setParameter('pw.package_dir', '%kernel.project_dir%/..');
     }
 
-    /**
-     * @return string
-     */
-    public function getAlias()
+    public function getAlias(): string
     {
         return 'pushword';
     }
