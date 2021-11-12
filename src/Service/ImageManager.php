@@ -22,6 +22,9 @@ final class ImageManager
 
     private string $projectDir;
 
+    /**
+     * @var array<string, array<string, mixed>>
+     */
     private array $filterSets;
 
     private OptimizerChain $optimizer;
@@ -30,6 +33,9 @@ final class ImageManager
 
     private FileSystem $fileSystem;
 
+    /**
+     * @param array<string, array<string, mixed>> $filterSets
+     */
     public function __construct(
         array $filterSets,
         string $publicDir,
@@ -46,6 +52,9 @@ final class ImageManager
         $this->optimizer = OptimizerChainFactory::create(); // t o d o make optimizer bin path configurable
     }
 
+    /**
+     * @param array<string, array<string, mixed>> $filters
+     */
     public function setFilters(array $filters): void
     {
         $this->filterSets = $filters;

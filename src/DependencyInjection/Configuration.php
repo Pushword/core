@@ -64,6 +64,9 @@ final class Configuration implements ConfigurationInterface
      */
     public const DEFAULT_PUBLIC_MEDIA_DIR = 'media';
 
+    /**
+     * @var array<string, array<string, mixed>>
+     */
     public const IMAGE_FILTERS_SET = [
         'default' => ['quality' => 90, 'filters' => ['downscale' => [1980, 1280]]],
         'height_300' => [
