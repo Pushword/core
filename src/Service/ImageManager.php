@@ -201,7 +201,7 @@ final class ImageManager
 
         $filterNames = array_keys($this->filterSets);
         foreach ($filterNames as $filterName) {
-            @\Safe\unlink($this->publicDir.'/'.$this->publicMediaDir.'/'.$filterName.'/'.$media);
+            @unlink($this->publicDir.'/'.$this->publicMediaDir.'/'.$filterName.'/'.$media);
         }
     }
 }
