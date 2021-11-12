@@ -46,6 +46,7 @@ class LastTime
             if (! $setIfNotExist) {
                 return;
             }
+
             \Safe\file_put_contents($this->filePath, '');
         }
 

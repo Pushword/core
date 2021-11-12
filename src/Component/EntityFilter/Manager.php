@@ -180,6 +180,7 @@ final class Manager
                 && \in_array($this->entity->getCustomProperty('filter_'.$this->className($filter)), [0, false], true)) {
                 continue;
             }
+
             $filterClass = $this->getFilterClass($filter);
 
             if (method_exists($filterClass, 'setProperty')) {

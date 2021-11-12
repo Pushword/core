@@ -16,12 +16,12 @@ class MarkdownParser extends MarkdownExtra
     /**
      * Simplify detab.
      */
-    public function detab($text)
+    protected function detab($text)
     {
         return str_replace("\t", str_repeat(' ', $this->tab_width), $text);
     }
 
-    public function _initDetab()
+    protected function _initDetab()
     {
     }
 }

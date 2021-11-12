@@ -25,6 +25,7 @@ trait LinkTwigTrait
             if (! isset($attr['href'])) {
                 throw new Exception('attr must contain href for render a link.');
             }
+
             $path = $attr['href'];
             unset($attr['href']);
         }
@@ -41,6 +42,7 @@ trait LinkTwigTrait
             if (str_contains($path, 'mailto:') && filter_var($anchor, \FILTER_VALIDATE_EMAIL)) {
                 return $this->renderEncodedMail($anchor);
             }
+
             $attr = array_merge($attr, ['data-rot' => self::encrypt($path)]);
             $template = $this->getApp()->getView('/component/link_js.html.twig');
             $renderedLink = $this->twig->render($template, ['anchor' => $anchor, 'attr' => $attr]);

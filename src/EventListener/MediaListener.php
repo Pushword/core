@@ -52,6 +52,7 @@ class MediaListener
         if (null !== $requestStack->getCurrentRequest() && method_exists($requestStack->getSession(), 'getFlashBag')) {
             $this->flashBag = $requestStack->getSession()->getFlashBag();
         }
+
         $this->translator = $translator;
     }
 
@@ -64,6 +65,7 @@ class MediaListener
         if (! $media instanceof MediaInterface) {
             throw new LogicException();
         }
+
         $this->beforeToImportAndStore($media);
     }
 
@@ -160,6 +162,7 @@ class MediaListener
         if (1 === $this->iterate && null !== $this->flashBag) {
             $this->flashBag->add('success', $this->translator->trans('media.name_was_changed')); // todo translate
         }
+
         ++$this->iterate;
         $this->renameIfMediaExists($media);
     }

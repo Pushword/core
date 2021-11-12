@@ -20,6 +20,7 @@ class Entity
             if ('id' === $property->getName()) {
                 continue;
             }
+
             $propertyNames[] = $property->getName();
         }
 

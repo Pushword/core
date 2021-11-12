@@ -33,8 +33,10 @@ final class ImageOptimizerCommand extends Command
                 $progressBar->setMessage($media->getPath());
                 $this->imageManager->optimize($media);
             }
+
             $progressBar->advance();
         }
+
         $progressBar->finish();
 
         return 0;

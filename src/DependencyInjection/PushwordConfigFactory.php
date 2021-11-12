@@ -84,6 +84,7 @@ final class PushwordConfigFactory
         if (! $this->container->hasParameter('pw.apps')) { // @phpstan-ignore-line
             throw new LogicException('You must register Pushword/CoreBundle in first (`pw.apps` is not loaded in ParameterBag.');
         }
+
         $apps = $this->container->getParameter('pw.apps');
 
         foreach ($apps as $host => $app) {
@@ -106,6 +107,7 @@ final class PushwordConfigFactory
             if (! isset($app['hosts']) || ! \is_array($app['hosts']) || ! isset($app['hosts'][0])) { // normally, it's impossible to reach this
                 throw new InvalidArgumentException('Something is badly configured in your pushword configuration file.');
             }
+
             $result[$app['hosts'][0]] = $app;
         }
 

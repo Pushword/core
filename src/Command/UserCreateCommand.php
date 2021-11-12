@@ -88,6 +88,7 @@ final class UserCreateCommand extends Command
         if ('password' == $argument) {
             $question->setHidden(true);
         }
+
         $argumentValue = $helper->ask($input, $output, $question);
 
         if (null === $argumentValue) {

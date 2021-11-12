@@ -54,6 +54,7 @@ trait CustomPropertiesTrait
         if ([] === $this->getCustomProperties()) {
             return '';
         }
+
         $standStandAloneCustomProperties = array_filter(
             $this->getCustomProperties(),
             [$this, 'isStandAloneCustomProperty'],
@@ -84,6 +85,7 @@ trait CustomPropertiesTrait
         if (! \is_array($standAloneProperties)) {
             throw new Exception('standAloneProperties are not a valid yaml array');
         }
+
         $this->standAloneCustomProperties = '';
 
         // remove the standAlone which were removed
@@ -115,11 +117,11 @@ trait CustomPropertiesTrait
     {
         try {
             $this->mergeStandAloneCustomProperties();
-        } catch (ParseException $exception) {
+        } catch (ParseException $parseException) {
             $executionContext->buildViolation('page.customProperties.malformed') //'$exception->getMessage())
                     ->atPath($this->buildValidationAtPath)
                     ->addViolation();
-        } catch (CustomPropertiesException $exception) {
+        } catch (CustomPropertiesException $customPropertiesException) {
             $executionContext->buildViolation('page.customProperties.notStandAlone') //'$exception->getMessage())
                     ->atPath($this->buildValidationAtPath)
                     ->addViolation();

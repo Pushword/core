@@ -48,6 +48,7 @@ final class PageController extends AbstractController
         if (! $translator instanceof DataCollectorTranslator && ! $translator instanceof Translator) {
             throw new LogicException('A symfony codebase changed make this hack impossible (cf setLocale). Get `'.\get_class($translator).'`');
         }
+
         $this->translator = $translator;
     }
 
@@ -246,6 +247,7 @@ final class PageController extends AbstractController
         if (! $page instanceof \Pushword\Core\Entity\PageInterface && $extractPager) {
             $page = $this->extractPager($request, $slug, $host, $throwException);
         }
+
         // Check if page exist
         if (! $page instanceof \Pushword\Core\Entity\PageInterface) {
             if ($throwException) {

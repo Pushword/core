@@ -33,8 +33,10 @@ final class ImageManagerCommand extends Command
                 $progressBar->setMessage($media->getPath());
                 $this->imageManager->generateCache($media);
             }
+
             $progressBar->advance();
         }
+
         $progressBar->finish();
 
         return 0;

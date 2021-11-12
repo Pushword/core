@@ -83,6 +83,7 @@ trait PageListTwigTrait
                 $where[] = $this->simpleStringToSearch($singleSearchToParse);
                 $where[] = 'OR';
             }
+
             array_pop($where);
         }
         /*elseif (strpos($search, ' AND ') !== false) { // Manage OR and Where seems difficult

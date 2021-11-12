@@ -42,6 +42,7 @@ final class Router implements RouterInterface
             if ($page->getLocale() !== $this->apps->get()->getDefaultLocale()) {
                 $homepage->setSlug($page->getLocale());
             }
+
             $homepage->setHost($page->getHost());
         } else {
             $homepage->setLocale($this->apps->get()->getLocale())->setHost($this->apps->get()->getMainHost());

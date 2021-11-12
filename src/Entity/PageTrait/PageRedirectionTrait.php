@@ -29,6 +29,7 @@ trait PageRedirectionTrait
                 $code = (int) (trim($match[0]));
                 $url = F::preg_replace_str('/ [1-5][0-9]{2}$/', '', $url);
             }
+
             if (false !== filter_var($url, \FILTER_VALIDATE_URL) || 1 === \Safe\preg_match('/^[^ ]+$/', $url)) {
                 $this->redirectionUrl = $url;
                 $this->redirectionCode = $code;

@@ -185,6 +185,7 @@ final class AppConfig
             if (! isset($this->assets[$row])) {
                 continue;
             }
+
             foreach ($this->assets[$row] as $key => $asset) {
                 $filepath = \strval($this->params->get('pw.public_dir')).$asset;
                 $assetsVersionned[$row][$key] = $asset.

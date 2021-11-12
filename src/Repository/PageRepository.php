@@ -201,6 +201,7 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         if (! empty($where) && (! isset($where[0]) || ! \is_array($where[0]))) {
             $where = [$where];
         }
+
         if (\in_array('OR', $where)) {
             return $this->andWhereOr($queryBuilder, $where);
         }

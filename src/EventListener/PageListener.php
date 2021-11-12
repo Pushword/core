@@ -42,7 +42,8 @@ final class PageListener
 
         if ('' !== $page->getSlug() && '' !== $user->getUserIdentifier()) {
             return;
-        } // Remove this when fix bug, only to avoid psalm shouting
+        }
+        // Remove this when fix bug, only to avoid psalm shouting
 
         /*
         HUGE BUG: une fois la page mise à jour avec ce code, impossible d'afficher la page d'édition

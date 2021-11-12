@@ -51,6 +51,7 @@ trait ImageImport
 
             $this->generateCache($media);
         }
+
         // Else, normally it's an external file ever imported
         // But SHA1_file may be checked to be sure it's the same file (/!\)
         // if not, the original file may have change OR we may have an internal file with the same slug.extension (media)
