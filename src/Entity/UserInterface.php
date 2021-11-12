@@ -2,10 +2,11 @@
 
 namespace Pushword\Core\Entity;
 
+use Pushword\Core\Entity\SharedTrait\IdInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface as BaseUserInterface;
 
-interface UserInterface extends PasswordAuthenticatedUserInterface, BaseUserInterface
+interface UserInterface extends PasswordAuthenticatedUserInterface, BaseUserInterface, IdInterface
 {
     /**
      * @var string

@@ -7,7 +7,6 @@ use LogicException;
 use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Entity\PageInterface;
-use Pushword\Core\Entity\PageInterface as Page;
 use Pushword\Core\Repository\PageRepository;
 use Pushword\Core\Repository\Repository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -219,7 +218,7 @@ final class PageController extends AbstractController
         string &$slug,
         string $host,
         bool $throwException
-    ): ?Page {
+    ): ?PageInterface {
         if (1 !== \Safe\preg_match('#(/([1-9][0-9]*)|^([1-9][0-9]*))$#', $slug, $match)) {
             return null;
         }
@@ -238,16 +237,16 @@ final class PageController extends AbstractController
         string $host,
         bool $throwException = true,
         bool $extractPager = false
-    ): ?Page {
+    ): ?PageInterface {
         $slug = $this->noramlizeSlug($slug);
         $page = $this->getPageRepository()->getPage($slug, '' !== $host ? $host : [$this->apps->getMainHost(), ''], true);
 
-        if (! $page instanceof \Pushword\Core\Entity\PageInterface && $extractPager) {
+        if (! $page instanceof PageInterface && $extractPager) {
             $page = $this->extractPager($request, $slug, $host, $throwException);
         }
 
         // Check if page exist
-        if (! $page instanceof \Pushword\Core\Entity\PageInterface) {
+        if (! $page instanceof PageInterface) {
             if ($throwException) {
                 throw $this->createNotFoundException();
             } else {

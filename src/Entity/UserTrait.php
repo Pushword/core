@@ -49,7 +49,7 @@ trait UserTrait
      * @var string The hashed password
      * @ORM\Column(type="string", nullable=true)
      */
-    private $password;
+    private ?string $password = null;
 
     public function __toString(): string
     {
@@ -113,7 +113,7 @@ trait UserTrait
     /**
      * @see UserInterface
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }

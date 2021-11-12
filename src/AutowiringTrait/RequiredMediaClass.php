@@ -2,8 +2,13 @@
 
 namespace Pushword\Core\AutowiringTrait;
 
+use Pushword\Core\Entity\MediaInterface;
+
 trait RequiredMediaClass
 {
+    /**
+     * @var class-string<MediaInterface>
+     */
     private string $mediaClass;
 
     /** @required */

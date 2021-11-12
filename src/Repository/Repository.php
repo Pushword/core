@@ -2,7 +2,6 @@
 
 namespace Pushword\Core\Repository;
 
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Pushword\Core\Entity\MediaInterface;
@@ -23,8 +22,8 @@ class Repository
     }
 
     /**
-     * @param ManagerRegistry|EntityManager $doctrine
-     * @param class-string<MediaInterface>  $mediaEntity
+     * @param ManagerRegistry|EntityManagerInterface $doctrine
+     * @param class-string<MediaInterface>           $mediaEntity
      * @psalm-suppress InvalidReturnStatement
      * @psalm-suppress InvalidReturnType
      */

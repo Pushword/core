@@ -26,7 +26,7 @@ final class AppConfig
 
     private string $template;
 
-    /** @var class-string[] */
+    /** @var array<string, string> */
     private array $filters;
 
     private bool $entityCanOverrideFilters;
@@ -152,13 +152,13 @@ final class AppConfig
         return $this->template;
     }
 
-    /** @return class-string[] */
+    /** @return array<string, string> */
     public function getFilters(): array
     {
         return $this->filters;
     }
 
-    /** @param class-string[] $filters */
+    /** @param array<string, string> $filters */
     public function setFilters(array $filters): void
     {
         $this->filters = $filters;

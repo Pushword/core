@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Pushword\Core\Entity\SharedTrait\CustomPropertiesInterface;
 use Pushword\Core\Entity\SharedTrait\IdInterface;
 use Pushword\Core\Entity\SharedTrait\TimestampableInterface;
@@ -60,4 +61,9 @@ interface MediaInterface extends IdInterface, TimestampableInterface, CustomProp
      * @throws \Exception if mediaFile is null
      */
     public function getMediaFileName(): string;
+
+    /**
+     * @return PageInterface[]|Collection<int, PageInterface>
+     */
+    public function getMainImagePages();
 }

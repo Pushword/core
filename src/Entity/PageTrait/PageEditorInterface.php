@@ -24,7 +24,7 @@ interface PageEditorInterface
 
     public function getEditMessage(): string;
 
-    public function setEditMessage(string $editMessage): self;
+    public function setEditMessage(?string $editMessage): self;
 
     /*
     public function setPageHasEditors($pageHasEditors): void;

@@ -110,9 +110,9 @@ trait PageEditorTrait
     /**
      * Set the value of editMessage.
      */
-    public function setEditMessage(string $editMessage): self
+    public function setEditMessage(?string $editMessage): self
     {
-        $this->editMessage = $editMessage;
+        $this->editMessage = (string) $editMessage;
 
         return $this;
     }
