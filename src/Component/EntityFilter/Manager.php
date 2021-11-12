@@ -114,7 +114,7 @@ final class Manager
     }
 
     /**
-     * @return class-string<FilterInterface>|false
+     * @return false|class-string<FilterInterface>
      */
     private function isFilter(string $className)
     {
@@ -130,7 +130,6 @@ final class Manager
             return false;
         }
 
-        // @var class-string<FilterInterface> $className
         return $filterClass; //@phpstan-ignore-line
     }
 

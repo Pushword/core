@@ -68,6 +68,9 @@ trait LinkTwigTrait
         return str_rot13($path);
     }
 
+    /**
+     * @return string
+     */
     public static function decrypt(string $string)
     {
         $path = str_rot13($string);

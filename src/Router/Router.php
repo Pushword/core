@@ -90,6 +90,9 @@ final class Router implements RouterInterface
         return $url;
     }
 
+    /**
+     * @return bool
+     */
     private function mayUseCustomPath()
     {
         return $this->useCustomHostPath

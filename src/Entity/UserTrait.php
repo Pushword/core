@@ -127,6 +127,8 @@ trait UserTrait
 
     /**
      * @see UserInterface
+     *
+     * @return string
      */
     public function getSalt()
     {

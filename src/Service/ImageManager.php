@@ -122,7 +122,7 @@ final class ImageManager
         }
     }
 
-    public function optimize(MediaInterface $media)
+    public function optimize(MediaInterface $media): void
     {
         $filterNames = array_keys($this->filterSets);
         foreach ($filterNames as $filterName) {
@@ -130,7 +130,7 @@ final class ImageManager
         }
     }
 
-    private function optimizeFiltered(MediaInterface $media, string $filterName)
+    private function optimizeFiltered(MediaInterface $media, string $filterName): void
     {
         if (! file_exists($this->getFilterPath($media, $filterName)) || ! file_exists($this->getFilterPath($media, $filterName, 'webp'))) {
             $this->generateFilteredCache($media, $filterName);
@@ -147,7 +147,7 @@ final class ImageManager
     private function normalizeFilter(string &$filter, array &$parameters): void
     {
         if ('downscale' == $filter) {
-            $parameters[] = function ($constraint) {
+            $parameters[] = function ($constraint): void {
                 $constraint->aspectRatio();
                 $constraint->upsize();
             };

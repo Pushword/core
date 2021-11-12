@@ -27,12 +27,11 @@ trait ImageImport
     ): MediaInterface {
         $imageLocalImport = $this->cacheExternalImage($image);
 
-        $imgSize = getimagesize($imageLocalImport);
-        if (false === $imgSize) {
+        if (false === $imageLocalImport || ($imgSize = getimagesize($imageLocalImport)) === false) {
             throw new Exception('Image `'.$image.'` was not imported.');
         }
 
-        $fileName = $this->generateFileName($image, $imgSize['mime'], $slug ?: $name, $hashInFilename);
+        $fileName = $this->generateFileName($image, $imgSize['mime'], '' !== $slug ? $slug : $name, $hashInFilename);
 
         $newFilePath = $this->mediaDir.'/'.$fileName;
 
@@ -61,7 +60,7 @@ trait ImageImport
     }
 
     /**
-     .
+    .
      *
      * @return false|string
      */

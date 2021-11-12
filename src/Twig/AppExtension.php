@@ -66,6 +66,9 @@ class AppExtension extends AbstractExtension
         return $this->apps->get();
     }
 
+    /**
+     * @return \Twig\TwigFilter[]
+     */
     public function getFilters()
     {
         return [
@@ -79,6 +82,9 @@ class AppExtension extends AbstractExtension
         ];
     }
 
+    /**
+     * @return \Twig\TwigFunction[]
+     */
     public function getFunctions()
     {
         return [
@@ -117,12 +123,18 @@ class AppExtension extends AbstractExtension
             ->getPublishedPages($host, $where, $orderBy, $limit, (bool) $withRedirection);
     }
 
+    /**
+     * @return string
+     */
     public function getView(string $path, ?string $fallback = null)
     {
         return $fallback ? $this->apps->get()->getView($path, $fallback)
             : $this->apps->get()->getView($path);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function options($needsEnv = false, $isSafe = ['html'])
     {
         return ['is_safe' => $isSafe, 'needs_environment' => $needsEnv];
@@ -170,6 +182,9 @@ class AppExtension extends AbstractExtension
         return $src;
     }
 
+    /**
+     * @return string[]|string
+     */
     public static function pregReplace($subject, $pattern, $replacement)
     {
         return \Safe\preg_replace($pattern, $replacement, $subject);

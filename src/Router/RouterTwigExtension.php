@@ -15,6 +15,9 @@ final class RouterTwigExtension extends AbstractExtension
         $this->router = $router;
     }
 
+    /**
+     * @return \Twig\TwigFunction[]
+     */
     public function getFunctions()
     {
         return [

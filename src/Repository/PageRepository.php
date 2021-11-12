@@ -271,6 +271,9 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         return $queryBuilder;
     }
 
+    /**
+     * @return mixed|string
+     */
     private function extractDirection(&$key, $orderBy)
     {
         if (! str_contains($key, ' ')) {

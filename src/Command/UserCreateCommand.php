@@ -61,6 +61,9 @@ final class UserCreateCommand extends Command
         $this->em->flush();
     }
 
+    /**
+     * @return int
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $email = $this->getOrAskIfNotSetted($input, $output, 'email');

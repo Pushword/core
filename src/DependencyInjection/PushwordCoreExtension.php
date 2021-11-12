@@ -14,10 +14,8 @@ final class PushwordCoreExtension extends ConfigurableExtension implements Prepe
 
     /**
      * @param array<mixed> $mergedConfig
-     *
-     * @return void
      */
-    protected function loadInternal(array $mergedConfig, ContainerBuilder $container)
+    protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         $this->setPathParameters($container);
 
@@ -42,6 +40,9 @@ final class PushwordCoreExtension extends ConfigurableExtension implements Prepe
         $containerBuilder->setParameter('pw.package_dir', '%kernel.project_dir%/..');
     }
 
+    /**
+     * @return string
+     */
     public function getAlias()
     {
         return 'pushword';

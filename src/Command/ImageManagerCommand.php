@@ -20,6 +20,9 @@ final class ImageManagerCommand extends Command
             ->addArgument('media', InputArgument::OPTIONAL, 'Image name (eg: filename.jpg).');
     }
 
+    /**
+     * @return int
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $medias = $this->getMedias($input);

@@ -41,11 +41,9 @@ final class HtmlEncryptedLink extends EncryptedLink
     }
 
     /**
-     * @param array<int, array<int, string>> $matches
-     * @param (int|string) $hrefKey
-     * @param (int|string) $anchorKey
+     * @param array<(string|int), array<int, string>> $matches
      */
-    private function replaceRelEncryptedLink(string $body, array $matches, $hrefKey = 2, $anchorKey = 1): string
+    private function replaceRelEncryptedLink(string $body, array $matches, string $hrefKey = '2', string $anchorKey = '1'): string
     {
         $nbrMatch = \count($matches[0]);
         for ($k = 0; $k < $nbrMatch; ++$k) {

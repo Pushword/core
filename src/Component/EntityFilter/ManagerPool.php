@@ -33,6 +33,9 @@ final class ManagerPool implements ManagerPoolInterface
         return $this->entityFilterManagers[$id->getId()];
     }
 
+    /**
+     * @return mixed|\Pushword\Core\Component\EntityFilter\Manager
+     */
     public function getProperty(IdInterface $id, string $property = '')
     {
         $manager = $this->getManager($id);
