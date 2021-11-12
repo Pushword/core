@@ -283,7 +283,7 @@ final class PageController extends AbstractController
     /**
      * @return false|string
      */
-    private function checkIfUriIsCanonical(Request $request, Page $page)
+    private function checkIfUriIsCanonical(Request $request, ?PageInterface $page)
     {
         $requestUri = $request->getRequestUri();
 
