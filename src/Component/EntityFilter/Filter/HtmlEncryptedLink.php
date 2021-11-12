@@ -4,10 +4,19 @@ namespace Pushword\Core\Component\EntityFilter\Filter;
 
 final class HtmlEncryptedLink extends EncryptedLink
 {
+    /**
+     * @var string
+     */
     public const HTML_REGEX = '/(<a\s+(?:[^>]*?\s+)?href=(["\'])(?P<href>((?!\2).)*)\2(?:[^>]*?\s+)?rel=(["\'])encrypt\5(?:[^>]*?\s+)?>(?P<anchor>((?!<\/a>).)*)<\/a>)/i';
 
+    /**
+     * @var string
+     */
     public const HTML_REGEX_HREF_KEY = 'href';
 
+    /**
+     * @var string
+     */
     public const HTML_REGEX_ANCHOR_KEY = 'anchor';
 
     public function convertEncryptedLink(string $body): string
