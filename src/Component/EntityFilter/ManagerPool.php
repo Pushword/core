@@ -8,6 +8,9 @@ use Pushword\Core\Entity\SharedTrait\IdInterface;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment as Twig;
 
+/**
+ * @template T of object
+ */
 final class ManagerPool implements ManagerPoolInterface
 {
     /** @required */
@@ -19,18 +22,22 @@ final class ManagerPool implements ManagerPoolInterface
     /** @required */
     public EventDispatcherInterface $eventDispatcher;
 
-    /** @var array<(string|int), Manager> */
+    /** @var array<(string|int), Manager<T>> */
     private array $entityFilterManagers = [];
 
+    /**
+     * @return Manager<T>
+     * @psalm-suppress InvalidArgument
+     */
     public function getManager(IdInterface $id): Manager
     {
         if (null !== $id->getId() && isset($this->entityFilterManagers[$id->getId()])) {
             return $this->entityFilterManagers[$id->getId()];
         }
 
-        $this->entityFilterManagers[$id->getId()] = new Manager($this, $this->eventDispatcher, $id);
+        $this->entityFilterManagers[$id->getId()] = new Manager($this, $this->eventDispatcher, $id); // @phpstan-ignore-line
 
-        return $this->entityFilterManagers[$id->getId()];
+        return $this->entityFilterManagers[$id->getId()]; // @phpstan-ignore-line
     }
 
     /**

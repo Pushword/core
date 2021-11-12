@@ -13,7 +13,7 @@ final class ImageManagerCommand extends Command
     use ImageCommandTrait;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected static $defaultName = 'pushword:image:cache';
 

@@ -48,7 +48,7 @@ final class AppConfig
 
             // TODO: solve why when i remove this, falt_import_dir disappear
             $prop = static::normalizePropertyName($prop);
-            $this->$prop = $value;
+            $this->$prop = $value; // @phpstan-ignore-line
         }
 
         $this->isFirstApp = $isFirstApp;

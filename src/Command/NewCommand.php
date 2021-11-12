@@ -12,7 +12,7 @@ use Symfony\Component\Yaml\Yaml;
 final class NewCommand extends Command
 {
     /**
-     * @var string
+     * @var string|null
      */
     protected static $defaultName = 'pushword:new';
 

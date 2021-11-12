@@ -7,25 +7,37 @@ use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Component\EntityFilter\Filter\FilterInterface;
 use Pushword\Core\Entity\SharedTrait\CustomPropertiesInterface;
+use Pushword\Core\Utils\F;
 use ReflectionClass;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment as Twig;
 
+/**
+ * @template T of object
+ */
 final class Manager
 {
+    /**
+     * @var T
+     */
     private object $entity;
 
     private AppConfig $app;
 
     private AppPool $apps;
 
+    /**
+     * @var ManagerPool<T>
+     */
     private ManagerPool $managerPool;
 
     private Twig $twig;
 
     private EventDispatcherInterface $eventDispatcher;
 
-    /** @param object $entity */
+    /** @param T $entity
+     * @param ManagerPool<T> $managerPool
+     */
     public function __construct(
         ManagerPool $managerPool,
         EventDispatcherInterface $eventDispatcher,
@@ -39,6 +51,9 @@ final class Manager
         $this->app = method_exists($entity, 'getHost') ? $this->apps->get($entity->getHost()) : $this->apps->get();
     }
 
+    /**
+     * @return T
+     */
     public function getEntity(): object
     {
         return $this->entity;
@@ -93,7 +108,7 @@ final class Manager
 
     private function camelCaseToSnakeCase(string $string): string
     {
-        return strtolower((string) \Safe\preg_replace('/[A-Z]/', '_\\0', lcfirst($string)));
+        return strtolower(F::preg_replace_str('/[A-Z]/', '_\\0', lcfirst($string)));
     }
 
     /** @return string[] */
@@ -132,10 +147,9 @@ final class Manager
             return false;
         }
 
-        return $filterClass; //@phpstan-ignore-line
+        return $filterClass;
     }
 
-    /** @param string $filter */
     private function getFilterClass(string $filter): FilterInterface
     {
         if (false === ($filterClassName = $this->isFilter($filter))) {
@@ -165,7 +179,7 @@ final class Manager
             $filterClass->setManagerPool($this->managerPool);
         }
 
-        return $filterClass;
+        return $filterClass; // @phpstan-ignore-line
     }
 
     /**

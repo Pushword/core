@@ -15,7 +15,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 final class UserCreateCommand extends Command
 {
     /**
-     * @var string
+     * @var string|null
      */
     protected static $defaultName = 'pushword:user:create';
 
