@@ -9,7 +9,7 @@ use Pushword\Core\Entity\PageInterface;
 class Name extends AbstractFilter
 {
     use RequiredAppTrait;
-    /*
+    /**
      * @use RequiredManagerTrait<PageInterface>
      */
     use RequiredManagerTrait;

@@ -10,6 +10,7 @@ use Twig\Environment as Twig;
 
 /**
  * @template T of object
+ * @implements ManagerPoolInterface<T>
  */
 final class ManagerPool implements ManagerPoolInterface
 {

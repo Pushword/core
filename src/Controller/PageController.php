@@ -193,7 +193,7 @@ final class PageController extends AbstractController
 
     private function getPageRepository(): PageRepository
     {
-        return Repository::getPageRepository($this->em, $this->params->get('pw.entity_page'));
+        return Repository::getPageRepository($this->em, $this->params->get('pw.entity_page')); // @phpstan-ignore-line
     }
 
     /**
@@ -208,7 +208,7 @@ final class PageController extends AbstractController
      * @psalm-suppress NullableReturnStatement
      * @psalm-suppress InvalidNullableReturnType
      */
-    private function getPageElse404(Request $request, ?string &$slug, string $host, bool $extractPager = false): ?PageInterface
+    private function getPageElse404(Request $request, ?string &$slug, string $host, bool $extractPager = false): PageInterface
     {
         return $this->getPage($request, $slug, $host, true, $extractPager); // @phpstan-ignore-line
     }
@@ -239,7 +239,7 @@ final class PageController extends AbstractController
         bool $extractPager = false
     ): ?PageInterface {
         $slug = $this->noramlizeSlug($slug);
-        $page = $this->getPageRepository()->getPage($slug, '' !== $host ? $host : [$this->apps->getMainHost(), ''], true);
+        $page = $this->getPageRepository()->getPage($slug, '' !== $host ? $host : [(string) $this->apps->getMainHost(), ''], true);
 
         if (! $page instanceof PageInterface && $extractPager) {
             $page = $this->extractPager($request, $slug, $host, $throwException);
@@ -284,7 +284,7 @@ final class PageController extends AbstractController
      *
      * @return false|string
      */
-    private function checkIfUriIsCanonical(Request $request, ?PageInterface $page)
+    private function checkIfUriIsCanonical(Request $request, PageInterface $page)
     {
         $requestUri = $request->getRequestUri();
 

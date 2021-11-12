@@ -65,7 +65,10 @@ trait ExtensionTrait
         }
     }
 
-    protected function loadInternal(array $mergedConfig, ContainerBuilder $container)
+    /**
+     * @param mixed[] $mergedConfig
+     */
+    protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
         (new PushwordConfigFactory($container, $mergedConfig, $this->getConfiguration($mergedConfig, $container), $this->getAlias()))
             ->loadConfigToParams()

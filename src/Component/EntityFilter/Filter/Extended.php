@@ -12,6 +12,9 @@ use Pushword\Core\Entity\PageInterface;
 class Extended extends AbstractFilter
 {
     use RequiredEntityTrait;
+    /**
+     * @use RequiredManagerPoolTrait<PageInterface>
+     */
     use RequiredManagerPoolTrait;
     use RequiredPropertyTrait;
 
