@@ -9,10 +9,7 @@ class Date extends AbstractFilter
 {
     use RequiredAppTrait;
 
-    /**
-     * @return string
-     */
-    public function apply($propertyValue)
+    public function apply($propertyValue): string
     {
         return $this->convertDateShortCode(\strval($propertyValue), $this->getApp()->getDefaultLocale());
     }

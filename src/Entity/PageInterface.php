@@ -66,6 +66,8 @@ interface PageInterface extends HostInterface, IdInterface, TimestampableInterfa
 
     public function getMetaRobots(): string;
 
+    public function getMainImage(): ?MediaInterface;
+
     public function setMainImage(?MediaInterface $media): self;
 
     public function __toString(): string;

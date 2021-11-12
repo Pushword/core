@@ -10,10 +10,7 @@ class Image extends AbstractFilter
     use RequiredAppTrait;
     use RequiredTwigTrait;
 
-    /**
-     * @return string
-     */
-    public function apply($propertyValue)
+    public function apply($propertyValue): string
     {
         return $this->convertMarkdownImage(\strval($propertyValue));
     }

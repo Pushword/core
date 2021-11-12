@@ -6,10 +6,7 @@ use Pushword\Core\Utils\HtmlBeautifer;
 
 class Punctuation extends AbstractFilter
 {
-    /**
-     * @return string
-     */
-    public function apply($propertyValue)
+    public function apply($propertyValue): string
     {
         return HtmlBeautifer::punctuationBeautifer(\strval($propertyValue));
     }

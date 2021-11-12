@@ -11,10 +11,7 @@ class Twig extends AbstractFilter
     use RequiredEntityTrait;
     use RequiredTwigTrait;
 
-    /**
-     * @return string
-     */
-    public function apply($propertyValue)
+    public function apply($propertyValue): string
     {
         return $this->render(\strval($propertyValue));
     }

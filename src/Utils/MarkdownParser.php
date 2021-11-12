@@ -15,8 +15,10 @@ class MarkdownParser extends MarkdownExtra
 
     /**
      * Simplify detab.
+     *
+     * @param string $text
      */
-    protected function detab($text)
+    protected function detab($text): string
     {
         return str_replace("\t", str_repeat(' ', $this->tab_width), $text);
     }

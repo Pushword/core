@@ -8,6 +8,7 @@ use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Entity\PageInterface;
 use Pushword\Core\Entity\PageInterface as Page;
+use Pushword\Core\Repository\PageRepositoryInterface;
 use Pushword\Core\Repository\Repository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Translation\Translator;
@@ -176,7 +177,7 @@ final class PageController extends AbstractController
     }
 
     /**
-     * Undocumented function.
+     .
      *
      * @return mixed //array<PageInterface>
      */
@@ -191,10 +192,7 @@ final class PageController extends AbstractController
         )->getQuery()->getResult();
     }
 
-    /**
-     * @return \Pushword\Core\Repository\PageRepositoryInterface
-     */
-    private function getPageRepository()
+    private function getPageRepository(): PageRepositoryInterface
     {
         return Repository::getPageRepository($this->em, $this->params->get('pw.entity_page'));
     }

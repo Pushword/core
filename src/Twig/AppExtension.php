@@ -11,6 +11,7 @@ use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Component\EntityFilter\ManagerPoolInterface;
 use Pushword\Core\Entity\Media;
 use Pushword\Core\Entity\MediaInterface;
+use Pushword\Core\Entity\PageInterface;
 use Pushword\Core\Repository\Repository;
 use Pushword\Core\Router\RouterInterface;
 use Pushword\Core\Service\ImageManager;
@@ -105,7 +106,12 @@ class AppExtension extends AbstractExtension
         ];
     }
 
-    public function getPublishedPages($host = null, $where = [], $orderBy = [], $limit = 0, $withRedirection = false)
+    /**
+     * @param string|string[]|null $host
+     *
+     * @return PageInterface[]
+     */
+    public function getPublishedPages($host = null, $where = [], $orderBy = [], $limit = 0, $withRedirection = false): array
     {
         return Repository::getPageRepository($this->em, $this->pageClass)
             ->getPublishedPages($host, $where, $orderBy, $limit, (bool) $withRedirection);

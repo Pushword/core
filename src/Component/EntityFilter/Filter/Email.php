@@ -12,10 +12,7 @@ class Email extends AbstractFilter
     use RequiredAppTrait;
     use RequiredTwigTrait;
 
-    /**
-     * @return string
-     */
-    public function apply($propertyValue)
+    public function apply($propertyValue): string
     {
         return $this->convertEmail(\strval($propertyValue));
     }

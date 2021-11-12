@@ -61,7 +61,7 @@ trait ImageImport
     }
 
     /**
-     * Undocumented function.
+     .
      *
      * @return false|string
      */
