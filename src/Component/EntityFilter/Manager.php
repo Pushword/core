@@ -114,6 +114,8 @@ final class Manager
     }
 
     /**
+     * @noRector
+     *
      * @return false|class-string
      */
     private function isFilter(string $className)

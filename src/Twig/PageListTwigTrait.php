@@ -125,7 +125,7 @@ trait PageListTwigTrait
     /**
      * @param string|array $search
      * @param string|array $order
-     * @param string       $host
+     * @param string|array $host
      * @param int|array    $max    if max is int => max result,
      *                             if max is array => paginate where 0 => item per page and 1 (fac) maxPage
      */

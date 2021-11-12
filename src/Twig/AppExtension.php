@@ -117,7 +117,7 @@ class AppExtension extends AbstractExtension
      *
      * @return PageInterface[]
      */
-    public function getPublishedPages($host = null, $where = [], $orderBy = [], $limit = 0, $withRedirection = false): array
+    public function getPublishedPages($host = null, array $where = [], array $orderBy = [], $limit = 0, $withRedirection = false): array
     {
         return Repository::getPageRepository($this->em, $this->pageClass)
             ->getPublishedPages($host, $where, $orderBy, $limit, (bool) $withRedirection);

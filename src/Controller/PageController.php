@@ -281,6 +281,8 @@ final class PageController extends AbstractController
     }
 
     /**
+     * @noRector
+     *
      * @return false|string
      */
     private function checkIfUriIsCanonical(Request $request, ?PageInterface $page)

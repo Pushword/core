@@ -38,7 +38,7 @@ trait PageI18nTrait
     /**
      * @param Collection<string, PageInterface> $translations
      */
-    public function setTranslations($translations): self
+    public function setTranslations(Collection $translations): self
     {
         $this->translations = $translations;
 

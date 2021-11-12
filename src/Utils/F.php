@@ -12,11 +12,10 @@ class F
     }
 
     /**
-     * @param string       $pattern
      * @param string|array $replacement
      * @param string|array $subject
      */
-    public static function preg_replace_str($pattern, $replacement, $subject, int $limit = -1, int &$count = 0): string // @phpstan-ignore-line
+    public static function preg_replace_str(string $pattern, $replacement, $subject, int $limit = -1, int &$count = 0): string // @phpstan-ignore-line
     {
         $return = \Safe\preg_replace($pattern, $replacement, $subject, $limit, $count);
 
