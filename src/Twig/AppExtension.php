@@ -6,6 +6,7 @@ use Cocur\Slugify\Slugify;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use PiedWeb\RenderAttributes\AttributesTrait;
+use Pushword\Core\AutowiringTrait\RequiredPageClass;
 use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Component\EntityFilter\ManagerPoolInterface;
@@ -23,6 +24,9 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
+/**
+ * @template T of object
+ */
 class AppExtension extends AbstractExtension
 {
     // TODO switch from Trait to service (will be better to test and add/remove twig extension)
@@ -32,6 +36,7 @@ class AppExtension extends AbstractExtension
     use LinkTwigTrait;
     use PageListTwigTrait;
     use PhoneNumberTwigTrait;
+    use RequiredPageClass;
     use TxtAnchorTwigTrait;
     use UnproseTwigTrait;
     use VideoTwigTrait;
@@ -40,21 +45,30 @@ class AppExtension extends AbstractExtension
 
     private EntityManagerInterface $em;
 
-    private string $pageClass;
-
     private AppPool $apps;
 
     private Twig $twig;
 
     private ImageManager $imageManager;
 
+    /**
+     * @var ManagerPoolInterface<T>
+     */
     private ManagerPoolInterface $entityFilterManagerPool;
 
-    public function __construct(EntityManagerInterface $entityManager, string $pageClass, RouterInterface $router, AppPool $appPool, Twig $twig, ImageManager $imageManager, ManagerPoolInterface $entityFilterManagerPool)
-    {
+    /**
+     * @param ManagerPoolInterface<T> $entityFilterManagerPool
+     */
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        RouterInterface $router,
+        AppPool $appPool,
+        Twig $twig,
+        ImageManager $imageManager,
+        ManagerPoolInterface $entityFilterManagerPool
+    ) {
         $this->em = $entityManager;
         $this->router = $router;
-        $this->pageClass = $pageClass;
         $this->apps = $appPool;
         $this->twig = $twig;
         $this->imageManager = $imageManager;
@@ -114,25 +128,30 @@ class AppExtension extends AbstractExtension
 
     /**
      * @param string|string[]|null $host
+     * @param array<(string|int), string> $orderBy
+     * @param array<mixed> $where
+     * @param int|array<(string|int), int> $limit
      *
      * @return PageInterface[]
      */
-    public function getPublishedPages($host = null, array $where = [], array $orderBy = [], $limit = 0, $withRedirection = false): array
+    public function getPublishedPages($host = null, array $where = [], array $orderBy = [], $limit = 0, bool $withRedirection = false): array
     {
-        return Repository::getPageRepository($this->em, $this->pageClass)
-            ->getPublishedPages($host, $where, $orderBy, $limit, (bool) $withRedirection);
+        return Repository::getPageRepository($this->em, $this->getPageClass())
+            ->getPublishedPages(null === $host ? [] : $host, $where, $orderBy, $limit, $withRedirection);
     }
 
     public function getView(string $path, ?string $fallback = null): string
     {
-        return $fallback ? $this->apps->get()->getView($path, $fallback)
+        return null !== $fallback ? $this->apps->get()->getView($path, $fallback)
             : $this->apps->get()->getView($path);
     }
 
     /**
+     * @param array<string> $isSafe
+     *
      * @return array<string, mixed>
      */
-    public static function options($needsEnv = false, $isSafe = ['html']): array
+    public static function options(bool $needsEnv = false, array $isSafe = ['html']): array
     {
         return ['is_safe' => $isSafe, 'needs_environment' => $needsEnv];
     }
@@ -144,7 +163,7 @@ class AppExtension extends AbstractExtension
 
     public static function normalizeMediaPath(string $src): string
     {
-        if (\Safe\preg_match('/^[a-z-]+$/', $src)) {
+        if (1 === \Safe\preg_match('/^[a-z-]+$/', $src)) {
             return '/media/default/'.$src.'.jpg';
         }
 
@@ -180,6 +199,10 @@ class AppExtension extends AbstractExtension
     }
 
     /**
+     * @param string[]|string $subject
+     * @param string[]|string $pattern
+     * @param string[]|string $replacement
+     *
      * @return string[]|string
      */
     public static function pregReplace($subject, $pattern, $replacement)

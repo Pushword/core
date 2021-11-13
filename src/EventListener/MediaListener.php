@@ -13,6 +13,7 @@ use League\ColorExtractor\Palette;
 use LogicException;
 use Pushword\Core\Entity\MediaInterface;
 use Pushword\Core\Service\ImageManager;
+use Pushword\Core\Utils\F;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -153,7 +154,7 @@ class MediaListener
             return;
         }
 
-        $newName = (1 === $this->iterate ? $media->getName() : \Safe\preg_replace('/ \([0-9]+\)$/', '', $media->getName()))
+        $newName = (1 === $this->iterate ? $media->getName() : F::preg_replace_str('/ \([0-9]+\)$/', '', $media->getName()))
             .' ('.$this->iterate.')';
         $media->setName($newName);
         $media->setMedia(null);

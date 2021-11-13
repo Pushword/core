@@ -3,6 +3,7 @@
 namespace Pushword\Core\Component\App;
 
 use Exception;
+use LogicException;
 use Pushword\Core\Entity\PageInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Twig\Environment as Twig;
@@ -83,6 +84,15 @@ final class AppPool
 
     public function getCurrentPage(): ?PageInterface
     {
+        return $this->currentPage;
+    }
+
+    public function getCurrentPageSafely(): PageInterface
+    {
+        if (null === $this->currentPage) {
+            throw new LogicException();
+        }
+
         return $this->currentPage;
     }
 

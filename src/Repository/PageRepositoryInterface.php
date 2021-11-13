@@ -9,8 +9,6 @@ use Doctrine\Persistence\ObjectRepository;
 use Pushword\Core\Entity\PageInterface;
 
 /**
- * @template T as PageInterface
- * @template TEntityClass as PageInterface
  * @extends Selectable<int, PageInterface>
  * @extends ObjectRepository<PageInterface>
  */
@@ -31,8 +29,8 @@ interface PageRepositoryInterface extends ServiceEntityRepositoryInterface, Obje
      *
      * @param string|array<string> $host
      * @param array<(string|int), string> $orderBy
-     * @param array<mixed>     $where
-     * @param int|array<mixed> $limit
+     * @param array<mixed> $where
+     * @param int|array<(string|int), int> $limit
      *
      * @return PageInterface[]
      */
@@ -49,8 +47,8 @@ interface PageRepositoryInterface extends ServiceEntityRepositoryInterface, Obje
      *
      * @param string|array<string> $host
      * @param array<(string|int), string> $orderBy
-     * @param array<mixed>     $where
-     * @param int|array<mixed> $limit
+     * @param array<mixed> $where
+     * @param int|array<(string|int), int> $limit
      */
     public function getPublishedPageQueryBuilder($host = '', array $where = [], array $orderBy = [], $limit = 0): QueryBuilder;
 

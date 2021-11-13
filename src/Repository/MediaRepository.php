@@ -10,6 +10,8 @@ use Pushword\Core\Entity\MediaInterface;
 
 /**
  * @extends ServiceEntityRepository<MediaInterface>
+ * @implements Selectable<int, MediaInterface>
+ * @implements ObjectRepository<MediaInterface>
  */
 class MediaRepository extends ServiceEntityRepository implements ObjectRepository, Selectable
 {
@@ -23,6 +25,6 @@ class MediaRepository extends ServiceEntityRepository implements ObjectRepositor
         $queryBuilder->groupBy('m.mimeType');
         $queryBuilder->orderBy('m.mimeType', Criteria::ASC);
 
-        return array_column($queryBuilder->getQuery()->getResult(), 'mimeType');
+        return array_column($queryBuilder->getQuery()->getResult(), 'mimeType'); // @phpstan-ignore-line
     }
 }

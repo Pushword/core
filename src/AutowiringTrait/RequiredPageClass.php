@@ -16,11 +16,9 @@ trait RequiredPageClass
      *
      * @param class-string<PageInterface> $pageClass
      */
-    public function setMediaClass(string $pageClass): self
+    public function setPageClass(string $pageClass): void
     {
         $this->pageClass = $pageClass;
-
-        return $this;
     }
 
     /**
@@ -28,6 +26,6 @@ trait RequiredPageClass
      */
     public function getPageClass(): string
     {
-        return $this->pageClass;
+        return $this->pageClass; // @phpstan-ignore-line
     }
 }

@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use LogicException;
 use Pushword\Core\Utils\IsAssociativeArray;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class PushwordConfigFactory
@@ -17,13 +18,13 @@ final class PushwordConfigFactory
     /** @var array<mixed> */
     private array $config;
 
-    private ?ConfigurationInterface $configuration;
+    private ConfigurationInterface $configuration;
 
     /** @param array<mixed> $configs */
     public function __construct(
         ContainerBuilder $containerBuilder,
         array $configs,
-        ?ConfigurationInterface $configuration = null,
+        ConfigurationInterface $configuration,
         string $prefix = ''
     ) {
         $this->container = $containerBuilder;
@@ -123,17 +124,24 @@ final class PushwordConfigFactory
     {
         $fallbackProperties = $this->getAppFallbackConfig();
 
-        if (null !== $this->configuration) {
-            $node = $this->configuration->getConfigTreeBuilder()->buildTree();
-            $node->finalize($app); // it will check value
+        $node = $this->configuration->getConfigTreeBuilder()->buildTree();
+        $node->finalize($app); // it will check value
+
+        if (! isset($app['hosts']) || ! \is_array($app['hosts'])) {
+            $app = (new Processor())->processConfiguration($this->configuration, $app);
+            //throw new LogicException();
         }
 
         foreach ($fallbackProperties as $fallbackProperty) {
             if (! isset($app[$fallbackProperty])) {
                 $app[$fallbackProperty] = \is_string($this->config[$fallbackProperty]) ? str_replace('%main_host%', $app['hosts'][0], $this->config[$fallbackProperty])
-                    : $this->config[$fallbackProperty]; // @phpstan-ignore-line
+                    : $this->config[$fallbackProperty];
             } elseif ('custom_properties' == $fallbackProperty) {
-                $app['custom_properties'] = array_merge($this->config['custom_properties'], $app['custom_properties']); // @phpstan-ignore-line
+                if (! \is_array($this->config['custom_properties']) || ! \is_array($app['custom_properties'])) {
+                    throw new LogicException();
+                }
+
+                $app['custom_properties'] = array_merge($this->config['custom_properties'], $app['custom_properties']);
             }
         }
 

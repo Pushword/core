@@ -13,7 +13,7 @@ trait MediaLoaderTrait
         $src = str_contains($src, '/') ? \Safe\substr($src, \strlen('/media/default/')) : $src;
 
         /** @var MediaInterface $media */
-        $self = new self();
+        $self = new self(); // @phpstan-ignore-line
         $self->setMedia($src);
 
         return $self;

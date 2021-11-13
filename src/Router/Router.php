@@ -69,15 +69,15 @@ final class Router implements RouterInterface
         if (! $canonical) {
             if ($this->mayUseCustomPath()) {
                 return $this->router->generate(self::CUSTOM_HOST_PATH, [
-                    'host' => $this->apps->getCurrentPage()->getHost(),
+                    'host' => $this->apps->getCurrentPageSafely()->getHost(),
                     'slug' => $slug,
                 ]);
-            } elseif ($page && ! $this->apps->sameHost($page->getHost())) { // maybe we force canonical - useful for views
+            } elseif (null !== $page && ! $this->apps->sameHost($page->getHost())) { // maybe we force canonical - useful for views
                 $canonical = true;
             }
         }
 
-        if ($canonical && $page) {
+        if ($canonical && null !== $page) {
             $baseUrl = $this->apps->getAppValue('baseUrl', $page->getHost());
         }
 
@@ -93,9 +93,9 @@ final class Router implements RouterInterface
     private function mayUseCustomPath(): bool
     {
         return $this->useCustomHostPath
-            && $this->currentHost // we have a request
-            && $this->apps->getCurrentPage() // a page is loaded
-            && $this->apps->getCurrentPage()->getHost()
+            && '' !== $this->currentHost // we have a request
+            && null !== $this->apps->getCurrentPage() // a page is loaded
+            && '' !== $this->apps->getCurrentPage()->getHost()
             && ! $this->apps->get()->isMainHost($this->currentHost);
     }
 

@@ -62,14 +62,11 @@ final class ImageManager
 
     public function isImage(MediaInterface $media): bool
     {
-        return str_contains($media->getMimeType(), 'image/')
-            && \in_array(strtolower(str_replace('image/', '', $media->getMimeType())), ['jpg', 'jpeg', 'png', 'gif']);
+        return str_contains((string) $media->getMimeType(), 'image/')
+            && \in_array(strtolower(str_replace('image/', '', (string) $media->getMimeType())), ['jpg', 'jpeg', 'png', 'gif'], true);
     }
 
-    /**
-     * @param MediaInterface|string $media
-     */
-    public function generateCache($media): void
+    public function generateCache(MediaInterface $media): void
     {
         $image = $this->getImage($media);
 
@@ -91,7 +88,7 @@ final class ImageManager
 
     /**
      * @param MediaInterface|string $media
-     * @param string|array          $filter
+     * @param string|array<mixed>   $filter
      */
     public function generateFilteredCache($media, $filter, ?Image $originalImage = null): Image
     {
@@ -106,13 +103,17 @@ final class ImageManager
         $image = null === $originalImage ? $this->getImage($media)
             : ('default' == $filterName ? $originalImage : clone $originalImage); // don't clone if default for speed perf
 
-        foreach ($filters[$filterName]['filters'] as $filter => $parameters) {
+        foreach ($filters[$filterName]['filters'] as $filter => $parameters) { // @phpstan-ignore-line
             $parameters = \is_array($parameters) ? $parameters : [$parameters];
             $this->normalizeFilter($filter, $parameters);
-            \call_user_func_array([$image, $filter], $parameters);
+            \call_user_func_array([$image, $filter], $parameters);  // @phpstan-ignore-line
         }
 
-        $quality = $filters[$filterName]['quality'] ?? 90;
+        /**
+         * @psalm-suppress RedundantCondition
+         * @psam-suppress TypeDoesNotContainNull
+         */
+        $quality = (int) (! isset($filters[$filterName]['quality']) ? 90 : $filters[$filterName]['quality']); // @phpstan-ignore-line
 
         $this->createFilterDir(\dirname($this->getFilterPath($media, $filterName)));
 
@@ -152,6 +153,8 @@ final class ImageManager
     /**
      * Transform {$fiter}_notupsize in $fiter and add constrait->upsize()
      * or transform dowscale in resize with aspectRatio and upSize contraint.
+     *
+     * @param array<mixed> $parameters
      */
     private function normalizeFilter(string &$filter, array &$parameters): void
     {
@@ -172,7 +175,7 @@ final class ImageManager
     /**
      * @param MediaInterface|string $media
      */
-    public function getFilterPath($media, string $filterName, ?string $extension = null, $browserPath = false): string
+    public function getFilterPath($media, string $filterName, ?string $extension = null, bool $browserPath = false): string
     {
         /** @var string $media */
         $media = $media instanceof MediaInterface ? $media->getMedia() : Filepath::filename($media);

@@ -6,15 +6,18 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
+use LogicException;
 use Pushword\Core\Entity\PageInterface;
 
 /**
+ * @extends ServiceEntityRepository<PageInterface>
+ *
  * @method PageInterface|null                        find($id, $lockMode = null, $lockVersion = null)
  * @method PageInterface|null                        findOneBy(array $criteria, array $orderBy = null)
  * @method list<\Pushword\Core\Entity\PageInterface> findAll()
  * @method list<\Pushword\Core\Entity\PageInterface> findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class PageRepository extends ServiceEntityRepository implements PageRepositoryInterface
+class PageRepository extends ServiceEntityRepository implements PageRepositoryInterface //@phpstan-ignore-line
 {
     protected bool $hostCanBeNull = false;
 
@@ -23,8 +26,8 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
      *
      * @param string|array<string> $host
      * @param array<(string|int), string> $orderBy
-     * @param array<mixed>     $where
-     * @param int|array<mixed> $limit
+     * @param array<mixed> $where
+     * @param int|array<(string|int), int> $limit
      *
      * @return PageInterface[]
      */
@@ -45,7 +48,7 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
 
         $query = $queryBuilder->getQuery();
 
-        return $query->getResult();
+        return $query->getResult(); // @phpstan-ignore-line
     }
 
     /**
@@ -53,8 +56,8 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
      *
      * @param string|array<string> $host
      * @param array<(string|int), string> $orderBy
-     * @param array<mixed>     $where
-     * @param int|array<mixed> $limit
+     * @param array<mixed> $where
+     * @param int|array<(string|int), int> $limit
      */
     public function getPublishedPageQueryBuilder($host = '', array $where = [], array $orderBy = [], $limit = 0): QueryBuilder
     {
@@ -63,7 +66,7 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         $this->andHost($qb, $host);
         $this->andWhere($qb, $where);
         $this->orderBy($qb, $orderBy);
-        if ($limit) {
+        if (! \in_array($limit, [0, []], true)) {
             $this->limit($qb, $limit);
         }
 
@@ -95,7 +98,7 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
 
         $qb = $this->andHost($qb, $host);
 
-        return $qb->getQuery()->getResult()[0] ?? null;
+        return $qb->getQuery()->getResult()[0] ?? null; // @phpstan-ignore-line
     }
 
     /**
@@ -108,7 +111,7 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         $qb = $this->createQueryBuilder('p');
         $this->andHost($qb, $host);
 
-        return $qb->getQuery()->getResult();
+        return $qb->getQuery()->getResult(); // @phpstan-ignore-line
     }
 
     /**
@@ -147,11 +150,13 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
             ->orderBy('p.slug', Criteria::DESC)
             ->getQuery();
 
-        return $query->getResult();
+        return $query->getResult(); // @phpstan-ignore-line
     }
 
     /**
      * Used in admin Media.
+     *
+     * @return PageInterface[]
      */
     public function getPagesUsingMedia(string $media): array
     {
@@ -162,14 +167,14 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         $orx->add($qb->expr()->like('p.mainContent', ':quotedMedia')); // catch: "example.jpg'
         $orx->add($qb->expr()->like('p.mainContent', ':defaultMedia')); // catch: media/default/example.jpg
         $orx->add($qb->expr()->like('p.mainContent', ':thumbMedia'));
-        $query = $qb->where($orx)->setParameters([
+        $query = $qb->where($orx)->setParameters([ // @phpstan-ignore-line
             'apostrophMedia' => '%\''.$media.'\'%',
             'quotedMedia' => '%"'.$media.'"%',
             'defaultMedia' => '/media/default/'.$media.'%',
             'thumbMedia' => '/media/thumb/'.$media.'%',
         ])->getQuery();
 
-        return $query->getResult();
+        return $query->getResult(); // @phpstan-ignore-line
     }
 
     private function getRootAlias(QueryBuilder $queryBuilder): string
@@ -188,21 +193,21 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
     /**
      * QueryBuilder Helper.
      *
-     * @param array $where array containing array with key,operator,value,key_prefix
-     *                     Eg:
-     *                     ['title', 'LIKE' '%this%'] => works
-     *                     [['title', 'LIKE' '%this%']] => works
-     *                     [['key'=>'title', 'operator' => 'LIKE', 'value' => '%this%'], 'OR', ['key'=>'slug', 'operator' => 'LIKE', 'value' => '%this%']] => works
-     *                     See confusing parenthesis DQL doctrine https://symfonycasts.com/screencast/doctrine-queries/and-where-or-where#avoid-orwhere-and-where
+     * @param array<mixed> $where array containing array with key,operator,value,key_prefix
+     *                            Eg:
+     *                            ['title', 'LIKE' '%this%'] => works
+     *                            [['title', 'LIKE' '%this%']] => works
+     *                            [['key'=>'title', 'operator' => 'LIKE', 'value' => '%this%'], 'OR', ['key'=>'slug', 'operator' => 'LIKE', 'value' => '%this%']] => works
+     *                            See confusing parenthesis DQL doctrine https://symfonycasts.com/screencast/doctrine-queries/and-where-or-where#avoid-orwhere-and-where
      */
     private function andWhere(QueryBuilder $queryBuilder, array $where): QueryBuilder
     {
         // Normalize array [']
-        if (! empty($where) && (! isset($where[0]) || ! \is_array($where[0]))) {
+        if ([] !== $where && (! isset($where[0]) || ! \is_array($where[0]))) {
             $where = [$where];
         }
 
-        if (\in_array('OR', $where)) {
+        if (\in_array('OR', $where, true)) {
             return $this->andWhereOr($queryBuilder, $where);
         }
 
@@ -217,6 +222,9 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         return $queryBuilder;
     }
 
+    /**
+     * @param array<mixed> $where
+     */
     private function andWhereOr(QueryBuilder $queryBuilder, array $where): QueryBuilder
     {
         $orX = $queryBuilder->expr()->orX();
@@ -234,6 +242,9 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         return $queryBuilder->andWhere($orX);
     }
 
+    /**
+     * @param array<mixed> $w
+     */
     private function simpleAndWhere(QueryBuilder $queryBuilder, array $w): QueryBuilder
     {
         if (($w['value'] ?? $w[2]) === null) {
@@ -253,7 +264,7 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
     }
 
     /**
-     * @param array $orderBy containing key,direction
+     * @param array<(string|int), string> $orderBy containing key,direction
      */
     private function orderBy(QueryBuilder $queryBuilder, array $orderBy): QueryBuilder
     {
@@ -265,16 +276,22 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
         foreach ($keys as $i => $key) {
             $direction = $this->extractDirection($key, $orderBy);
             $orderByFunc = 0 === $i ? 'orderBy' : 'addOrderBy';
-            $queryBuilder->$orderByFunc($this->getRootAlias($queryBuilder).'.'.$key, $direction);
+            if (! method_exists($queryBuilder, $orderByFunc)) {
+                throw new LogicException();
+            }
+
+            $queryBuilder->$orderByFunc($this->getRootAlias($queryBuilder).'.'.$key, $direction); // @phpstan-ignore-line
         }
 
         return $queryBuilder;
     }
 
     /**
+     * @param array<(string|int), string> $orderBy
+     *
      * @return mixed|string
      */
-    private function extractDirection(&$key, $orderBy)
+    private function extractDirection(string &$key, array $orderBy): string
     {
         if (! str_contains($key, ' ')) {
             return $orderBy['direction'] ?? $orderBy[1] ?? 'DESC';
@@ -289,11 +306,11 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
     /**
      * QueryBuilder Helper.
      *
-     * @param string|array $host
+     * @param string|string[] $host
      */
     public function andHost(QueryBuilder $queryBuilder, $host): QueryBuilder
     {
-        if (! $host) {
+        if (\in_array($host, ['', []], true)) {
             return $queryBuilder;
         }
 
@@ -336,11 +353,11 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
     /**
      * Query Builder helper.
      *
-     * @param int|array $limit containing start,max or just max
+     * @param int|array<(string|int), int> $limit containing start,max or just max
      */
-    protected function limit($qb, $limit): QueryBuilder
+    protected function limit(QueryBuilder $qb, $limit): QueryBuilder
     {
-        if (! $limit) {
+        if (\in_array($limit, [0, []], true)) {
             return $qb;
         }
 

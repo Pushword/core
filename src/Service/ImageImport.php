@@ -13,7 +13,7 @@ trait ImageImport
     {
         $slug = (new Slugify())->slugify($slug);
 
-        return ($slug ?: pathinfo($url, \PATHINFO_BASENAME))
+        return ('' !== $slug ? $slug : pathinfo($url, \PATHINFO_BASENAME))
             .($hashInFilename ? '-'.\Safe\substr(md5(sha1($url)), 0, 4) : '')
             .'.'.str_replace(['image/', 'jpeg'], ['', 'jpg'], $mimeType);
     }
@@ -22,7 +22,7 @@ trait ImageImport
         string $image,
         string $name = '',
         string $slug = '',
-        $hashInFilename = true
+        bool $hashInFilename = true
         //, $ifNameIsTaken = null
     ): MediaInterface {
         $imageLocalImport = $this->cacheExternalImage($image);
@@ -73,10 +73,10 @@ trait ImageImport
 
         if (! is_readable($src) && \function_exists('curl_init')) {
             $curl = curl_init($src);
-            curl_setopt($curl, \CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($curl, \CURLOPT_RETURNTRANSFER, 1); // @phpstan-ignore-line
             /** @var false|string $content */
-            $content = curl_exec($curl);
-            curl_close($curl);
+            $content = curl_exec($curl); // @phpstan-ignore-line
+            curl_close($curl); // @phpstan-ignore-line
         } else {
             $content = file_get_contents($src);
         }
