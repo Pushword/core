@@ -162,7 +162,7 @@ trait CustomPropertiesTrait
      * Magic getter for customProperties.
      * TODO/IDEA magic setter for customProperties.
      *
-     * @param array<string, mixed> $arguments
+     * @param mixed[] $arguments
      *
      * @return mixed
      */
