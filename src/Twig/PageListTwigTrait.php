@@ -4,6 +4,7 @@ namespace Pushword\Core\Twig;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use LogicException;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Pagerfanta;
 use Pagerfanta\PagerfantaInterface;
@@ -169,9 +170,13 @@ trait PageListTwigTrait
                 $pages = \array_slice($pages, 0, $limit);
             }
 
+            if ($max[0] < 1) {
+                throw new LogicException();
+            }
+
             $pagerfanta = (new Pagerfanta(new ArrayAdapter($pages)))
                 ->setMaxNbPages($max[1])
-                ->setMaxPerPage($max[0]) // @phpstan-ignore-line
+                ->setMaxPerPage($max[0])
                 ->setCurrentPage($this->getCurrentPage()); // @phpstan-ignore-line
             $pages = $pagerfanta->getCurrentPageResults();
         } else {
