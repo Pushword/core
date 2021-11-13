@@ -9,7 +9,7 @@ trait KernelTrait
 {
     public static ?KernelInterface $appKernel = null;
 
-    protected ?KernelInterface $kernel;
+    protected KernelInterface $kernel;
 
     public static function loadKernel(KernelInterface $kernel): void
     {
