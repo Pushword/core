@@ -13,7 +13,11 @@ trait LinkTwigTrait
 
     abstract public function getApp(): AppConfig;
 
-    public function renderLink($anchor, $path, $attr = [], bool $encrypt = true): string
+    /**
+     * @param array<string, string>|string|PageInterface $path
+     * @param array<string, string>|bool|string          $attr
+     */
+    public function renderLink(string $anchor, $path, $attr = [], bool $encrypt = true): string
     {
         if (\is_bool($attr)) {
             $encrypt = $attr;
@@ -39,7 +43,7 @@ trait LinkTwigTrait
         }
 
         if ($encrypt) {
-            if (str_contains($path, 'mailto:') && filter_var($anchor, \FILTER_VALIDATE_EMAIL)) {
+            if (str_contains($path, 'mailto:') && false !== filter_var($anchor, \FILTER_VALIDATE_EMAIL)) {
                 return $this->renderEncodedMail($anchor);
             }
 
@@ -86,7 +90,7 @@ trait LinkTwigTrait
         return $path;
     }
 
-    public function renderEncodedMail($mail, $class = '')
+    public function renderEncodedMail(string $mail, string $class = ''): string
     {
         $template = $this->getApp()->getView('/component/encoded_mail.html.twig');
 

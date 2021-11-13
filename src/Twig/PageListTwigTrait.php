@@ -11,6 +11,7 @@ use Pagerfanta\RouteGenerator\RouteGeneratorFactoryInterface;
 use Pagerfanta\Twig\View\TwigView;
 use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\App\AppPool;
+use Pushword\Core\Entity\PageInterface;
 use Pushword\Core\Repository\Repository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -18,6 +19,9 @@ use Twig\Environment as Twig;
 
 trait PageListTwigTrait
 {
+    /**
+     * @var class-string<PageInterface>
+     */
     private string $pageClass;
 
     private EntityManagerInterface $em;
@@ -51,8 +55,8 @@ trait PageListTwigTrait
             $params['host'] = $this->apps->getCurrentPage()->getHost();
         }
 
-        if (null !== $this->getCurrentRequest() && null !== $this->getCurrentRequest()->get('host')) {
-            $params['host'] = \strval($this->requestStack->getCurrentRequest()->get('host'));
+        if (null !== ($request = $this->getCurrentRequest()) && null !== ($host = $request->get('host'))) {
+            $params['host'] = \strval($host);
         }
 
         return $params;
@@ -103,7 +107,7 @@ trait PageListTwigTrait
      */
     private function simpleStringToSearch(string $search): array
     {
-        if ('children' == strtolower($search) && $this->apps->getCurrentPage()) {
+        if ('children' == strtolower($search) && null !== $this->apps->getCurrentPage()) {
             return ['parentPage', '=', $this->apps->getCurrentPage()->getId()];
         }
 
@@ -123,11 +127,11 @@ trait PageListTwigTrait
     }
 
     /**
-     * @param string|array $search
-     * @param string|array $order
-     * @param string|array $host
-     * @param int|array    $max    if max is int => max result,
-     *                             if max is array => paginate where 0 => item per page and 1 (fac) maxPage
+     * @param string|array<mixed> $search
+     * @param string|array<(string|int), string> $order
+     * @param string|string[] $host
+     * @param int|array<(string|int), int>    $max    if max is int => max result,
+     *                                        if max is array => paginate where 0 => item per page and 1 (fac) maxPage
      */
     public function renderPagesList(
         Twig $twig,
@@ -154,21 +158,21 @@ trait PageListTwigTrait
                 $this->getLimit($max)
             );
 
-        if ($this->apps->getCurrentPage()) {
+        if (null !== $this->apps->getCurrentPage()) {
             $queryBuilder->andWhere('p.slug <> '.$this->apps->getCurrentPage()->getId());
         }
 
         if (\is_array($max) && isset($max[1]) && $max[1] > 1) {
             $pages = (array) $queryBuilder->getQuery()->getResult();
             $limit = $this->getLimit($max);
-            if ($limit) {
+            if (0 !== $limit) {
                 $pages = \array_slice($pages, 0, $limit);
             }
 
             $pagerfanta = (new Pagerfanta(new ArrayAdapter($pages)))
-                ->setMaxNbPages($max[1] ?? 0)
-                ->setMaxPerPage($max[0])
-                ->setCurrentPage($this->getCurrentPage());
+                ->setMaxNbPages($max[1])
+                ->setMaxPerPage($max[0]) // @phpstan-ignore-line
+                ->setCurrentPage($this->getCurrentPage()); // @phpstan-ignore-line
             $pages = $pagerfanta->getCurrentPageResults();
         } else {
             $pages = $queryBuilder->getQuery()->getResult();
@@ -185,7 +189,8 @@ trait PageListTwigTrait
     }
 
     /**
-     * @param string|array|null $viewName the view name
+     * @param array<mixed>               $options
+     * @param PagerfantaInterface<mixed> $pagerfanta
      *
      * @throws \InvalidArgumentException if the $viewName argument is an invalid type
      */
@@ -197,13 +202,17 @@ trait PageListTwigTrait
     ): string {
         $pagerFantaTwigView = new TwigView($twig, $this->getApp()->getView($template));
 
-        return $pagerFantaTwigView->render($pagerfanta, $this->routeGeneratorFactory->create($options), $options)
+        return $pagerFantaTwigView
+            ->render($pagerfanta, $this->routeGeneratorFactory->create($options), $options)
             .($pagerfanta->hasNextPage() ? '<!-- pager:'.$pagerfanta->getNextPage().' -->' : '');
     }
 
+    /**
+     * @param int|array<(string|int), int> $max
+     */
     private function getLimit($max): int
     {
-        return \is_int($max) ? $max : (\is_array($max) && isset($max[1]) ? $max[1] * $max[0] : 0);
+        return \is_int($max) ? $max : (\is_array($max) && isset($max[1]) ? $max[1] * $max[0] : 0); // @phpstan-ignore-line
     }
 
     private function getCurrentPage(): int
@@ -213,6 +222,6 @@ trait PageListTwigTrait
             return 1;
         }
 
-        return (int) $this->requestStack->getCurrentRequest()->attributes->get('pager', 1);
+        return \intval($this->requestStack->getCurrentRequest()->attributes->get('pager', 1));
     }
 }

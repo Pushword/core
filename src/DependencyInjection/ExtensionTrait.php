@@ -3,6 +3,7 @@
 namespace Pushword\Core\DependencyInjection;
 
 use Exception;
+use LogicException;
 use Pushword\Core\Utils\F;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -70,7 +71,11 @@ trait ExtensionTrait
      */
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
-        (new PushwordConfigFactory($container, $mergedConfig, $this->getConfiguration($mergedConfig, $container), $this->getAlias()))
+        if (($configuration = $this->getConfiguration($mergedConfig, $container)) === null) {
+            throw new LogicException();
+        }
+
+        (new PushwordConfigFactory($container, $mergedConfig, $configuration, $this->getAlias()))
             ->loadConfigToParams()
             ->processAppsConfiguration();
 

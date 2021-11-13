@@ -15,7 +15,6 @@ class ElseH1 extends AbstractFilter
      */
     use RequiredManagerTrait;
 
-    /** @return ?string */
     public function apply($propertyValue): ?string
     {
         $return = '' !== \strval($propertyValue) ? $propertyValue : $this->entityFilterManager->getEntity()->getH1();

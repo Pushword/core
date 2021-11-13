@@ -288,8 +288,6 @@ class PageRepository extends ServiceEntityRepository implements PageRepositoryIn
 
     /**
      * @param array<(string|int), string> $orderBy
-     *
-     * @return mixed|string
      */
     private function extractDirection(string &$key, array $orderBy): string
     {
