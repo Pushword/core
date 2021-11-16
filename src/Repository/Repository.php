@@ -2,10 +2,6 @@
 
 namespace Pushword\Core\Repository;
 
-<<<<<<< HEAD
-=======
-use Doctrine\ORM\EntityManager;
->>>>>>> 054dd57 (...)
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Pushword\Core\Entity\MediaInterface;
