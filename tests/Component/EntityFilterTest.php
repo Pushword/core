@@ -50,7 +50,7 @@ class EntityFilterTest extends KernelTestCase
         self::bootKernel();
         $pool = new ManagerPool();
         $pool->apps = self::$kernel->getContainer()->get('pushword.apps');
-        $pool->twig = self::$kernel->getContainer()->get('twig');
+        $pool->twig = self::$kernel->getContainer()->get('test.service_container')->get('twig');
         $pool->eventDispatcher = self::$kernel->getContainer()->get('event_dispatcher');
 
         return $pool;
