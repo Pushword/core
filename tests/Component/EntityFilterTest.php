@@ -26,7 +26,7 @@ class EntityFilterTest extends KernelTestCase
 
         $filter = new HtmlEncryptedLink();
         $filter->setApp(self::$kernel->getContainer()->get('pushword.apps')->getApp());
-        $filter->setTwig(self::$kernel->getContainer()->get('twig'));
+        $filter->setTwig(self::$kernel->getContainer()->get('test.service_container')->get('twig'));
         $this->assertSame(
             'Lorem <span data-rot=_cvrqjro.pbz/>Test</span> ipsum',
             $filter->convertHtmlRelEncryptedLink('Lorem <a href="https://piedweb.com/" rel="encrypt">Test</a> ipsum')
