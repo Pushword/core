@@ -11,7 +11,7 @@ use Twig\Environment as Twig;
 final class AppPool
 {
     /** @var array<string, AppConfig> */
-    private $apps = [];
+    private array $apps = [];
 
     private ?string $currentApp = null;
 
@@ -30,6 +30,13 @@ final class AppPool
         }
 
         $this->switchCurrentApp($firstHost);
+    }
+
+    public function setCurrentPage(PageInterface $page): self
+    {
+        $this->currentPage = $page;
+
+        return $this;
     }
 
     public function switchCurrentApp(PageInterface|string $host): self
@@ -71,6 +78,17 @@ final class AppPool
     public function getHosts(): array
     {
         return array_keys($this->apps);
+    }
+
+    public function findHost(string $host): string
+    {
+        foreach ($this->apps as $key => $app) {
+            if (\in_array($host, $app->getHosts(), true)) {
+                return $key;
+            }
+        }
+
+        return '';
     }
 
     /** @return array<string, AppConfig> */
