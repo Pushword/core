@@ -178,13 +178,16 @@ trait CustomPropertiesTrait
                 return $this->getCustomProperty($property) ?? null;
             }
 
-            return $this->$property; // may keep that ?! @phpstan-ignore-line
-        } else {
-            if (\array_key_exists($method, get_object_vars($this)) && \is_callable($getter = [$this, 'get'.ucfirst($method)])) {
-                return \call_user_func_array($getter, $arguments);
-            }
-
+            // @phpstan-ignore-next-line
+            return $this->$property;
+        }
+        if (! \array_key_exists($method, get_object_vars($this))) {
             return $this->getCustomProperty(lcfirst($method)) ?? null;
         }
+        if (! \is_callable($getter = [$this, 'get'.ucfirst($method)])) {
+            return $this->getCustomProperty(lcfirst($method)) ?? null;
+        }
+
+        return \call_user_func_array($getter, $arguments);
     }
 }
