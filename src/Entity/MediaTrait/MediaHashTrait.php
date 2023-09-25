@@ -8,9 +8,9 @@ use Symfony\Component\HttpFoundation\File\File;
 trait MediaHashTrait
 {
     /**
-     * @var ?string
+     * @var string|resource|null
      */
-    #[ORM\Column(type: 'binary', length: 20, options: ['default' => ''])]
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::BINARY, length: 20, options: ['default' => ''])]
     protected $hash;
 
     abstract public function getMediaFile(): ?File;
@@ -19,7 +19,7 @@ trait MediaHashTrait
 
     abstract public function getMedia(): ?string;
 
-    public function getHash(): string
+    public function getHash(): mixed
     {
         return $this->hash ?? $this->setHash()->getHash();
     }

@@ -22,7 +22,7 @@ trait MediaTrait
     use MediaSlugTrait;
     use TimestampableTrait;
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::STRING, length: 255)]
     protected string $storeIn = '';
 
     /**
@@ -30,7 +30,7 @@ trait MediaTrait
      */
     protected string $projectDir = '';
 
-    #[ORM\Column(type: 'string', length: 255, name: 'media')]
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::STRING, length: 255, name: 'media')]
     protected ?string $media = null;
 
     // TODO Rename to filename
@@ -40,10 +40,10 @@ trait MediaTrait
      */
     protected ?string $mediaBeforeUpdate = null;
 
-    #[ORM\Column(type: 'string', length: 50)]
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::STRING, length: 50)]
     protected ?string $mimeType = null;
 
-    #[ORM\Column(type: 'integer')]
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::INTEGER)]
     protected int $size;
 
     /**
@@ -54,10 +54,10 @@ trait MediaTrait
 
     // todo Rename to $file
     /**
-     * @var PageInterface[]|Collection<int, PageInterface>
+     * @var \Doctrine\Common\Collections\Collection<\Pushword\Core\Entity\PageInterface>|null
      */
-    #[ORM\OneToMany(targetEntity: \Pushword\Core\Entity\PageInterface::class, mappedBy: 'mainImage')]
-    protected $mainImagePages;
+    #[ORM\OneToMany(targetEntity: PageInterface::class, mappedBy: 'mainImage')]
+    protected ?Collection $mainImagePages = null; // @phpstan-ignore-line
 
     public function setProjectDir(string $projectDir): self
     {
@@ -239,11 +239,11 @@ trait MediaTrait
     }
 
     /**
-     * @return array<PageInterface>|Collection<int, PageInterface>
+     * @return Collection<int, PageInterface>
      */
-    public function getMainImagePages(): array|Collection
+    public function getMainImagePages(): Collection
     {
-        return $this->mainImagePages;
+        return $this->mainImagePages ?? throw new \Exception();
     }
 
     #[ORM\PreRemove]
