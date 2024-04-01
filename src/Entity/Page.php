@@ -16,6 +16,7 @@ use Pushword\Core\Entity\SharedTrait\CustomPropertiesTrait;
 use Pushword\Core\Entity\SharedTrait\HostTrait;
 use Pushword\Core\Entity\SharedTrait\IdInterface;
 use Pushword\Core\Entity\SharedTrait\IdTrait;
+use Pushword\Core\Entity\SharedTrait\TagsTrait;
 use Pushword\Core\Entity\SharedTrait\TimestampableTrait;
 use Pushword\Core\Repository\PageRepository;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -40,6 +41,7 @@ class Page implements IdInterface
     use PageRedirectionTrait;
     use PageSearchTrait;
     use PageTrait;
+    use TagsTrait;
     use TimestampableTrait;
 
     public function __construct(bool $initDateTimeProperties = true)

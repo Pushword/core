@@ -312,4 +312,24 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
 
         return $queryBuilder->setMaxResults($limit);
     }
+
+    /**
+     * @return string[]
+     */
+    public function getAllTags(): array
+    {
+        $queryBuilder = $this->createQueryBuilder('p')
+            ->select('p.tags')
+            ->getQuery();
+
+        /** @var array{tags: string[]}[] */
+        $tags = $queryBuilder->getResult();
+
+        $allTags = [];
+        foreach ($tags as $entity) {
+            $allTags = array_merge($allTags, $entity['tags']);
+        }
+
+        return array_unique($allTags);
+    }
 }

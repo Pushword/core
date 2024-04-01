@@ -30,17 +30,13 @@ trait CustomPropertiesTrait
 
     protected string $buildValidationAtPath = 'standAloneCustomProperties';
 
-    /**
-     * @return array<mixed>
-     */
+    /** @return array<mixed> */
     public function getCustomProperties(): array
     {
         return $this->customProperties;
     }
 
-    /**
-     * @param array<mixed> $customProperties
-     */
+    /** @param array<mixed> $customProperties */
     public function setCustomProperties(array $customProperties): self
     {
         $this->customProperties = $customProperties;
