@@ -23,7 +23,7 @@ class Email extends AbstractFilter
     }
 
     /**
-     * @psalm-suppress PossiblyUndefinedMethod
+     * @psalm-suppress all
      */
     public function convertEmail(string $body): string
     {

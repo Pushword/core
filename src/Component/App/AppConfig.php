@@ -47,7 +47,6 @@ final class AppConfig
         array $properties,
         private readonly bool $isFirstApp = false
     ) {
-        /** @psalm-suppress MixedAssignment */
         foreach ($properties as $prop => $value) {
             $this->setCustomProperty($prop, $value);
 
@@ -245,9 +244,6 @@ final class AppConfig
         return $assetsVersionned;
     }
 
-    /**
-     * @psalm-suppress InternalMethod
-     */
     public function getView(?string $path = null, string $fallback = '@Pushword'): string
     {
         if (null === $path) {

@@ -58,7 +58,7 @@ final class PageController extends AbstractController
             return;
         }
 
-        $host = \strval($request->attributes->get('host', '')); // @phpstan-ignore-line
+        $host = $request->attributes->getString('host', '');
         if ('' !== $host) {
             $this->apps->switchCurrentApp($host);
 
@@ -109,11 +109,13 @@ final class PageController extends AbstractController
         $view = $this->getView($page->getTemplate() ?? '/page/page.html.twig');
 
         $response = new Response();
-        if (\is_array($headers = $page->getCustomProperty('headers'))) {
-            foreach ($headers as $header) {
-                $response->headers->set($header[0], $header[1]);
-            }
-        }
+
+        // used ???
+        // if (\is_array($headers = $page->getCustomProperty('headers'))) {
+        //     foreach ($headers as $header) {
+        //         $response->headers->set($header[0], $header[1]);
+        //     }
+        // }
 
         return $this->render($view, $params, $response);
     }
@@ -259,7 +261,6 @@ final class PageController extends AbstractController
         return $this->getPage($request, $unpaginatedSlug, $throwException);
     }
 
-    /** @psalm-suppress UndefinedInterfaceMethod */
     private function getPage(
         Request $request,
         string &$slug,

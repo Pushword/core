@@ -16,8 +16,8 @@ final class AppsConfigParser
         $result = [];
         foreach ($apps as $app) {
             $app = self::parseAppConfig($app, $containerBuilder);
-            $key = \is_string($key = $app['hosts'][0] ?? throw new \Exception()) ? $key : throw new \Exception();
-            $result[$key] = $app; // @phpstan-ignore-line
+            $key = \is_string($key = $app['hosts'][0] ?? null) ? $key : throw new \Exception(); // @phpstan-ignore-line
+            $result[$key] = $app;
         }
 
         return $result;

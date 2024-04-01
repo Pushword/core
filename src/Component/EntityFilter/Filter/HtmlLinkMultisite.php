@@ -56,6 +56,8 @@ final class HtmlLinkMultisite extends AbstractFilter
             return $body;
         }
 
+        /** @var array<int|string, array<int, string>> $matches */
+
         return $this->replaceLinks($body, $matches);
     }
 

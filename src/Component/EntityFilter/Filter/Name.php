@@ -18,9 +18,16 @@ class Name extends AbstractFilter
 
     public function apply(mixed $propertyValue): ?string
     {
+        if (! \is_string($propertyValue)) {
+            throw new \Exception();
+        }
+
         $names = explode("\n", $this->string($propertyValue));
 
-        return isset($names[0]) && '' !== $names[0] ? trim($names[0])
-            : ('' !== $propertyValue ? $propertyValue : $this->entityFilterManager->getH1()); // @phpstan-ignore-line
+        if (isset($names[0]) && '' !== $names[0]) {
+            return trim($names[0]);
+        }
+
+        return '' !== $propertyValue ? $propertyValue : $this->entityFilterManager->page->getH1();
     }
 }

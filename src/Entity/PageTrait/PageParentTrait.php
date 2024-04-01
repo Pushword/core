@@ -4,7 +4,6 @@ namespace Pushword\Core\Entity\PageTrait;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\Order;
 use Doctrine\ORM\Mapping as ORM;
 use Pushword\Core\Entity\Page;
 
@@ -17,7 +16,7 @@ trait PageParentTrait
      * @var ?Collection<int, Page>
      */
     #[ORM\OneToMany(targetEntity: Page::class, mappedBy: 'parentPage')]
-    #[ORM\OrderBy(['publishedAt' => Order::Descending, 'priority' => 'DESC'])]
+    #[ORM\OrderBy(['publishedAt' => 'DESC', 'priority' => 'DESC'])]
     protected ?Collection $childrenPages;  // @phpstan-ignore-line
 
     public function getParentPage(): ?Page

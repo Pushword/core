@@ -25,9 +25,6 @@ final class ManagerPool
     /** @var array<(string|int), Manager> */
     private array $entityFilterManagers = [];
 
-    /**
-     * @psalm-suppress InvalidArgument
-     */
     public function getManager(Page $page): Manager
     {
         $id = $page->getId() ?? 0;

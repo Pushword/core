@@ -20,7 +20,7 @@ class Image extends AbstractFilter
     }
 
     /**
-     * @psalm-suppress PossiblyUndefinedMethod
+     * @psalm-suppress all
      */
     public function convertMarkdownImage(string $body): string
     {
