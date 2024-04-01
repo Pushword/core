@@ -30,6 +30,7 @@ final class Configuration implements ConfigurationInterface
         'filters',
         'assets',
         'custom_properties',
+        'svg_dir',
     ];
 
     /**
@@ -176,6 +177,17 @@ final class Configuration implements ConfigurationInterface
 
             ->booleanNode('tailwind_generator')->defaultTrue()->end()
             ->scalarNode('path_to_bin')->defaultValue('')->end()
+
+            ->variableNode('svg_dir')->defaultValue([
+                '%kernel.project_dir%/templates/icons',
+                '%vendor_dir%/fortawesome/font-awesome/free/svgs/solid',
+                '%vendor_dir%/fortawesome/font-awesome/svgs/solid',
+                '%vendor_dir%/fortawesome/font-awesome/free/svgs/regular',
+                '%vendor_dir%/fortawesome/font-awesome/svgs/regular',
+                '%vendor_dir%/fortawesome/font-awesome/free/svgs/brands',
+                '%vendor_dir%/fortawesome/font-awesome/svgs/brands',
+            ])->cannotBeEmpty()->end()
+
         ->end();
 
         return $treeBuilder;

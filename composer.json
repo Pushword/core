@@ -90,7 +90,6 @@
     "pushword/page-scanner": "Find dead links, 404, 301 and more (command line or admin).",
     "pushword/page-update-notifier": "Get mail notification when your pushword content (page) is edited.",
     "pushword/static-generator": "Generate a static website serve by github pages, apaches with one command or via the admin.",
-    "pushword/svg": "Add SVG with ease in your main content or in a template file via a twig function.",
     "pushword/template-editor": "Edit view file online in the admin.",
     "pushword/version": "Versioning pages with Pushword CMS."
   }
