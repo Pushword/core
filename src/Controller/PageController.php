@@ -2,12 +2,9 @@
 
 namespace Pushword\Core\Controller;
 
-use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\EntityManagerInterface;
 use Pushword\Core\Component\App\AppPool;
-use Pushword\Core\Entity\PageInterface;
+use Pushword\Core\Entity\Page;
 use Pushword\Core\Repository\PageRepository;
-use Pushword\Core\Repository\Repository;
 
 use function Safe\preg_match;
 
@@ -19,20 +16,20 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\DataCollectorTranslator;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment as Twig;
 
 final class PageController extends AbstractController
 {
-    use RenderTrait;
-
     /** @var DataCollectorTranslator|Translator */
     private readonly TranslatorInterface $translator;
 
     public function __construct(
         RequestStack $requestStack,
         private readonly ParameterBagInterface $params,
-        private readonly EntityManagerInterface $em,
         private readonly AppPool $apps,
-        TranslatorInterface $translator
+        TranslatorInterface $translator,
+        private readonly Twig $twig,
+        private readonly PageRepository $pageRepository,
     ) {
         if (! $translator instanceof DataCollectorTranslator && ! $translator instanceof Translator) {
             throw new \LogicException('A symfony codebase changed make this hack impossible (cf setLocale). Get `'.$translator::class.'`');
@@ -40,6 +37,17 @@ final class PageController extends AbstractController
 
         $this->initHost($requestStack);
         $this->translator = $translator;
+    }
+
+    /**
+     * Returns a rendered view.
+     * Use by abstract controller without de deprecation message.
+     *
+     * @param array<mixed> $parameters
+     */
+    protected function renderView(string $view, array $parameters = []): string
+    {
+        return $this->twig->render($view, $parameters);
     }
 
     private function initHost(RequestStack|Request $request): void
@@ -94,7 +102,7 @@ final class PageController extends AbstractController
         return $this->showPage($page);
     }
 
-    public function showPage(PageInterface $page): Response
+    public function showPage(Page $page): Response
     {
         $params = [...['page' => $page], ...$this->apps->getApp()->getParamsForRendering()];
 
@@ -119,7 +127,7 @@ final class PageController extends AbstractController
     {
         $this->initHost($request);
 
-        if ('homepage' == $slug) {
+        if ('homepage' === $slug) {
             return $this->redirect($this->generateUrl('pushword_page_feed', ['slug' => 'index']), Response::HTTP_MOVED_PERMANENTLY);
         }
 
@@ -152,7 +160,7 @@ final class PageController extends AbstractController
         $LocaleHomepage = $this->getPage($request, $locale, false);
         $slug = 'homepage';
         $page = $LocaleHomepage ?? $this->getPage($request, $slug);
-        if (! $page instanceof PageInterface) {
+        if (! $page instanceof Page) {
             throw $this->createNotFoundException('The page `'.$slug.'` was not found');
         }
 
@@ -206,24 +214,19 @@ final class PageController extends AbstractController
     /**
      * .
      *
-     * @return mixed //array<PageInterface>
+     * @return mixed //array<Page>
      */
     private function getPages(Request $request, ?int $limit = null)
     {
         $requestedLocale = rtrim($request->getLocale(), '/');
 
-        return $this->getPageRepository()->getIndexablePagesQuery(
+        return $this->pageRepository->getIndexablePagesQuery(
             (string) $this->apps->getMainHost(),
             '' !== $requestedLocale ? $requestedLocale : $this->params->get('kernel.default_locale'),
             $limit
         )
-        ->orderBy('p.publishedAt', Criteria::DESC)
+        ->orderBy('p.publishedAt', 'DESC')
         ->getQuery()->getResult();
-    }
-
-    private function getPageRepository(): PageRepository
-    {
-        return Repository::getPageRepository($this->em, $this->params->get('pw.entity_page')); // @phpstan-ignore-line
     }
 
     /**
@@ -232,8 +235,10 @@ final class PageController extends AbstractController
      *
      * @noRector
      */
-    private function getPageElse404(Request $request, ?string &$slug, bool $extractPager = false): PageInterface
+    private function getPageElse404(Request $request, ?string &$slug, bool $extractPager = false): Page
     {
+        $slug = $slug ??= 'homepage';
+
         return $this->getPage($request, $slug, true, $extractPager); // @phpstan-ignore-line
     }
 
@@ -241,12 +246,13 @@ final class PageController extends AbstractController
         Request $request,
         string &$slug,
         bool $throwException
-    ): ?PageInterface {
+    ): ?Page {
         if (1 !== preg_match('#(/([1-9]\d*)|^([1-9]\d*))$#', $slug, $match)) {
             return null;
         }
 
-        $unpaginatedSlug = substr($slug, 0, -\strlen((string) $match[1]));
+        /** @var array{1: string, 2: string, 3:string} $match */
+        $unpaginatedSlug = substr($slug, 0, -\strlen($match[1]));
         $request->attributes->set('pager', (int) $match[2] >= 1 ? $match[2] : $match[3]);
         $request->attributes->set('slug', $unpaginatedSlug);
 
@@ -256,19 +262,19 @@ final class PageController extends AbstractController
     /** @psalm-suppress UndefinedInterfaceMethod */
     private function getPage(
         Request $request,
-        ?string &$slug,
+        string &$slug,
         bool $throwException = true,
         bool $extractPager = false
-    ): ?PageInterface {
+    ): ?Page {
         $slug = $this->noramlizeSlug($slug);
-        $page = $this->getPageRepository()->getPage($slug, $this->apps->get()->getHostForDoctrineSearch(), true);
+        $page = $this->pageRepository->getPage($slug, $this->apps->get()->getHostForDoctrineSearch(), true);
 
-        if (! $page instanceof PageInterface && $extractPager) {
+        if (! $page instanceof Page && $extractPager) {
             $page = $this->extractPager($request, $slug, $throwException);
         }
 
         // Check if page exist
-        if (! $page instanceof PageInterface) {
+        if (! $page instanceof Page) {
             if ($throwException) {
                 throw $this->createNotFoundException();
             }
@@ -304,7 +310,7 @@ final class PageController extends AbstractController
     /**
      * @noRector
      */
-    private function checkIfUriIsCanonical(Request $request, PageInterface $page): false|string
+    private function checkIfUriIsCanonical(Request $request, Page $page): false|string
     {
         $requestUri = $request->getRequestUri();
 

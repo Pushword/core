@@ -2,7 +2,7 @@
 
 namespace Pushword\Core\Router;
 
-use Pushword\Core\Entity\PageInterface as Page;
+use Pushword\Core\Entity\Page;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -52,6 +52,7 @@ final class RouterTwigExtension extends AbstractExtension
         $arg4 = $args[3] ?? null;
         $host ??= \is_string($arg4) ? $arg4 : null;
 
+        /** @psalm-suppress MixedArgument */
         return $this->router->generate($slug, $canonical, $pager, $host);
     }
 

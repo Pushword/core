@@ -2,17 +2,20 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
-use Pushword\Core\AutowiringTrait\RequiredAppTrait;
-use Pushword\Core\AutowiringTrait\RequiredTwigTrait;
-use Pushword\Core\Twig\PhoneNumberTwigTrait;
+use Pushword\Core\Component\App\AppConfig;
+use Pushword\Core\Service\LinkProvider;
 
 use function Safe\preg_match_all;
 
+use Twig\Environment;
+
 class PhoneNumber extends AbstractFilter
 {
-    use PhoneNumberTwigTrait;
-    use RequiredAppTrait;
-    use RequiredTwigTrait;
+    public LinkProvider $linkProvider;
+
+    public AppConfig $app;
+
+    public Environment $twig;
 
     public function apply(mixed $propertyValue): string
     {
@@ -31,7 +34,7 @@ class PhoneNumber extends AbstractFilter
 
         foreach ($matches[0] as $k => $m) {
             $after = $matches['after'][$k];
-            $body = str_replace($m, ' '.$this->renderPhoneNumber(trim(substr((string) $m, 0, -\strlen((string) $after)))).$after, $body);
+            $body = str_replace($m, ' '.$this->linkProvider->renderPhoneNumber(trim(substr((string) $m, 0, -\strlen((string) $after)))).$after, $body);
         }
 
         return $body;

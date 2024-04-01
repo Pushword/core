@@ -5,7 +5,6 @@ namespace Pushword\Core\Entity\PageTrait;
 use Cocur\Slugify\Slugify;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Pushword\Core\Utils\F;
 
 trait PageTrait
 {
@@ -79,7 +78,7 @@ trait PageTrait
     {
         $this->mainContent = (string) $mainContent;
         // clean empty link added by editor.js
-        $this->mainContent = F::preg_replace_str('@<a[^>]+"></a>@U', '', $this->mainContent);
+        $this->mainContent = preg_replace('@<a[^>]+"></a>@U', '', $this->mainContent) ?? throw new \Exception();
 
         return $this;
     }

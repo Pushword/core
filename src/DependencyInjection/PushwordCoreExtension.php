@@ -19,9 +19,7 @@ final class PushwordCoreExtension extends ConfigurableExtension implements Prepe
     {
         $this->setPathParameters($container);
 
-        if (($configuration = $this->getConfiguration($mergedConfig, $container)) === null) {
-            throw new \LogicException();
-        }
+        $configuration = $this->getConfiguration($mergedConfig, $container) ?? throw new \LogicException(); // @phpstan-ignore-line
 
         (new PushwordConfigFactory($container, $mergedConfig, $configuration))
             ->loadConfigToParams()

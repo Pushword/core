@@ -7,8 +7,6 @@ use Symfony\Contracts\EventDispatcher\Event;
 /**
  * The order.placed event is dispatched each time an order is created
  * in the system.
- *
- * @template T of object
  */
 final class FilterEvent extends Event
 {
@@ -22,18 +20,12 @@ final class FilterEvent extends Event
      */
     public const NAME_AFTER = 'pushword.entity_filter.after_filtering';
 
-    /**
-     * @param Manager<T> $manager
-     */
     public function __construct(
         private readonly Manager $manager,
         private readonly string $property
     ) {
     }
 
-    /**
-     * @return Manager<T>
-     */
     public function getManager(): Manager
     {
         return $this->manager;

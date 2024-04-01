@@ -14,25 +14,31 @@ final class AppConfig
     /** @var array<(string|int), mixed> */
     private array $customProperties = [];
 
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private string $locale;
 
     /** @var string|string[]|null */
     private string|array|null $locales = null;
 
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private string $baseUrl;
 
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private string $name;
 
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private string $template;
 
     /** @var array<string, string> */
     private array $filters = [];
 
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private bool $entityCanOverrideFilters;
 
     /** @var array<string, array<string>> */
     private array $assets = [];
 
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private Twig $twig;
 
     /** @param array<string, mixed> $properties */
@@ -41,6 +47,7 @@ final class AppConfig
         array $properties,
         private readonly bool $isFirstApp = false
     ) {
+        /** @psalm-suppress MixedAssignment */
         foreach ($properties as $prop => $value) {
             $this->setCustomProperty($prop, $value);
 
@@ -113,6 +120,48 @@ final class AppConfig
         }
 
         return (string) $returnValue;
+    }
+
+    /**
+     * @param array<array-key, mixed> $default
+     *
+     * @return array<array-key, mixed>
+     */
+    public function getArray(string $key, array $default = []): array
+    {
+        $returnValue = $this->get($key) ?? $default;
+
+        if (! \is_array($returnValue)) {
+            throw new \LogicException('`'.$key.'` is not an array');
+        }
+
+        return $returnValue;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getStringList(string $key): array
+    {
+        $value = $this->getArray($key);
+
+        $toReturn = [];
+        foreach ($value as $v) {
+            $toReturn[] = \is_string($v) ? $v : throw new \Exception();
+        }
+
+        return $toReturn;
+    }
+
+    public function getBoolean(string $key, bool $default = true): bool
+    {
+        $returnValue = $this->get($key) ?? $default;
+
+        if (! \is_bool($returnValue)) {
+            throw new \LogicException('`'.$key.'` is not a boolean');
+        }
+
+        return $returnValue;
     }
 
     public function get(string $key): mixed
@@ -234,7 +283,7 @@ final class AppConfig
     {
         $name = ('/' === $name[0] ? '' : '/').$name;
 
-        $templateDir = $this->get('template_dir');
+        $templateDir = $this->getStr('template_dir');
 
         $templateOverridedForHost = $templateDir.'/'.$this->getMainHost().$name;
         if (file_exists($templateOverridedForHost)) {

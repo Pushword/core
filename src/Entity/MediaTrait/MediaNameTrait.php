@@ -49,7 +49,17 @@ trait MediaNameTrait
             throw new \Exception('Names malformatted');
         }
 
-        return $return;
+        $toReturn = [];
+
+        foreach ($return as $k => $v) {
+            if (! \is_string($k) || ! \is_string($v)) {
+                throw new \Exception();
+            }
+
+            $toReturn[$k] = $v;
+        }
+
+        return $toReturn;
     }
 
     public function getNames(bool $yamlParsed = false): mixed

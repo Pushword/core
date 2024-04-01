@@ -40,6 +40,7 @@ final class HtmlEncryptedLink extends EncryptedLink
             return $body;
         }
 
+        /** @var array<(string|int), array<int, string>> $matches */
         return $this->replaceRelEncryptedLink($body, $matches);
     }
 
@@ -57,7 +58,7 @@ final class HtmlEncryptedLink extends EncryptedLink
         for ($k = 0; $k < $nbrMatch; ++$k) {
             $attr = $this->extractClass($matches[1][$k]);
             $attr = '' !== $attr ? ['class' => $attr] : [];
-            $link = $this->renderLink(
+            $link = $this->linkProvider->renderLink(
                 $matches[self::HTML_REGEX_ANCHOR_KEY][$k],
                 $this->getHrefValue($matches, $k),
                 $attr

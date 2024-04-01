@@ -3,7 +3,7 @@
 namespace Pushword\Core\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Pushword\Core\Entity\UserInterface;
+use Pushword\Core\Entity\User;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\QuestionHelper;
@@ -16,13 +16,9 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 #[AsCommand(name: 'pushword:user:create')]
 final class UserCreateCommand extends Command
 {
-    /**
-     * @param class-string $userClass
-     */
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly UserPasswordHasherInterface $passwordEncoder,
-        private readonly string $userClass
     ) {
         parent::__construct();
     }
@@ -37,9 +33,7 @@ final class UserCreateCommand extends Command
 
     protected function createUser(string $email, string $password, string $role): void
     {
-        /** @var class-string<UserInterface> $userClass */
-        $userClass = $this->userClass;
-        $user = new $userClass();
+        $user = new User();
         $user->setEmail($email);
         $user->setPassword($this->passwordEncoder->hashPassword($user, $password));
         $user->setRoles([$role]);
@@ -65,7 +59,7 @@ final class UserCreateCommand extends Command
     {
         /** @var QuestionHelper $helper */
         $helper = $this->getHelper('question');
-        /** @var bool|float|int|resource|string|null */
+        /** @var bool|float|int|string|null */
         $argumentValue = $input->getArgument($argument);
 
         if (null !== $argumentValue) {
@@ -73,7 +67,7 @@ final class UserCreateCommand extends Command
         }
 
         $question = new Question($argument.('' !== $default ? ' (default: '.$default.')' : '').':', $default);
-        if ('password' == $argument) {
+        if ('password' === $argument) {
             $question->setHidden(true);
         }
 
@@ -84,6 +78,10 @@ final class UserCreateCommand extends Command
             $output->writeln('<error>'.$argument.' is required.</error>');
 
             return $this->getOrAskIfNotSetted($input, $output, $argument, $default);
+        }
+
+        if (! \is_scalar($argumentValue)) {
+            throw new \Exception();
         }
 
         return \strval($argumentValue);

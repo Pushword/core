@@ -5,6 +5,8 @@ namespace Pushword\Core\Tests\Component;
 use Pushword\Core\Component\EntityFilter\Filter\HtmlEncryptedLink;
 use Pushword\Core\Component\EntityFilter\ManagerPool;
 use Pushword\Core\Entity\Page;
+use Pushword\Core\Router\PushwordRouteGenerator;
+use Pushword\Core\Service\LinkProvider;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class EntityFilterTest extends KernelTestCase
@@ -24,8 +26,10 @@ class EntityFilterTest extends KernelTestCase
         self::bootKernel();
 
         $filter = new HtmlEncryptedLink();
-        $filter->setApp(self::$kernel->getContainer()->get(\Pushword\Core\Component\App\AppPool::class)->getApp());
-        $filter->setTwig(self::$kernel->getContainer()->get('test.service_container')->get('twig'));
+        $filter->app = ($apps = self::$kernel->getContainer()->get(\Pushword\Core\Component\App\AppPool::class))->getApp();
+        $filter->twig = self::$kernel->getContainer()->get('test.service_container')->get('twig');
+        $router = self::$kernel->getContainer()->get(PushwordRouteGenerator::class);
+        $filter->linkProvider = new LinkProvider($router, $apps, $filter->twig);
         $this->assertSame(
             'Lorem <span data-rot=_cvrqjro.pbz/>Test</span> ipsum',
             $filter->convertHtmlRelEncryptedLink('Lorem <a href="https://piedweb.com/" rel="encrypt">Test</a> ipsum')
@@ -52,41 +56,47 @@ class EntityFilterTest extends KernelTestCase
     private function getManagerPool()
     {
         self::bootKernel();
-        $pool = new ManagerPool();
-        $pool->apps = self::$kernel->getContainer()->get(\Pushword\Core\Component\App\AppPool::class);
-        $pool->twig = self::$kernel->getContainer()->get('test.service_container')->get('twig');
-        $pool->eventDispatcher = self::$kernel->getContainer()->get('event_dispatcher');
-        $pool->entityManager = self::$kernel->getContainer()->get('doctrine.orm.entity_manager');
-        $pool->router = self::$kernel->getContainer()->get(\Pushword\Core\Router\PushwordRouteGenerator::class);
 
-        return $pool;
+        return new ManagerPool(
+            $apps = self::$kernel->getContainer()->get(\Pushword\Core\Component\App\AppPool::class),
+            $twig = self::$kernel->getContainer()->get('test.service_container')->get('twig'),
+            self::$kernel->getContainer()->get('event_dispatcher'),
+            $router = self::$kernel->getContainer()->get(PushwordRouteGenerator::class),
+            new LinkProvider($router, $apps, $twig),
+            self::$kernel->getContainer()->get('doctrine.orm.default_entity_manager')
+        );
     }
 
     public function testToc()
     {
-        $manager = $this->getManagerPool()->getManager($this->getPage($this->getContentReadyForToc()));
+        $page = $this->getPage($this->getContentReadyForToc());
+
+        /** @var \Pushword\Core\Component\EntityFilter\Manager */
+        $manager = $this->getManagerPool()->getManager($page);
 
         $this->assertSame('<p>my intro...</p>', trim($manager->getMainContent()->getIntro()));
-        $toCheck = '<h2 id="fist-title">Fist Title</h2>';
+        $toCheck = '<h2 id="first-title">First Title</h2>';
         $this->assertSame($toCheck, substr(trim($manager->getMainContent()->getContent()), 0, \strlen($toCheck)));
     }
 
     private function getPage($content = null)
     {
-        return (new Page())
+        $page = (new Page())
             ->setH1('Demo Page - Kitchen Sink  Markdown + Twig')
             ->setSlug('kitchen-sink')
             ->setLocale('en')
-            ->setCustomProperty('toc', true)
             ->setCreatedAt(new \DateTime('1 day ago'))
             ->setUpdatedAt(new \DateTime('1 day ago'))
             ->setMainContent($content ?? file_get_contents(__DIR__.'/../../../skeleton/src/DataFixtures/WelcomePage.md'));
+        $page->setCustomProperty('toc', true);
+
+        return $page;
     }
 
     private function getContentReadyForToc()
     {
         return 'my intro...'
-            .\chr(10).'## Fist Title'
+            .\chr(10).'## First Title'
             .\chr(10).'first paragraph'
             .\chr(10).'## Second Title'
             .\chr(10).'second paragraph';

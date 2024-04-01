@@ -5,9 +5,6 @@ declare(strict_types=1);
 use PiedWeb\RenderAttributes\TwigExtension;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\PushwordCoreBundle;
-use Pushword\Core\Repository\MediaRepository;
-use Pushword\Core\Repository\PageRepository;
-use Pushword\Core\Repository\UserRepository;
 use Pushword\Core\Router\PushwordRouteGenerator;
 use Pushword\Core\Service\VichUploadPropertyNamer;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -20,9 +17,6 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     $services->defaults()
         ->autowire()
         ->autoconfigure()
-        ->bind('$mediaClass', '%pw.entity_media%')
-        ->bind('$pageClass', '%pw.entity_page%')
-        ->bind('$userClass', '%pw.entity_user%')
         ->bind('$projectDir', '%kernel.project_dir%')
         ->bind('$filterSets', '%pw.image_filter_sets%')
         ->bind('$publicMediaDir', '%pw.public_media_dir%')
@@ -42,11 +36,11 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     $services->load('Pushword\Core\Controller\\', __DIR__.'/../../../src/Controller')
         ->tag('controller.service_arguments');
 
-    $services->set(PageRepository::class)->arg('$entityClass', '%pw.entity_page%');
+    // $services->set(PageRepository::class)->arg('$entityClass', '%pw.entity_page%');
 
-    $services->set(MediaRepository::class)->arg('$entityClass', '%pw.entity_media%');
+    // $services->set(MediaRepository::class)->arg('$entityClass', '%pw.entity_media%');
 
-    $services->set(UserRepository::class)->arg('$entityClass', '%pw.entity_user%');
+    // $services->set(UserRepository::class)->arg('$entityClass', '%pw.entity_user%');
 
     $services->set(StringLoaderExtension::class);
 

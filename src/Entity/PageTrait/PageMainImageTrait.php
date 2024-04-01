@@ -3,19 +3,19 @@
 namespace Pushword\Core\Entity\PageTrait;
 
 use Doctrine\ORM\Mapping as ORM;
-use Pushword\Core\Entity\MediaInterface;
+use Pushword\Core\Entity\Media;
 
 trait PageMainImageTrait
 {
-    #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'], inversedBy: 'mainImagePages')]
-    protected ?MediaInterface $mainImage = null;  // @phpstan-ignore-line
+    #[ORM\ManyToOne(targetEntity: Media::class, cascade: ['persist'], inversedBy: 'mainImagePages')]
+    protected ?Media $mainImage = null;  // @phpstan-ignore-line
 
-    public function getMainImage(): ?MediaInterface
+    public function getMainImage(): ?Media
     {
         return $this->mainImage;
     }
 
-    public function setMainImage(?MediaInterface $media): self
+    public function setMainImage(?Media $media): self
     {
         // TODO: Déplacer en Assert pour éviter une erreur dégueu ?!
         if (null !== $media && null === $media->getWidth()) {

@@ -2,12 +2,12 @@
 
 namespace Pushword\Core\Service;
 
-use Pushword\Core\Entity\MediaInterface;
+use Pushword\Core\Entity\Media;
 use Vich\UploaderBundle\Mapping\PropertyMapping;
 use Vich\UploaderBundle\Naming\NamerInterface;
 
 /**
- * @implements NamerInterface<MediaInterface>
+ * @implements NamerInterface<Media>
  */
 final class VichUploadPropertyNamer implements NamerInterface
 {

@@ -1,16 +1,16 @@
 <?php
 
-namespace Pushword\Core\Twig;
+namespace Pushword\Core\Utils;
 
 use Doctrine\Common\Collections\ArrayCollection;
-use Pushword\Core\Entity\PageInterface;
+use Pushword\Core\Entity\Page;
 
-class StringToSearch
+class StringToDQLCriteria
 {
     /** @var array<int, string|array{0: string, 1: string, 2: string|int|float|int[]}|array{0: string, 1: string, 2: string|int|float|int[]}[]> */
     private array $where = [];
 
-    public function __construct(private readonly string $search, private readonly ?PageInterface $currentPage)
+    public function __construct(private readonly string $search, private readonly ?Page $currentPage)
     {
     }
 
@@ -74,36 +74,38 @@ class StringToSearch
     private function simpleStringToSearchChildren(string $search): bool
     {
         $searchLowerCased = strtolower($search);
-        if ('related' == $searchLowerCased) {
-            if (($parentPage = $this->currentPage?->getParentPage()) !== null) {
+        if ('related' === $searchLowerCased) {
+            $currentPage = $this->currentPage;
+            if (null !== $currentPage && ($parentPage = $currentPage->getParentPage()) !== null) {
                 $this->where[] = [
                     ['parentPage', '=', $parentPage->getId() ?? 0],
-                    ['id', '<', ($this->currentPage->getId() ?? 0) + 3],
+                    ['id', '<', ($currentPage->getId() ?? 0) + 3],
                 ];
 
                 return true;
             }
 
-            $this->where[] = ['id', '<', ($this->currentPage?->getId() ?? 0) + 3];
+            $this->where[] = ['id', '<', ($currentPage?->getId() ?? 0) + 3];
 
             return true;
         }
 
-        if ('children' == $searchLowerCased) {
+        if ('children' === $searchLowerCased) {
             $this->where[] = ['parentPage', '=', $this->currentPage?->getId() ?? 0];
 
             return true;
         }
 
-        if ('parent_children' == $searchLowerCased) {
+        if ('parent_children' === $searchLowerCased) {
             $this->where[] = ['parentPage', '=', $this->currentPage?->getParentPage()?->getId() ?? 0];
 
             return true;
         }
 
-        if ('children_children' == $searchLowerCased) {
-            /** @var int[] */
-            $childrenPage = ($this->currentPage?->getChildrenPages() ?? new ArrayCollection([]))->map(static fn ($page): ?int => $page->getId())->toArray();
+        if ('children_children' === $searchLowerCased) {
+            /** @psalm-suppress all  */
+            $childrenPage = ($this->currentPage?->getChildrenPages() ?? new ArrayCollection([]))
+                ->map(static fn ($page): int => $page->getId() ?? 0)->toArray();
 
             $this->where[] = ['parentPage', 'IN', $childrenPage];
 

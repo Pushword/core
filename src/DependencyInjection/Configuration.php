@@ -2,9 +2,9 @@
 
 namespace Pushword\Core\DependencyInjection;
 
-use App\Entity\Media;
-use App\Entity\Page;
-use App\Entity\User;
+use Pushword\Core\Entity\Media;
+use Pushword\Core\Entity\Page;
+use Pushword\Core\Entity\User;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 

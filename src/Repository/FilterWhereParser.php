@@ -67,6 +67,7 @@ class FilterWhereParser
                 continue;
             }
 
+            /** @psalm-suppress MixedArgumentTypeCoercion */
             $compose->add($this->retrieveExpressionFrom($singleWhere));
         }
 
@@ -74,7 +75,7 @@ class FilterWhereParser
     }
 
     /**
-     * @param array<mixed> $whereRow
+     * @param array{key_prefix: string, key: string, operator: string, value: string}|array{0: string, 1:string, 2: string, 4:string}|array{} $whereRow
      */
     private function retrieveExpressionFrom(array $whereRow): string
     {
@@ -84,7 +85,7 @@ class FilterWhereParser
         $key = $whereRow['key'] ?? $whereRow[0] ?? throw new \Exception('key was forgotten');
         $operator = $whereRow['operator'] ?? $whereRow[1] ?? throw new \Exception('operator was forgotten');
         $sqlValue = 'IN' === $operator ? '( :'.$paramKey.')' : ' :'.$paramKey;
-        $value = $whereRow['value'] ?? $whereRow[2];
+        $value = $whereRow['value'] ?? $whereRow[2] ?? null;
 
         if (null === $value) {
             if (! \in_array($operator, ['IS', 'IS NOT'], true)) {

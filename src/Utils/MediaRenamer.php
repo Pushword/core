@@ -2,7 +2,7 @@
 
 namespace Pushword\Core\Utils;
 
-use Pushword\Core\Entity\MediaInterface;
+use Pushword\Core\Entity\Media;
 
 class MediaRenamer
 {
@@ -13,10 +13,10 @@ class MediaRenamer
         $this->iterate = 1;
     }
 
-    public function rename(MediaInterface $media): MediaInterface
+    public function rename(Media $media): Media
     {
         $newName = (1 === $this->iterate ? $media->getName()
-            : F::preg_replace_str('/ \(\d+\)$/', '', $media->getName()));
+            : preg_replace('/ \(\d+\)$/', '', $media->getName()));
         $newName .= ' ('.($this->iterate + 1).')';
 
         $media->setName($newName);

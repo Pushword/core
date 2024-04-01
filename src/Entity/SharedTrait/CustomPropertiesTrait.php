@@ -4,7 +4,6 @@ namespace Pushword\Core\Entity\SharedTrait;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Pushword\Core\Utils\F;
 
 use function Safe\preg_match;
 
@@ -94,15 +93,15 @@ trait CustomPropertiesTrait
         // remove the standAlone which were removed
         $existingPropertyNames = array_keys($this->getCustomProperties());
         foreach ($existingPropertyNames as $existingPropertyName) {
-            if (! $this->isStandAloneCustomProperty($existingPropertyName)) {
+            if (! $this->isStandAloneCustomProperty((string) $existingPropertyName)) {
                 continue;
             }
 
-            if (isset($standAloneProperties[$existingPropertyName])) {
+            if (isset($standAloneProperties[(string) $existingPropertyName])) {
                 continue;
             }
 
-            $this->removeCustomProperty($existingPropertyName);
+            $this->removeCustomProperty((string) $existingPropertyName);
         }
 
         // nothing to add
@@ -111,11 +110,11 @@ trait CustomPropertiesTrait
         }
 
         foreach ($standAloneProperties as $name => $value) {
-            if (! $this->isStandAloneCustomProperty($name)) {
-                throw new CustomPropertiesException($name);
+            if (! $this->isStandAloneCustomProperty((string) $name)) {
+                throw new CustomPropertiesException((string) $name);
             }
 
-            $this->setCustomProperty($name, $value);
+            $this->setCustomProperty((string) $name, $value);
         }
     }
 
@@ -142,11 +141,14 @@ trait CustomPropertiesTrait
         return ! method_exists($this, 'set'.ucfirst($name)) && ! method_exists($this, 'set'.$name);
     }
 
-    public function setCustomProperty(string $name, mixed $value): self
+    public function setCustomProperty(string $name, mixed $value): void
     {
         $this->customProperties[$name] = $value;
+    }
 
-        return $this;
+    public function hasCustomProperty(string $name): bool
+    {
+        return isset($this->customProperties[$name]);
     }
 
     public function getCustomProperty(string $name): mixed
@@ -164,6 +166,25 @@ trait CustomPropertiesTrait
         return $return;
     }
 
+    /**
+     * @return array<string>
+     */
+    public function getCustomPropertyList(string $name): array
+    {
+        $value = $this->customProperties[$name] ?? null;
+
+        if (! \is_array($value)) {
+            throw new \LogicException(\gettype($value));
+        }
+
+        $toReturn = [];
+        foreach ($value as $v) {
+            $toReturn[] = \is_string($v) ? $v : throw new \Exception();
+        }
+
+        return $toReturn;
+    }
+
     public function removeCustomProperty(string $name): void
     {
         unset($this->customProperties[$name]);
@@ -179,12 +200,12 @@ trait CustomPropertiesTrait
      */
     public function __call(string $method, array $arguments = [])
     {
-        if ('_actions' == $method) {
+        if ('_actions' === $method) {
             return; // avoid error with sonata
         }
 
         if (1 === preg_match('/^get/', $method)) {
-            $property = lcfirst(F::preg_replace_str('/^get/', '', $method));
+            $property = lcfirst(preg_replace('/^get/', '', $method) ?? throw new \Exception());
             if (! property_exists(static::class, $property)) {
                 return $this->getCustomProperty($property) ?? null;
             }

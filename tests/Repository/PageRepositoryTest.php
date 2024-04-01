@@ -2,6 +2,8 @@
 
 namespace Pushword\Core\Tests\Controller;
 
+use Pushword\Core\Entity\Page;
+use Pushword\Core\Repository\PageRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class PageRepositoryTest extends KernelTestCase
@@ -11,12 +13,17 @@ class PageRepositoryTest extends KernelTestCase
         self::bootKernel();
 
         $em = self::$kernel->getContainer()->get('doctrine.orm.default_entity_manager');
-        $pages = $em->getRepository('App\Entity\Page')->getIndexablePagesQuery('', 'en', 2)
+
+        /** @var PageRepository */
+        $pageRepo = $em->getRepository(Page::class);
+        $this->assertInstanceOf(PageRepository::class, $pageRepo);
+
+        $pages = $pageRepo->getIndexablePagesQuery('', 'en', 2)
             ->getQuery()->getResult();
 
         $this->assertSame(2, \count($pages)); // depend on AppFixtures
 
-        $pages = $em->getRepository('App\Entity\Page')->getPublishedPages(
+        $pages = $pageRepo->getPublishedPages(
             '',
             [['key' => 'slug', 'operator' => '=', 'value' => 'homepage']],
             ['key' => 'publishedAt', 'direction' => 'DESC'],

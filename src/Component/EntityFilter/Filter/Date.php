@@ -2,16 +2,17 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
-use Pushword\Core\AutowiringTrait\RequiredAppTrait;
-use Pushword\Core\Utils\F;
+use Pushword\Core\Component\App\AppConfig;
+
+use function Safe\preg_replace;
 
 class Date extends AbstractFilter
 {
-    use RequiredAppTrait;
+    public AppConfig $app;
 
     public function apply(mixed $propertyValue): string
     {
-        return $this->convertDateShortCode($this->string($propertyValue), $this->getApp()->getDefaultLocale());
+        return $this->convertDateShortCode($this->string($propertyValue), $this->app->getDefaultLocale());
     }
 
     private function convertDateShortCode(string $string, ?string $locale = null): string
@@ -21,21 +22,23 @@ class Date extends AbstractFilter
 
         // $string = preg_replace('/date\([\'"]?([a-z% ]+)[\'"]?\)/i',
         //  strftime(strpos('\1', '%') ? '\1': '%\1'), $string);
-        $string = F::preg_replace_str('/date\([\'"]?%?S[\'"]?\)/i', $this->getSummerYear(), $string);
-        $string = F::preg_replace_str('/date\([\'"]?%?W[\'"]?\)/i', $this->getWinterYear(), $string);
-        $string = F::preg_replace_str('/date\([\'"]?%?Y-1[\'"]?\)/i', date('Y', strtotime('-1 year')), $string);
-        $string = F::preg_replace_str('/date\([\'"]?%?Y\+1[\'"]?\)/i', date('Y', strtotime('next year')), $string);
-        $string = F::preg_replace_str('/date\([\'"]?%?Y[\'"]?\)/i', date('Y'), $string);
+        $string = preg_replace('/date\([\'"]?%?S[\'"]?\)/i', $this->getSummerYear(), $string);
+        $string = preg_replace('/date\([\'"]?%?W[\'"]?\)/i', $this->getWinterYear(), $string);
+        $string = preg_replace('/date\([\'"]?%?Y-1[\'"]?\)/i', date('Y', strtotime('-1 year')), $string);
+        $string = preg_replace('/date\([\'"]?%?Y\+1[\'"]?\)/i', date('Y', strtotime('next year')), $string);
+        $string = preg_replace('/date\([\'"]?%?Y[\'"]?\)/i', date('Y'), $string);
 
         $intlDateFormatter->setPattern('MMMM');
-        $string = F::preg_replace_str('/date\([\'"]?%?(B|M)[\'"]?\)/i', (string) $intlDateFormatter->format(time()), $string);
+        $string = preg_replace('/date\([\'"]?%?(B|M)[\'"]?\)/i', (string) $intlDateFormatter->format(time()), $string);
 
         $intlDateFormatter->setPattern('cccc');
-        $string = F::preg_replace_str('/date\([\'"]?%?A[\'"]?\)/i', (string) $intlDateFormatter->format(time()), $string);
+        $string = preg_replace('/date\([\'"]?%?A[\'"]?\)/i', (string) $intlDateFormatter->format(time()), $string);
 
         $intlDateFormatter->setPattern('d');
 
-        return F::preg_replace_str('/date\([\'"]?%?e[\'"]?\)/i', (string) $intlDateFormatter->format(time()), $string);
+        $string = preg_replace('/date\([\'"]?%?e[\'"]?\)/i', (string) $intlDateFormatter->format(time()), $string);
+
+        return \is_string($string) ? $string : throw new \Exception();
     }
 
     private function getWinterYear(): string
@@ -50,11 +53,11 @@ class Date extends AbstractFilter
 
     private function convertLocale(string $locale): string
     {
-        if ('fr' == $locale) {
+        if ('fr' === $locale) {
             return 'fr_FR';
         }
 
-        if ('en' == $locale) {
+        if ('en' === $locale) {
             return 'en_UK';
         }
 

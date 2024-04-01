@@ -2,15 +2,17 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
-use Pushword\Core\AutowiringTrait\RequiredAppTrait;
-use Pushword\Core\AutowiringTrait\RequiredTwigTrait;
+use Pushword\Core\Component\App\AppConfig;
 
 use function Safe\preg_match_all;
 
+use Twig\Environment;
+
 class Image extends AbstractFilter
 {
-    use RequiredAppTrait;
-    use RequiredTwigTrait;
+    public AppConfig $app;
+
+    public Environment $twig;
 
     public function apply(mixed $propertyValue): string
     {

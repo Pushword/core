@@ -2,7 +2,7 @@
 
 namespace Pushword\Core\Service;
 
-use Pushword\Core\Entity\PageInterface;
+use Pushword\Core\Entity\Page;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -16,7 +16,7 @@ class TailwindGenerator
     ) {
     }
 
-    public function run(PageInterface $page): void
+    public function run(Page $page): void
     {
         if (false === $this->tailwindGeneratorisActive) {
             return;
@@ -32,7 +32,7 @@ class TailwindGenerator
 
         $fs = new Filesystem();
         $fs->dumpFile(
-            $this->projectDir.'/var/TailwindGeneratorCache/'.$page->getId(),
+            $this->projectDir.'/var/TailwindGeneratorCache/'.($page->getId() ?? 0),
             serialize($page)
         );
 

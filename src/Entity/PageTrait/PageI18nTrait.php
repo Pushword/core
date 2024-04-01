@@ -6,7 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Pushword\Core\Entity\PageInterface;
+use Pushword\Core\Entity\Page;
 
 trait PageI18nTrait
 {
@@ -17,9 +17,9 @@ trait PageI18nTrait
     protected string $locale = '';
 
     /**
-     * @var Collection<string, PageInterface>|null
+     * @var Collection<string, Page>|null
      */
-    #[ORM\ManyToMany(targetEntity: PageInterface::class)]
+    #[ORM\ManyToMany(targetEntity: Page::class)]
     protected ?Collection $translations = null;  // @phpstan-ignore-line
 
     public function getLocale(): string
@@ -35,7 +35,7 @@ trait PageI18nTrait
     }
 
     /**
-     * @param Collection<string, PageInterface> $translations
+     * @param Collection<string, Page> $translations
      */
     public function setTranslations(Collection $translations): self
     {
@@ -45,14 +45,14 @@ trait PageI18nTrait
     }
 
     /**
-     * @return Collection<string, PageInterface>
+     * @return Collection<string, Page>
      */
     public function getTranslations(): Collection
     {
         return $this->translations ?? ($this->translations = new ArrayCollection());
     }
 
-    public function addTranslation(PageInterface $page, bool $recursive = true): self
+    public function addTranslation(Page $page, bool $recursive = true): self
     {
         if (! $this->getTranslations()->contains($page) && $this != $page) {
             $this->getTranslations()->add($page);
@@ -87,7 +87,7 @@ trait PageI18nTrait
         return $this;
     }
 
-    public function removeTranslation(PageInterface $page, bool $recursive = true): self
+    public function removeTranslation(Page $page, bool $recursive = true): self
     {
         if ($this->getTranslations()->contains($page)) {
             $this->getTranslations()->removeElement($page);

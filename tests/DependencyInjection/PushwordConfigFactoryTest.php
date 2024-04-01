@@ -20,7 +20,6 @@ class PushwordConfigFactoryTest extends TestCase
         $factory = new PushwordConfigFactory($container, $config, new Configuration());
         $factory->loadConfigToParams();
         $factory->loadApps();
-        $this->assertSame('App\Entity\Page', $container->getParameter('pw.entity_page'));
         $this->assertTrue(! empty($container->getParameter('pw.apps')));
     }
 
@@ -31,7 +30,6 @@ class PushwordConfigFactoryTest extends TestCase
         $factory = new PushwordConfigFactory($container, $this->getConfigArray(), new Configuration());
         $factory->loadConfigToParams();
 
-        $this->assertSame('App\Entity\Page', $container->getParameter('pw.entity_page'));
         $this->assertFalse($container->hasParameter('pw.custom_property'));
         $this->assertFalse($container->hasParameter('pw.apps'));
 

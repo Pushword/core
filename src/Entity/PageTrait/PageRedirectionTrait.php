@@ -2,8 +2,6 @@
 
 namespace Pushword\Core\Entity\PageTrait;
 
-use Pushword\Core\Utils\F;
-
 use function Safe\preg_match;
 
 trait PageRedirectionTrait
@@ -27,8 +25,9 @@ trait PageRedirectionTrait
         if (str_starts_with($content, 'Location:')) {
             $url = trim(substr($content, 9));
             if (1 === preg_match('/ [1-5]\d{2}$/', $url, $match)) {
-                $code = (int) trim((string) $match[0]);
-                $url = F::preg_replace_str('/ [1-5]\d{2}$/', '', $url);
+                /** @var array{0:string} $match */
+                $code = (int) trim($match[0]);
+                $url = preg_replace('/ [1-5]\d{2}$/', '', $url) ?? throw new \Exception();
             }
 
             if (false !== filter_var($url, \FILTER_VALIDATE_URL) || 1 === preg_match('/^[^ ]+$/', $url)) {

@@ -3,7 +3,7 @@
 namespace Pushword\Core\Tests\Entity\SharedTrait;
 
 use PHPUnit\Framework\TestCase;
-use Pushword\Core\Entity\SharedTrait\CustomPropertiesTrait;
+use Pushword\Core\Entity\Page;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
 use Symfony\Component\Yaml\Yaml;
@@ -25,7 +25,7 @@ class CustomPropertiesTraitTest extends TestCase
 
     public function testStandAloneCustomProperties()
     {
-        $customProperties = $this->getCustomPropertiesTrait();
+        $customProperties = new Page();
 
         $this->assertEmpty($customProperties->getCustomProperties());
 
@@ -42,17 +42,6 @@ class CustomPropertiesTraitTest extends TestCase
 
         $customProperties->removeCustomProperty('newCustomPropertyNotIndexed');
         $this->assertArrayNotHasKey('newCustomPropertyNotIndexed', $customProperties->getCustomProperties());
-    }
-
-    /**
-     * @return CustomPropertiesTrait
-     */
-    protected function getCustomPropertiesTrait()
-    {
-        $mock = $this->getMockForTrait(CustomPropertiesTrait::class);
-        // $mock->method('getTitle')->willReturn(true);
-
-        return $mock;
     }
 
     /**

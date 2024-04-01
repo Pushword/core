@@ -2,17 +2,20 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
-use Pushword\Core\AutowiringTrait\RequiredAppTrait;
-use Pushword\Core\AutowiringTrait\RequiredTwigTrait;
-use Pushword\Core\Twig\LinkTwigTrait;
+use Pushword\Core\Component\App\AppConfig;
+use Pushword\Core\Service\LinkProvider;
 
 use function Safe\preg_match_all;
 
+use Twig\Environment;
+
 class Email extends AbstractFilter
 {
-    use LinkTwigTrait;
-    use RequiredAppTrait;
-    use RequiredTwigTrait;
+    public LinkProvider $linkProvider;
+
+    public AppConfig $app;
+
+    public Environment $twig;
 
     public function apply(mixed $propertyValue): string
     {
@@ -28,11 +31,15 @@ class Email extends AbstractFilter
 
         preg_match_all($rgx, $body, $matches);
 
+        if (null === $matches) {
+            throw new \Exception();
+        }
+
         $nbrMatch = is_countable($matches[0]) ? \count($matches[0]) : 0;
         for ($k = 0; $k < $nbrMatch; ++$k) {
             $body = str_replace(
                 $matches[0][$k],
-                ' '.trim($this->renderEncodedMail($matches[1][$k])).$matches[2][$k],
+                ' '.trim($this->linkProvider->renderEncodedMail($matches[1][$k])).$matches[2][$k],
                 $body
             );
         }

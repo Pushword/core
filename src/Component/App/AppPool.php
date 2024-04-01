@@ -2,7 +2,7 @@
 
 namespace Pushword\Core\Component\App;
 
-use Pushword\Core\Entity\PageInterface;
+use Pushword\Core\Entity\Page;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Twig\Environment as Twig;
 
@@ -15,7 +15,7 @@ final class AppPool
 
     /**
      * Why there ? Because often, need to check current page don't override App Config. */
-    private ?PageInterface $currentPage = null;
+    private ?Page $currentPage = null;
 
     /** @param array<string, array<string, mixed>> $rawApps */
     public function __construct(array $rawApps, Twig $twig, ParameterBagInterface $parameterBag)
@@ -30,16 +30,16 @@ final class AppPool
         $this->switchCurrentApp($firstHost);
     }
 
-    public function setCurrentPage(PageInterface $page): self
+    public function setCurrentPage(Page $page): self
     {
         $this->currentPage = $page;
 
         return $this;
     }
 
-    public function switchCurrentApp(PageInterface|string $host): self
+    public function switchCurrentApp(Page|string $host): self
     {
-        if ($host instanceof PageInterface) {
+        if ($host instanceof Page) {
             $this->currentPage = $host;
             $host = $host->getHost();
         }
@@ -66,9 +66,10 @@ final class AppPool
         }
 
         if (! isset($app)) {
-            throw new \Exception('No AppConfig found (`'.$host.'`)');
+            throw new \Exception('No AppConfig found (`'.($host ?? '').'`)');
         }
 
+        /** @var AppConfig $app */
         return $app;
     }
 
@@ -95,12 +96,12 @@ final class AppPool
         return $this->apps;
     }
 
-    public function getCurrentPage(): ?PageInterface
+    public function getCurrentPage(): ?Page
     {
         return $this->currentPage;
     }
 
-    public function safegetCurrentPage(): PageInterface
+    public function safegetCurrentPage(): Page
     {
         if (null === $this->currentPage) {
             throw new \LogicException();

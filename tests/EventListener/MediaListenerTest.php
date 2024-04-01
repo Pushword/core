@@ -3,7 +3,7 @@
 namespace Pushword\Core\Tests\Controller;
 
 use Pushword\Admin\Tests\AbstractAdminTestClass;
-use Pushword\Core\Repository\Repository;
+use Pushword\Core\Entity\Media;
 use Pushword\Core\Service\ImageManager;
 use Pushword\Core\Tests\PathTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -18,7 +18,10 @@ class MediaListenerTest extends AbstractAdminTestClass // PantherTestCase // Ker
         self::bootKernel();
 
         $em = self::$kernel->getContainer()->get('doctrine.orm.default_entity_manager');
-        $media = Repository::getMediaRepository($em, 'App\Entity\Media')->findOneBy(['media' => 'piedweb-logo.png']);
+        /** @var MediaRepository */
+        $mediaRepo = $em->getRepository(Media::class);
+
+        $media = $mediaRepo->findOneBy(['media' => 'piedweb-logo.png']);
         $media->setMedia('piedweb.png');
         $em->flush();
         $this->assertSame(file_exists($this->mediaDir.'/piedweb.png'), true);
@@ -33,7 +36,6 @@ class MediaListenerTest extends AbstractAdminTestClass // PantherTestCase // Ker
     public function testRenameAndCo()
     {
         self::bootKernel();
-        $em = self::$kernel->getContainer()->get('doctrine.orm.default_entity_manager');
 
         $mediaEntity = $this->getImageManager()->importExternal(__DIR__.'/media/2.jpg', '1', '', false);
         // $em->persist($mediaEntity);
@@ -60,7 +62,7 @@ class MediaListenerTest extends AbstractAdminTestClass // PantherTestCase // Ker
             // dump($file);
             $client = $this->loginUser();
             $client->catchExceptions(false);
-            $crawler = $client->request('GET', '/admin/app/media/create');
+            $crawler = $client->request('GET', '/admin/media/create');
             $formId = strtok($crawler->filter('[type="file"]')->getNode(0)->getAttribute('name'), '[');
             $form = $crawler->filter('[role="form"]')->form([
                 $formId.'[mediaFile]' => $file,
@@ -69,7 +71,7 @@ class MediaListenerTest extends AbstractAdminTestClass // PantherTestCase // Ker
             $this->assertEquals(302, $client->getResponse()->getStatusCode());
             $this->assertFileExists($this->mediaDir.'/2-2.jpg');
 
-            $crawler = $client->request('GET', '/admin/app/media/create');
+            $crawler = $client->request('GET', '/admin/media/create');
             $formId = strtok($crawler->filter('[type="file"]')->getNode(0)->getAttribute('name'), '[');
             $form = $crawler->filter('[role="form"]')->form([
                 $formId.'[mediaFile]' => $file,
@@ -80,7 +82,7 @@ class MediaListenerTest extends AbstractAdminTestClass // PantherTestCase // Ker
             $this->assertEquals(302, $client->getResponse()->getStatusCode());
             $this->assertFileExists($this->mediaDir.'/1-2.jpg');
 
-            $crawler = $client->request('GET', '/admin/app/media/create');
+            $crawler = $client->request('GET', '/admin/media/create');
             $formId = strtok($crawler->filter('[type="file"]')->getNode(0)->getAttribute('name'), '[');
             $form = $crawler->filter('[role="form"]')->form([
                 $formId.'[mediaFile]' => $file,
@@ -92,7 +94,11 @@ class MediaListenerTest extends AbstractAdminTestClass // PantherTestCase // Ker
             $this->assertFileExists($this->mediaDir.'/1-3.jpg');
 
             $em = self::$kernel->getContainer()->get('doctrine.orm.default_entity_manager');
-            $medias = Repository::getMediaRepository($em, 'App\Entity\Media')->findBy([], ['id' => 'DESC'], 3, 0);
+
+            /** @var MediaRepository */
+            $mediaRepo = $em->getRepository(Media::class);
+
+            $medias = $mediaRepo->findBy([], ['id' => 'DESC'], 3, 0);
             foreach ($medias as $m) {
                 $em->remove($m);
             }

@@ -2,8 +2,8 @@
 
 namespace Pushword\Core\Tests\Controller;
 
-use App\Entity\Media;
-use Pushword\Core\Entity\MediaInterface;
+use Pushword\Core\Entity\Media;
+use Pushword\Core\Repository\MediaRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class MediaRepositoryTest extends KernelTestCase
@@ -13,11 +13,16 @@ class MediaRepositoryTest extends KernelTestCase
         self::bootKernel();
 
         $em = self::$kernel->getContainer()->get('doctrine.orm.default_entity_manager');
-        $duplicate = $em->getRepository('App\Entity\Media')->findDuplicate((new Media())->setHash('testFakeHash'));
+
+        /** @var MediaRepository */
+        $mediaRepo = $em->getRepository(Media::class);
+        $this->assertInstanceOf(MediaRepository::class, $mediaRepo);
+
+        $duplicate = $mediaRepo->findDuplicate((new Media())->setHash('testFakeHash'));
         $this->assertNull($duplicate);
 
-        $duplicate = $em->getRepository('App\Entity\Media')->findDuplicate($this->getMediaToTestDuplicate());
-        $this->assertInstanceOf(MediaInterface::class, $duplicate);
+        $duplicate = $em->getRepository(Media::class)->findDuplicate($this->getMediaToTestDuplicate());
+        $this->assertInstanceOf(Media::class, $duplicate);
     }
 
     public function getMediaToTestDuplicate()

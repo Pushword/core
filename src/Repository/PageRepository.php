@@ -3,31 +3,35 @@
 namespace Pushword\Core\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Collections\Selectable;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectRepository;
 use Pushword\Admin\PageCheatSheetAdmin;
-use Pushword\Core\Entity\MediaInterface;
-use Pushword\Core\Entity\PageInterface;
-use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use Pushword\Core\Entity\Media;
+use Pushword\Core\Entity\Page;
 
 /**
  * @psalm-suppress MethodSignatureMustProvideReturnType
  *
- * @extends ServiceEntityRepository<PageInterface>
+ * @extends ServiceEntityRepository<Page>
  *
- * @method PageInterface|null  find($id, $lockMode = null, $lockVersion = null)
- * @method PageInterface|null  findOneBy(array $criteria, array $orderBy = null)
- * @method list<PageInterface> findAll()
- * @method list<PageInterface> findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method Page|null  find($id, $lockMode = null, $lockVersion = null)
+ * @method Page|null  findOneBy(array $criteria, array $orderBy = null)
+ * @method list<Page> findAll()
+ * @method list<Page> findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  *
- * @implements Selectable<int, PageInterface>
- * @implements ObjectRepository<PageInterface>
+ * @implements Selectable<int, Page>
+ * @implements ObjectRepository<Page>
  */
-#[AutoconfigureTag('doctrine.repository_service')]
 class PageRepository extends ServiceEntityRepository implements ObjectRepository, Selectable
 {
+    public function __construct(
+        ManagerRegistry $registry,
+    ) {
+        parent::__construct($registry, Page::class);
+    }
+
     protected bool $hostCanBeNull = false;
 
     /**
@@ -38,7 +42,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
      * @param array<mixed>                 $where
      * @param int|array<(string|int), int> $limit
      *
-     * @return PageInterface[]
+     * @return Page[]
      */
     public function getPublishedPages(
         string|array $host = '',
@@ -94,7 +98,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
     /**
      * @param string|string[] $host
      */
-    public function getPage(string $slug, string|array $host, bool $checkId = true): ?PageInterface
+    public function getPage(string $slug, string|array $host, bool $checkId = true): ?Page
     {
         $queryBuilder = $this->createQueryBuilder('p')
             ->andWhere('p.slug =  :slug')->setParameter('slug', $slug);
@@ -105,20 +109,20 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
 
         $queryBuilder = $this->andHost($queryBuilder, $host);
 
-        return $queryBuilder->getQuery()->getResult()[0] ?? null; // @phpstan-ignore-line
+        return $queryBuilder->getQuery()->getResult()[0] ?? null;  // @phpstan-ignore-line
     }
 
     /**
      * @param string|string[] $host
      *
-     * @return PageInterface[]
+     * @return Page[]
      */
     public function findByHost(string|array $host): array
     {
         $queryBuilder = $this->createQueryBuilder('p');
         $this->andHost($queryBuilder, $host);
 
-        return $queryBuilder->getQuery()->getResult(); // @phpstan-ignore-line
+        return $queryBuilder->getQuery()->getResult();
     }
 
     /**
@@ -148,24 +152,24 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
     /**
      * Used in admin PageCrudController.
      *
-     * @return PageInterface[]
+     * @return Page[]
      */
     public function getPagesWithoutParent(): array
     {
         $query = $this->createQueryBuilder('p')
             ->andWhere('p.parentPage is NULL')
-            ->orderBy('p.slug', Criteria::DESC)
+            ->orderBy('p.slug', 'DESC')
             ->getQuery();
 
-        return $query->getResult(); // @phpstan-ignore-line
+        return $query->getResult();
     }
 
     /**
      * Used in admin Media.
      *
-     * @return PageInterface[]
+     * @return Page[]
      */
-    public function getPagesUsingMedia(MediaInterface $media): array
+    public function getPagesUsingMedia(Media $media): array
     {
         $queryBuilder = $this->createQueryBuilder('p');
 
@@ -186,7 +190,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
             ->setParameter('thumbMedia', '/media/thumb/'.$media->getMedia().'%')
             ->getQuery();
 
-        return $query->getResult(); // @phpstan-ignore-line
+        return $query->getResult();
     }
 
     private function getRootAlias(QueryBuilder $queryBuilder): string

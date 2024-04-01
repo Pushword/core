@@ -12,18 +12,21 @@ use Pushword\Core\Entity\PageTrait\PageParentTrait;
 use Pushword\Core\Entity\PageTrait\PageRedirectionTrait;
 use Pushword\Core\Entity\PageTrait\PageSearchTrait;
 use Pushword\Core\Entity\PageTrait\PageTrait;
-use Pushword\Core\Entity\PageTrait\PageTwitterCardTrait;
 use Pushword\Core\Entity\SharedTrait\CustomPropertiesTrait;
 use Pushword\Core\Entity\SharedTrait\HostTrait;
+use Pushword\Core\Entity\SharedTrait\IdInterface;
 use Pushword\Core\Entity\SharedTrait\IdTrait;
 use Pushword\Core\Entity\SharedTrait\TimestampableTrait;
+use Pushword\Core\Repository\PageRepository;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 #[ORM\MappedSuperclass]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['host', 'slug'], errorPath: 'slug', message: 'page.slug.already_used')]
-class Page implements PageInterface
+#[ORM\Entity(repositoryClass: PageRepository::class)]
+#[ORM\Table(name: 'page')]
+class Page implements IdInterface
 {
     use CustomPropertiesTrait;
     use HostTrait;
@@ -37,7 +40,6 @@ class Page implements PageInterface
     use PageRedirectionTrait;
     use PageSearchTrait;
     use PageTrait;
-    use PageTwitterCardTrait;
     use TimestampableTrait;
 
     public function __construct(bool $initDateTimeProperties = true)

@@ -12,7 +12,7 @@ use Imagine\Image\Palette\RGB;
 use Imagine\Image\Point;
 use Imagine\Imagick\Imagine;
 use Pushword\Core\Component\App\AppPool;
-use Pushword\Core\Entity\PageInterface;
+use Pushword\Core\Entity\Page;
 use Symfony\Component\Filesystem\Filesystem;
 use Twig\Environment as Twig;
 
@@ -26,7 +26,7 @@ class PageOpenGraphImageGenerator
 
     public ?ImagineInterface $imagine = null;
 
-    public PageInterface $page;
+    public ?Page $page = null;
 
     public function __construct(
         private readonly AppPool $apps,
@@ -38,16 +38,28 @@ class PageOpenGraphImageGenerator
         private readonly int $imageWidth = 1200,
         private readonly int $marginSize = 60,
     ) {
-        if (null !== $this->apps->getCurrentPage()) {
-            $this->page = $this->apps->getCurrentPage();
+        if (null !== ($currentPage = $this->apps->getCurrentPage())) {
+            $this->page = $currentPage;
         }
+    }
+
+    public function setPage(Page $page): static
+    {
+        $this->page = $page;
+
+        return $this;
+    }
+
+    public function getPage(): Page
+    {
+        return $this->page ?? throw new \Exception();
     }
 
     public function getPath(bool $browserPath = false): string
     {
         return ($browserPath ? '' : $this->publicDir).'/'.$this->publicMediaDir.'/og/'
-            .str_replace('/', '_', $this->page->getSlug()).'-'
-            .substr(sha1($this->page->getId().$this->apps->get()->getHosts()[0]), 0, 6).'.png';
+            .str_replace('/', '_', $this->getPage()->getSlug()).'-'
+            .substr(sha1(($this->getPage()->getId() ?? '').$this->apps->get()->getHosts()[0]), 0, 6).'.png';
     }
 
     public function generatePreviewImage(): void
@@ -69,7 +81,7 @@ class PageOpenGraphImageGenerator
 
     private function drawTitle(DrawerInterface $drawer): void
     {
-        $titleText = $this->page->getH1() ?? '...';
+        $titleText = $this->getPage()->getH1() ?? '...';
 
         if (\strlen($titleText) > 90) {
             $titleText = substr($titleText, 0, 87).'…';
@@ -145,12 +157,5 @@ class PageOpenGraphImageGenerator
         }
 
         return $this->rgb;
-    }
-
-    public function setPage(PageInterface $page): static
-    {
-        $this->page = $page;
-
-        return $this;
     }
 }

@@ -14,7 +14,7 @@ trait KernelTrait
     {
         if (null === static::$appKernel) {
             $kernelClass = $kernel::class;
-            $env = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'];
+            $env = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? throw new \Exception();
             // file_put_contents('debug', $env, FILE_APPEND);
             static::$appKernel = new $kernelClass('test' == $env ? 'test' : 'prod', true);
             // static::$appKernel = clone $kernel;

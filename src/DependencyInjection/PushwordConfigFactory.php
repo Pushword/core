@@ -4,9 +4,6 @@ namespace Pushword\Core\DependencyInjection;
 
 use LogicException;
 use Pushword\Core\Utils\IsAssociativeArray;
-
-use function Safe\sprintf;
-
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -33,7 +30,7 @@ final class PushwordConfigFactory
     }
 
     /**
-     * @return array<string>
+     * @return string[]
      */
     private function getAppFallbackConfig(): array
     {
@@ -45,11 +42,14 @@ final class PushwordConfigFactory
             $this->config['app_fallback_properties'] = explode(',', $this->config['app_fallback_properties']);
         }
 
-        return $this->config['app_fallback_properties'];  // @phpstan-ignore-line
+        /** @var string[] */
+        return $this->config['app_fallback_properties'];
     }
 
     /**
      * load Apps config and retrieve fallback directly, no need to call processAppsConfiguration.
+     *
+     * @psalm-suppress MixedArgument MixedArrayOffset
      */
     public function loadApps(): self
     {
@@ -102,6 +102,7 @@ final class PushwordConfigFactory
                 throw new \InvalidArgumentException('Something is badly configured in your pushword configuration file.');
             }
 
+            /** @psalm-suppress MixedArrayOffset */
             $result[$app['hosts'][0]] = $app;
         }
 
@@ -112,6 +113,8 @@ final class PushwordConfigFactory
      * @param array<mixed> $app
      *
      * @return array<mixed>
+     *
+     * @psalm-suppress all
      */
     private function processAppConfig(array $app): array
     {
@@ -166,7 +169,8 @@ final class PushwordConfigFactory
                 continue;
             }
 
-            $this->setParameter($prefix.$key, $value); // @phpstan-ignore-line
+            /** @var scalar|null $value */
+            $this->setParameter($prefix.$key, $value);
         }
     }
 
