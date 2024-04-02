@@ -5,6 +5,7 @@ namespace Pushword\Core\Repository;
 use Doctrine\ORM\Query\Expr\Andx;
 use Doctrine\ORM\Query\Expr\Orx;
 use Doctrine\ORM\QueryBuilder;
+use Exception;
 
 /**
  * Eg:
@@ -43,7 +44,7 @@ class FilterWhereParser
      */
     private function containsSubQuery(array $where): bool
     {
-        return \is_array(array_values($where)[0] ?? throw new \Exception());
+        return \is_array(array_values($where)[0] ?? throw new Exception());
     }
 
     /**
@@ -58,7 +59,7 @@ class FilterWhereParser
             }
 
             if (! \is_array($singleWhere)) {
-                throw new \Exception('malformated where params');
+                throw new Exception('malformated where params');
             }
 
             if ($this->containsSubQuery($singleWhere)) {
@@ -67,6 +68,7 @@ class FilterWhereParser
                 continue;
             }
 
+            /** @psalm-suppress MixedArgumentTypeCoercion */
             $compose->add($this->retrieveExpressionFrom($singleWhere));
         }
 
@@ -74,21 +76,21 @@ class FilterWhereParser
     }
 
     /**
-     * @param array<mixed> $whereRow
+     * @param array{key_prefix: string, key: string, operator: string, value: string}|array{0: string, 1:string, 2: string, 4:string}|array{} $whereRow
      */
     private function retrieveExpressionFrom(array $whereRow): string
     {
         $paramKey = 'm'.md5('a'.random_int(0, mt_getrandmax()));
 
         $prefix = $whereRow['key_prefix'] ?? $whereRow[4] ?? 'p.';
-        $key = $whereRow['key'] ?? $whereRow[0] ?? throw new \Exception('key was forgotten');
-        $operator = $whereRow['operator'] ?? $whereRow[1] ?? throw new \Exception('operator was forgotten');
+        $key = $whereRow['key'] ?? $whereRow[0] ?? throw new Exception('key was forgotten');
+        $operator = $whereRow['operator'] ?? $whereRow[1] ?? throw new Exception('operator was forgotten');
         $sqlValue = 'IN' === $operator ? '( :'.$paramKey.')' : ' :'.$paramKey;
-        $value = $whereRow['value'] ?? $whereRow[2];
+        $value = $whereRow['value'] ?? $whereRow[2] ?? null;
 
         if (null === $value) {
             if (! \in_array($operator, ['IS', 'IS NOT'], true)) {
-                throw new \Exception('operator `'.$operator.'` forbidden for null value');
+                throw new Exception('operator `'.$operator.'` forbidden for null value');
             }
 
             return $prefix.$key.' '.$operator.' NULL';

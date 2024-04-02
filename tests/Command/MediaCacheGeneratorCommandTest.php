@@ -8,7 +8,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class MediaCacheGeneratorCommandTest extends KernelTestCase
 {
-    public function testExecute()
+    public function testExecute(): void
     {
         $kernel = static::createKernel();
         $application = new Application($kernel);
@@ -19,12 +19,12 @@ class MediaCacheGeneratorCommandTest extends KernelTestCase
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        $this->assertTrue(str_contains($output, '100%'));
+        self::assertTrue(str_contains($output, '100%'));
 
         $commandTester->execute(['media' => 'piedweb-logo.png']);
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        $this->assertTrue(str_contains($output, '100%'));
+        self::assertTrue(str_contains($output, '100%'));
     }
 }

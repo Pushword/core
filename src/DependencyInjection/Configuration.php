@@ -2,9 +2,9 @@
 
 namespace Pushword\Core\DependencyInjection;
 
-use App\Entity\Media;
-use App\Entity\Page;
-use App\Entity\User;
+use Pushword\Core\Entity\Media;
+use Pushword\Core\Entity\Page;
+use Pushword\Core\Entity\User;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -16,7 +16,7 @@ final class Configuration implements ConfigurationInterface
     public const DEFAULT_TEMPLATE = '@Pushword';
 
     /**
-     * @var string[]|class-string<\locale>[]
+     * @var string[]|class-string<locale>[]
      */
     public const DEFAULT_APP_FALLBACK = [
         'hosts',
@@ -30,6 +30,7 @@ final class Configuration implements ConfigurationInterface
         'filters',
         'assets',
         'custom_properties',
+        'svg_dir',
     ];
 
     /**
@@ -176,6 +177,17 @@ final class Configuration implements ConfigurationInterface
 
             ->booleanNode('tailwind_generator')->defaultTrue()->end()
             ->scalarNode('path_to_bin')->defaultValue('')->end()
+
+            ->variableNode('svg_dir')->defaultValue([
+                '%kernel.project_dir%/templates/icons',
+                '%vendor_dir%/fortawesome/font-awesome/free/svgs/solid',
+                '%vendor_dir%/fortawesome/font-awesome/svgs/solid',
+                '%vendor_dir%/fortawesome/font-awesome/free/svgs/regular',
+                '%vendor_dir%/fortawesome/font-awesome/svgs/regular',
+                '%vendor_dir%/fortawesome/font-awesome/free/svgs/brands',
+                '%vendor_dir%/fortawesome/font-awesome/svgs/brands',
+            ])->cannotBeEmpty()->end()
+
         ->end();
 
         return $treeBuilder;

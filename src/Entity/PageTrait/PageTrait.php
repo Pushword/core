@@ -3,9 +3,11 @@
 namespace Pushword\Core\Entity\PageTrait;
 
 use Cocur\Slugify\Slugify;
+use DateTime;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Pushword\Core\Utils\F;
+use Exception;
 
 trait PageTrait
 {
@@ -22,7 +24,7 @@ trait PageTrait
     protected string $mainContent = '';
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['default' => 'CURRENT_TIMESTAMP'])]
-    protected ?\DateTimeInterface $publishedAt = null;  // @phpstan-ignore-line
+    protected ?DateTimeInterface $publishedAt = null;  // @phpstan-ignore-line
 
     public function __toString(): string
     {
@@ -79,7 +81,7 @@ trait PageTrait
     {
         $this->mainContent = (string) $mainContent;
         // clean empty link added by editor.js
-        $this->mainContent = F::preg_replace_str('@<a[^>]+"></a>@U', '', $this->mainContent);
+        $this->mainContent = preg_replace('@<a[^>]+"></a>@U', '', $this->mainContent) ?? throw new Exception();
 
         return $this;
     }
@@ -87,7 +89,7 @@ trait PageTrait
     /**
      * Get the value of publishedAt.
      */
-    public function getPublishedAt(bool $safe = true): ?\DateTimeInterface
+    public function getPublishedAt(bool $safe = true): ?DateTimeInterface
     {
         if (! $safe) {
             return $this->publishedAt;
@@ -97,10 +99,10 @@ trait PageTrait
             return $this->publishedAt;
         }
 
-        return new \DateTime();
+        return new DateTime();
     }
 
-    public function setPublishedAt(\DateTimeInterface $publishedAt): self
+    public function setPublishedAt(DateTimeInterface $publishedAt): self
     {
         $this->publishedAt = $publishedAt;
 
@@ -109,6 +111,6 @@ trait PageTrait
 
     public function isPublished(): bool
     {
-        return $this->publishedAt <= new \DateTime('now');
+        return $this->publishedAt <= new DateTime('now');
     }
 }

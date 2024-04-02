@@ -2,14 +2,13 @@
 
 namespace Pushword\Core\DependencyInjection;
 
+use InvalidArgumentException;
 use LogicException;
 use Pushword\Core\Utils\IsAssociativeArray;
-
-use function Safe\sprintf;
-
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use UnitEnum;
 
 final class PushwordConfigFactory
 {
@@ -33,7 +32,7 @@ final class PushwordConfigFactory
     }
 
     /**
-     * @return array<string>
+     * @return string[]
      */
     private function getAppFallbackConfig(): array
     {
@@ -45,11 +44,14 @@ final class PushwordConfigFactory
             $this->config['app_fallback_properties'] = explode(',', $this->config['app_fallback_properties']);
         }
 
-        return $this->config['app_fallback_properties'];  // @phpstan-ignore-line
+        /** @var string[] */
+        return $this->config['app_fallback_properties'];
     }
 
     /**
      * load Apps config and retrieve fallback directly, no need to call processAppsConfiguration.
+     *
+     * @psalm-suppress MixedArgument MixedArrayOffset
      */
     public function loadApps(): self
     {
@@ -60,7 +62,7 @@ final class PushwordConfigFactory
         }
 
         if ($this->container->hasParameter('pw.apps')) { // @phpstan-ignore-line
-            throw new \InvalidArgumentException('Invalid "apps" name: parameter is ever registered.');
+            throw new InvalidArgumentException('Invalid "apps" name: parameter is ever registered.');
         }
 
         $this->setParameter('pw.apps', $this->parseApps($this->config['apps'])); // @phpstan-ignore-line
@@ -75,7 +77,7 @@ final class PushwordConfigFactory
         }
 
         if (! $this->container->hasParameter('pw.apps')) { // @phpstan-ignore-line
-            throw new \LogicException('You must register Pushword/CoreBundle in first (`pw.apps` is not loaded in ParameterBag.');
+            throw new LogicException('You must register Pushword/CoreBundle in first (`pw.apps` is not loaded in ParameterBag.');
         }
 
         /** @var array<string, array<mixed>> */
@@ -99,9 +101,10 @@ final class PushwordConfigFactory
         foreach ($apps as $app) {
             $app = $this->processAppConfig($app);
             if (! isset($app['hosts']) || ! \is_array($app['hosts']) || ! isset($app['hosts'][0])) { // normally, it's impossible to reach this
-                throw new \InvalidArgumentException('Something is badly configured in your pushword configuration file.');
+                throw new InvalidArgumentException('Something is badly configured in your pushword configuration file.');
             }
 
+            /** @psalm-suppress MixedArrayOffset */
             $result[$app['hosts'][0]] = $app;
         }
 
@@ -112,6 +115,8 @@ final class PushwordConfigFactory
      * @param array<mixed> $app
      *
      * @return array<mixed>
+     *
+     * @psalm-suppress all
      */
     private function processAppConfig(array $app): array
     {
@@ -131,7 +136,7 @@ final class PushwordConfigFactory
                     : $this->config[$fallbackProperty];
             } elseif ('custom_properties' == $fallbackProperty) {
                 if (! \is_array($this->config['custom_properties']) || ! \is_array($app['custom_properties'])) {
-                    throw new \LogicException();
+                    throw new LogicException();
                 }
 
                 $app['custom_properties'] = [...$this->config['custom_properties'], ...$app['custom_properties']];
@@ -166,7 +171,8 @@ final class PushwordConfigFactory
                 continue;
             }
 
-            $this->setParameter($prefix.$key, $value); // @phpstan-ignore-line
+            /** @var scalar|null $value */
+            $this->setParameter($prefix.$key, $value);
         }
     }
 
@@ -175,10 +181,10 @@ final class PushwordConfigFactory
      *
      * @noRector
      */
-    private function setParameter(string $key, array|bool|string|int|float|\UnitEnum|null $value): void
+    private function setParameter(string $key, array|bool|string|int|float|UnitEnum|null $value): void
     {
         if ($this->container->hasParameter($key)) {
-            throw new \InvalidArgumentException(sprintf('Invalid "%s" name: parameter is ever registered.', $key));
+            throw new InvalidArgumentException(sprintf('Invalid "%s" name: parameter is ever registered.', $key));
         }
 
         $this->container->setParameter($key, $value);

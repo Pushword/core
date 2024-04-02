@@ -20,7 +20,7 @@ interface CustomPropertiesInterface
 
     public function isStandAloneCustomProperty(string $name): bool;
 
-    public function setCustomProperty(string $name, mixed $value): self;
+    public function setCustomProperty(string $name, mixed $value): void;
 
     public function getCustomProperty(string $name): mixed;
 

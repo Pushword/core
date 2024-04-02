@@ -2,6 +2,8 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
+use Exception;
+
 use function Safe\preg_match_all;
 
 final class HtmlEncryptedLink extends EncryptedLink
@@ -40,6 +42,7 @@ final class HtmlEncryptedLink extends EncryptedLink
             return $body;
         }
 
+        /** @var array<(string|int), array<int, string>> $matches */
         return $this->replaceRelEncryptedLink($body, $matches);
     }
 
@@ -57,7 +60,7 @@ final class HtmlEncryptedLink extends EncryptedLink
         for ($k = 0; $k < $nbrMatch; ++$k) {
             $attr = $this->extractClass($matches[1][$k]);
             $attr = '' !== $attr ? ['class' => $attr] : [];
-            $link = $this->renderLink(
+            $link = $this->linkProvider->renderLink(
                 $matches[self::HTML_REGEX_ANCHOR_KEY][$k],
                 $this->getHrefValue($matches, $k),
                 $attr
@@ -79,6 +82,6 @@ final class HtmlEncryptedLink extends EncryptedLink
             }
         }
 
-        throw new \Exception();
+        throw new Exception();
     }
 }

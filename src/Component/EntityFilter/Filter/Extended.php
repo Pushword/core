@@ -2,23 +2,21 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
-use Pushword\Core\AutowiringTrait\RequiredEntityTrait;
-use Pushword\Core\AutowiringTrait\RequiredManagerPoolTrait;
-use Pushword\Core\AutowiringTrait\RequiredPropertyTrait;
-use Pushword\Core\Entity\PageInterface;
+use Pushword\Core\Component\EntityFilter\ManagerPool;
+use Pushword\Core\Entity\Page;
 
 // TODO: Documenter
 // TODO: Tester
 class Extended extends AbstractFilter
 {
-    use RequiredEntityTrait;
-    /**
-     * @use RequiredManagerPoolTrait<PageInterface>
-     */
-    use RequiredManagerPoolTrait;
-    use RequiredPropertyTrait;
+    /** @psalm-suppress MissingConstructor */
+    public ManagerPool $managerPool;
 
-    public function apply(mixed $propertyValue) // @phpstan-ignore-line
+    public Page $page;
+
+    public string $property;
+
+    public function apply(mixed $propertyValue): mixed
     {
         return $this->loadExtendedValue($propertyValue);
     }
@@ -29,16 +27,12 @@ class Extended extends AbstractFilter
             return $propertyValue;
         }
 
-        if (! $this->entity instanceof PageInterface) {
+        if (! $this->page->getExtendedPage() instanceof Page) {
             return $propertyValue;
         }
 
-        if (! $this->entity->getExtendedPage() instanceof PageInterface) {
-            return $propertyValue;
-        }
+        $getter = 'get'.ucfirst($this->property);
 
-        $getter = 'get'.ucfirst($this->getProperty());
-
-        return $this->entityFilterManagerPool->getManager($this->entity)->$getter(); // @phpstan-ignore-line
+        return $this->managerPool->getManager($this->page)->$getter(); // @phpstan-ignore-line
     }
 }

@@ -2,91 +2,91 @@
 
 namespace Pushword\Core\Tests\Component;
 
+use DateTime;
+use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Component\EntityFilter\Filter\HtmlEncryptedLink;
+use Pushword\Core\Component\EntityFilter\Manager;
 use Pushword\Core\Component\EntityFilter\ManagerPool;
 use Pushword\Core\Entity\Page;
+use Pushword\Core\Router\PushwordRouteGenerator;
+use Pushword\Core\Service\LinkProvider;
+
+use function Safe\file_get_contents;
+
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class EntityFilterTest extends KernelTestCase
 {
-    public function testIt()
+    public function testIt(): void
     {
         $manager = $this->getManagerPool()->getManager($this->getPage());
 
-        $this->assertSame($this->getPage()->getH1(), $manager->title());
-        $this->assertSame($this->getPage()->getH1(), $manager->getTitle());
-        $this->assertSame('', $manager->getMainContent()->getChapeau());
-        $this->assertSame('<p>', substr(trim($manager->getMainContent()->getBody()), 0, 3));
+        self::assertSame($this->getPage()->getH1(), $manager->title()); // @phpstan-ignore-line
+        self::assertSame($this->getPage()->getH1(), $manager->getTitle()); // @phpstan-ignore-line
+        self::assertSame('', $manager->getMainContent()->getChapeau());
+        self::assertSame('<p>', substr(trim($manager->getMainContent()->getBody()), 0, 3));
     }
 
-    public function testEncryptedLink()
+    public function testEncryptedLink(): void
     {
-        self::bootKernel();
-
         $filter = new HtmlEncryptedLink();
-        $filter->setApp(self::$kernel->getContainer()->get(\Pushword\Core\Component\App\AppPool::class)->getApp());
-        $filter->setTwig(self::$kernel->getContainer()->get('test.service_container')->get('twig'));
-        $this->assertSame(
-            'Lorem <span data-rot=_cvrqjro.pbz/>Test</span> ipsum',
-            $filter->convertHtmlRelEncryptedLink('Lorem <a href="https://piedweb.com/" rel="encrypt">Test</a> ipsum')
-        );
-        $this->assertSame(
-            'Lorem <span class=link-btn data-rot=_cvrqjro.pbz/>Test</span> ipsum',
-            $filter->convertHtmlRelEncryptedLink('Lorem <a class="link-btn" href="https://piedweb.com/" rel="encrypt">Test</a> ipsum')
-        );
-        $this->assertSame(
-            'Lorem <span class="link-btn btn-plus" data-rot=_cvrqjro.pbz/>Test</span> ipsum',
-            $filter->convertHtmlRelEncryptedLink('Lorem <a class="link-btn btn-plus" href="https://piedweb.com/" rel="encrypt">Test</a> ipsum')
-        );
-        $this->assertSame(
-            'Lorem <span class="link-btn btn-plus" data-rot=&>Test</span> ipsum',
-            $filter->convertHtmlRelEncryptedLink('Lorem <a class="link-btn btn-plus" href="&" rel="encrypt">Test</a> ipsum')
-        );
+        $filter->app = ($apps = self::getContainer()->get(AppPool::class))->getApp();
+        $filter->twig = self::getContainer()->get('twig');
+        $router = self::getContainer()->get(PushwordRouteGenerator::class);
+        $filter->linkProvider = new LinkProvider($router, $apps, $filter->twig);
+        self::assertSame('Lorem <span data-rot=_cvrqjro.pbz/>Test</span> ipsum', $filter->convertHtmlRelEncryptedLink('Lorem <a href="https://piedweb.com/" rel="encrypt">Test</a> ipsum'));
+        self::assertSame('Lorem <span class=link-btn data-rot=_cvrqjro.pbz/>Test</span> ipsum', $filter->convertHtmlRelEncryptedLink('Lorem <a class="link-btn" href="https://piedweb.com/" rel="encrypt">Test</a> ipsum'));
+        self::assertSame('Lorem <span class="link-btn btn-plus" data-rot=_cvrqjro.pbz/>Test</span> ipsum', $filter->convertHtmlRelEncryptedLink('Lorem <a class="link-btn btn-plus" href="https://piedweb.com/" rel="encrypt">Test</a> ipsum'));
+        self::assertSame('Lorem <span class="link-btn btn-plus" data-rot=&>Test</span> ipsum', $filter->convertHtmlRelEncryptedLink('Lorem <a class="link-btn btn-plus" href="&" rel="encrypt">Test</a> ipsum'));
 
-        $this->assertSame(
-            'Lorem <a href="/a1" class="ninja">Test</a> <span data-rot=_cvrqjro.pbz/>Anchor 2</span>',
-            $filter->convertHtmlRelEncryptedLink('Lorem <a href="/a1" class="ninja">Test</a> <a href="https://piedweb.com/" rel="encrypt">Anchor 2</a>')
-        );
+        self::assertSame('Lorem <a href="/a1" class="ninja">Test</a> <span data-rot=_cvrqjro.pbz/>Anchor 2</span>', $filter->convertHtmlRelEncryptedLink('Lorem <a href="/a1" class="ninja">Test</a> <a href="https://piedweb.com/" rel="encrypt">Anchor 2</a>'));
     }
 
-    private function getManagerPool()
+    private function getManagerPool(): ManagerPool
     {
         self::bootKernel();
-        $pool = new ManagerPool();
-        $pool->apps = self::$kernel->getContainer()->get(\Pushword\Core\Component\App\AppPool::class);
-        $pool->twig = self::$kernel->getContainer()->get('test.service_container')->get('twig');
-        $pool->eventDispatcher = self::$kernel->getContainer()->get('event_dispatcher');
-        $pool->entityManager = self::$kernel->getContainer()->get('doctrine.orm.entity_manager');
-        $pool->router = self::$kernel->getContainer()->get(\Pushword\Core\Router\PushwordRouteGenerator::class);
 
-        return $pool;
+        return new ManagerPool(
+            $apps = self::getContainer()->get(AppPool::class),
+            $twig = self::getContainer()->get('twig'),
+            self::getContainer()->get('event_dispatcher'),
+            /** @var PushwordRouteGenerator */
+            $router = self::getContainer()->get(PushwordRouteGenerator::class),
+            new LinkProvider($router, $apps, $twig),
+            self::getContainer()->get('doctrine.orm.default_entity_manager')
+        );
     }
 
-    public function testToc()
+    public function testToc(): void
     {
-        $manager = $this->getManagerPool()->getManager($this->getPage($this->getContentReadyForToc()));
+        $page = $this->getPage($this->getContentReadyForToc());
 
-        $this->assertSame('<p>my intro...</p>', trim($manager->getMainContent()->getIntro()));
-        $toCheck = '<h2 id="fist-title">Fist Title</h2>';
-        $this->assertSame($toCheck, substr(trim($manager->getMainContent()->getContent()), 0, \strlen($toCheck)));
+        /** @var Manager */
+        $manager = $this->getManagerPool()->getManager($page);
+
+        self::assertSame('<p>my intro...</p>', trim($manager->getMainContent()->getIntro()));
+        $toCheck = '<h2 id="first-title">First Title</h2>';
+        self::assertSame($toCheck, substr(trim($manager->getMainContent()->getContent()), 0, \strlen($toCheck)));
     }
 
-    private function getPage($content = null)
+    private function getPage(?string $content = null): Page
     {
-        return (new Page())
+        $page = (new Page())
             ->setH1('Demo Page - Kitchen Sink  Markdown + Twig')
             ->setSlug('kitchen-sink')
             ->setLocale('en')
-            ->setCustomProperty('toc', true)
-            ->setCreatedAt(new \DateTime('1 day ago'))
-            ->setUpdatedAt(new \DateTime('1 day ago'))
+            ->setCreatedAt(new DateTime('1 day ago'))
+            ->setUpdatedAt(new DateTime('1 day ago'))
             ->setMainContent($content ?? file_get_contents(__DIR__.'/../../../skeleton/src/DataFixtures/WelcomePage.md'));
+        $page->setCustomProperty('toc', true);
+
+        return $page;
     }
 
-    private function getContentReadyForToc()
+    private function getContentReadyForToc(): string
     {
         return 'my intro...'
-            .\chr(10).'## Fist Title'
+            .\chr(10).'## First Title'
             .\chr(10).'first paragraph'
             .\chr(10).'## Second Title'
             .\chr(10).'second paragraph';

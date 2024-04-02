@@ -7,12 +7,12 @@ use Pushword\Core\Entity\User;
 
 class UserTest extends TestCase
 {
-    public function testBasics()
+    public function testBasics(): void
     {
         $user = new User();
-        $this->assertEmpty($user->getEmail());
+        self::assertEmpty($user->getEmail());
 
         $user->setEmail('test@example.tld');
-        $this->assertSame('test@example.tld', (string) $user);
+        self::assertSame('test@example.tld', (string) $user);
     }
 }

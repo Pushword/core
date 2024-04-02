@@ -7,15 +7,15 @@ use Pushword\Core\Entity\Page;
 
 class PageTest extends TestCase
 {
-    public function testBasics()
+    public function testBasics(): void
     {
         $page = new Page();
-        $this->assertEmpty($page->getTitle());
+        self::assertEmpty($page->getTitle());
 
         $page->setTitle('hello');
-        $this->assertSame('hello', $page->getTitle());
+        self::assertSame('hello', $page->getTitle());
 
         $page->setSlug('hello you');
-        $this->assertSame('hello-you', $page->getSlug());
+        self::assertSame('hello-you', $page->getSlug());
     }
 }

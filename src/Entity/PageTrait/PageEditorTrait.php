@@ -4,12 +4,12 @@ namespace Pushword\Core\Entity\PageTrait;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Pushword\Core\Entity\UserInterface;
+use Pushword\Core\Entity\User;
 
 trait PageEditorTrait
 {
-    #[ORM\ManyToOne(targetEntity: UserInterface::class)]
-    protected ?UserInterface $editedBy = null; // @phpstan-ignore-line
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    protected ?User $editedBy = null; // @phpstan-ignore-line
 
     /*
      * @ORM\OneToMany(
@@ -23,34 +23,34 @@ trait PageEditorTrait
     protected ?ArrayCollection $pageHasEditors;
     /**/
 
-    #[ORM\ManyToOne(targetEntity: UserInterface::class)]
-    protected ?UserInterface $createdBy = null; // @phpstan-ignore-line
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    protected ?User $createdBy = null; // @phpstan-ignore-line
 
     #[ORM\Column(type: Types::TEXT, options: ['default' => ''])]
     protected string $editMessage = '';
 
-    public function getEditedBy(): ?UserInterface
+    public function getEditedBy(): ?User
     {
         return $this->editedBy;
     }
 
-    public function setEditedBy(?UserInterface $user): void
+    public function setEditedBy(?User $user): void
     {
         $this->editedBy = $user;
     }
 
     /**
-     * Get targetEntity="Pushword\Core\Entity\UserInterface",.
+     * Get targetEntity="Pushword\Core\Entity\User",.
      */
-    public function getCreatedBy(): ?UserInterface
+    public function getCreatedBy(): ?User
     {
         return $this->createdBy;
     }
 
     /**
-     * Set targetEntity="Pushword\Core\Entity\UserInterface",.
+     * Set targetEntity="Pushword\Core\Entity\User",.
      */
-    public function setCreatedBy(?UserInterface $user): void
+    public function setCreatedBy(?User $user): void
     {
         $this->createdBy = $user;
     }

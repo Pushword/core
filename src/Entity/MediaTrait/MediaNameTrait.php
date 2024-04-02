@@ -4,6 +4,7 @@ namespace Pushword\Core\Entity\MediaTrait;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use Symfony\Component\Yaml\Yaml;
 
 trait MediaNameTrait
@@ -46,10 +47,20 @@ trait MediaNameTrait
         $return = '' !== $this->names ? Yaml::parse($this->names) : [];
 
         if (! \is_array($return)) {
-            throw new \Exception('Names malformatted');
+            throw new Exception('Names malformatted');
         }
 
-        return $return;
+        $toReturn = [];
+
+        foreach ($return as $k => $v) {
+            if (! \is_string($k) || ! \is_string($v)) {
+                throw new Exception();
+            }
+
+            $toReturn[$k] = $v;
+        }
+
+        return $toReturn;
     }
 
     public function getNames(bool $yamlParsed = false): mixed

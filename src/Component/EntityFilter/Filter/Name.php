@@ -2,23 +2,33 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
-use Pushword\Core\AutowiringTrait\RequiredAppTrait;
+use Exception;
 use Pushword\Core\AutowiringTrait\RequiredManagerTrait;
-use Pushword\Core\Entity\PageInterface;
+use Pushword\Core\Component\App\AppConfig;
+use Pushword\Core\Component\EntityFilter\Manager;
+use Pushword\Core\Entity\Page;
 
 class Name extends AbstractFilter
 {
-    use RequiredAppTrait;
+    public AppConfig $app;
+
     /**
-     * @use RequiredManagerTrait<PageInterface>
+     * @use RequiredManagerTrait<Page>
      */
-    use RequiredManagerTrait;
+    public Manager $entityFilterManager;
 
     public function apply(mixed $propertyValue): ?string
     {
+        if (! \is_string($propertyValue)) {
+            throw new Exception();
+        }
+
         $names = explode("\n", $this->string($propertyValue));
 
-        return isset($names[0]) && '' !== $names[0] ? trim($names[0])
-            : ('' !== $propertyValue ? $propertyValue : $this->entityFilterManager->getH1()); // @phpstan-ignore-line
+        if (isset($names[0]) && '' !== $names[0]) {
+            return trim($names[0]);
+        }
+
+        return '' !== $propertyValue ? $propertyValue : $this->entityFilterManager->page->getH1();
     }
 }

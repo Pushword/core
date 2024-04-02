@@ -3,7 +3,11 @@
 namespace Pushword\Core\DependencyInjection;
 
 use Exception;
-use Pushword\Core\Utils\F;
+use LogicException;
+
+use function Safe\file_get_contents;
+
+use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
@@ -32,9 +36,9 @@ trait ExtensionTrait
         $parser = new Parser();
         $finder = Finder::create()->files()->name('*.yaml')->in($this->getConfigFolder().'/packages');
         foreach ($finder as $singleFinder) {
-            $configs = $parser->parse(F::file_get_contents($singleFinder->getRealPath())); // @phpstan-ignore-line
+            $configs = $parser->parse(file_get_contents($singleFinder->getRealPath()));
             if (! \is_array($configs)) {
-                throw new \Exception($singleFinder->getRealPath().' is malformed');
+                throw new Exception($singleFinder->getRealPath().' is malformed');
             }
 
             $this->prependExtensionConfigs($configs, $container);
@@ -42,7 +46,12 @@ trait ExtensionTrait
 
         $finder = Finder::create()->files()->name('*.php')->in($this->getConfigFolder().'/packages');
         foreach ($finder as $singleFinder) {
+            /** @psalm-suppress UnresolvableInclude */
             $configs = @include $singleFinder->getRealPath();
+            if (! \is_array($configs)) {
+                throw new Exception();
+            }
+
             $this->prependExtensionConfigs($configs, $container);
         }
     }
@@ -58,21 +67,25 @@ trait ExtensionTrait
             }
 
             if (! \is_array($config)) {
-                throw new \Exception('Malformed config named `'.$name.'`');
+                throw new Exception('Malformed config named `'.((string) $name).'`');
             }
 
-            $container->prependExtensionConfig($name, $config);
+            /** @var array<string, mixed> $config */
+            $container->prependExtensionConfig((string) $name, $config);
         }
     }
+
+    /**
+     * @return ConfigurationInterface|null
+     */
+    abstract public function getConfiguration(array $config, ContainerBuilder $container);
 
     /**
      * @param mixed[] $mergedConfig
      */
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
-        if (($configuration = $this->getConfiguration($mergedConfig, $container)) === null) {
-            throw new \LogicException();
-        }
+        $configuration = $this->getConfiguration($mergedConfig, $container) ?? throw new LogicException(); // @phpstan-ignore-line
 
         (new PushwordConfigFactory($container, $mergedConfig, $configuration, $this->getAlias()))
             ->loadConfigToParams()

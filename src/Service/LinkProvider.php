@@ -1,22 +1,33 @@
 <?php
 
-namespace Pushword\Core\Twig;
+namespace Pushword\Core\Service;
 
+use Exception;
 use Pushword\Core\Component\App\AppConfig;
-use Pushword\Core\Entity\PageInterface;
+use Pushword\Core\Component\App\AppPool;
+use Pushword\Core\Entity\Page;
 use Pushword\Core\Router\PushwordRouteGenerator;
+use Twig\Environment as Twig;
 
-trait LinkTwigTrait
+final readonly class LinkProvider
 {
-    private PushwordRouteGenerator $router;
+    public function __construct(
+        private PushwordRouteGenerator $router,
+        private AppPool $apps,
+        private Twig $twig
+    ) {
+    }
 
-    abstract public function getApp(): AppConfig;
+    private function getApp(): AppConfig
+    {
+        return $this->apps->get();
+    }
 
     /**
-     * @param array<string, string>|string|PageInterface $path
-     * @param array<string, string>|bool|string          $attr
+     * @param array<string, string>|string|Page $path
+     * @param array<string, string>|bool|string $attr
      */
-    public function renderLink(string $anchor, array|PageInterface|string $path, array|bool|string $attr = [], bool $encrypt = true): string
+    public function renderLink(string $anchor, array|Page|string $path, array|bool|string $attr = [], bool $encrypt = true): string
     {
         if (\is_bool($attr)) {
             $encrypt = $attr;
@@ -26,7 +37,7 @@ trait LinkTwigTrait
         if (\is_array($path)) {
             $attr = $path;
             if (! isset($attr['href'])) {
-                throw new \Exception('attr must contain href for render a link.');
+                throw new Exception('attr must contain href for render a link.');
             }
 
             $path = $attr['href'];
@@ -37,7 +48,7 @@ trait LinkTwigTrait
             $attr = ['class' => $attr];
         }
 
-        if ($path instanceof PageInterface) {
+        if ($path instanceof Page) {
             $path = $this->router->generate($path);
         }
 
@@ -93,14 +104,14 @@ trait LinkTwigTrait
         $mail = trim($mail);
 
         return $this->twig->render($template, [
-            'mail_readable' => self::readableEncodedMail($mail),
+            'mail_readable' => $this->readableEncodedMail($mail),
             'mail_encoded' => str_rot13($mail),
             'mail' => $mail,
             'class' => $class,
         ]);
     }
 
-    public static function readableEncodedMail(string $mail): string
+    private function readableEncodedMail(string $mail): string
     {
         return str_replace('@', '<svg width="1em" height="1em" viewBox="0 0 16 16" class="inline-block" '
         .'fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M13.106 '
@@ -111,5 +122,16 @@ trait LinkTwigTrait
         .' 1.737.957 2.906 2.379 2.906.8 0 1.415-.39 1.709-1.087h.11c.081.67.703 1.148 1.503 1.148 1.572 0 2.57-1.415'
         .' 2.57-3.643zm-7.177.704c0-1.197.54-1.907 1.456-1.907.93 0 1.524.738 1.524 1.907S8.308 9.84 7.371 9.84c-.895'
         .' 0-1.442-.725-1.442-1.914z"/></svg>', $mail);
+    }
+
+    public function renderPhoneNumber(string $number, string $class = ''): string
+    {
+        $template = $this->apps->get()->getView('/component/phone_number.html.twig');
+
+        return trim($this->twig->render($template, [
+            'number' => str_replace([' ', '&nbsp;', '.'], '', $number),
+            'number_readable' => str_replace(' ', '&nbsp;', preg_replace('#^\+\d{2} ?#', '0', $number) ?? throw new Exception()),
+            'class' => $class,
+        ]));
     }
 }

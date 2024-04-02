@@ -4,17 +4,22 @@ namespace Pushword\Core\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Selectable;
+use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectRepository;
-use Pushword\Core\Entity\UserInterface;
-use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use Pushword\Core\Entity\User;
 
 /**
- * @extends ServiceEntityRepository<UserInterface>
+ * @extends ServiceEntityRepository<User>
  *
- * @implements ObjectRepository<UserInterface>
- * @implements Selectable<int, UserInterface>
+ * @implements ObjectRepository<User>
+ * @implements Selectable<int, User>
  */
-#[AutoconfigureTag('doctrine.repository_service')]
+// #[AutoconfigureTag('doctrine.repository_service')]
 class UserRepository extends ServiceEntityRepository implements ObjectRepository, Selectable
 {
+    public function __construct(
+        ManagerRegistry $registry,
+    ) {
+        parent::__construct($registry, User::class);
+    }
 }

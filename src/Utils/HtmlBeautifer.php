@@ -2,16 +2,18 @@
 
 namespace Pushword\Core\Utils;
 
+use Exception;
+
 class HtmlBeautifer
 {
     public static function removeHtmlComments(string $content): string
     {
-        return F::preg_replace_str('/<!--(.|\s)*?-->/', '', $content);
+        return preg_replace('/<!--(.|\s)*?-->/', '', $content) ?? throw new Exception();
     }
 
     public static function punctuationBeautifer(string $text): string
     {
-        $text = F::preg_replace_str('# ([\!\?\:;])([^a-zA-Z]|$)#', '&nbsp;$1$2', $text);
+        $text = preg_replace('# ([\!\?\:;])([^a-zA-Z]|$)#', '&nbsp;$1$2', $text) ?? throw new Exception();
         // avoid to catch tailwind selector inside ""
 
         return str_replace(

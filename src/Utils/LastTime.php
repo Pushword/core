@@ -4,6 +4,8 @@ namespace Pushword\Core\Utils;
 
 use DateInterval;
 use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
 
 use function Safe\file_put_contents;
 use function Safe\filemtime;
@@ -19,33 +21,33 @@ class LastTime
     {
     }
 
-    public function wasRunSince(\DateInterval $dateInterval): bool
+    public function wasRunSince(DateInterval $dateInterval): bool
     {
         $dateTime = $this->get();
 
-        return null !== $dateTime && $dateTime->add($dateInterval) >= new \DateTime('now');
+        return null !== $dateTime && $dateTime->add($dateInterval) >= new DateTime('now');
     }
 
     /**
      * Return false if never runned else last datetime it was runned.
      * If $default is set, return $default time if never runned.
      *
-     * @return \DateTime|\DateTimeImmutable|null
+     * @return DateTime|DateTimeImmutable|null
      */
-    public function get(?string $default = null): ?\DateTimeInterface
+    public function get(?string $default = null): ?DateTimeInterface
     {
         if (! file_exists($this->filePath)) {
-            return null === $default ? null : new \DateTime($default);
+            return null === $default ? null : new DateTime($default);
         }
 
-        return new \DateTime('@'.filemtime($this->filePath));
+        return new DateTime('@'.filemtime($this->filePath));
     }
 
     /**
      * @psalm-suppress InvalidNullableReturnType
      * @psalm-suppress NullableReturnStatement
      */
-    public function safeGet(string $default): \DateTimeInterface
+    public function safeGet(string $default): DateTimeInterface
     {
         return $this->get($default); // @phpstan-ignore-line
     }
@@ -60,7 +62,7 @@ class LastTime
             file_put_contents($this->filePath, '');
         }
 
-        touch($this->filePath, (new \DateTime($datetime))->getTimestamp());
+        touch($this->filePath, (new DateTime($datetime))->getTimestamp());
     }
 
     /**

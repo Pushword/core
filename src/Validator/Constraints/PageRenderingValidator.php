@@ -2,8 +2,9 @@
 
 namespace Pushword\Core\Validator\Constraints;
 
+use Exception;
 use Pushword\Core\Controller\PageController;
-use Pushword\Core\Entity\PageInterface;
+use Pushword\Core\Entity\Page;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -22,8 +23,8 @@ class PageRenderingValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, PageRendering::class);
         }
 
-        if (! $value instanceof PageInterface) {
-            throw new UnexpectedTypeException($value, PageInterface::class);
+        if (! $value instanceof Page) {
+            throw new UnexpectedTypeException($value, Page::class);
         }
 
         if ($value->hasRedirection()) { // si c'est une redir, on check rien
@@ -38,7 +39,7 @@ class PageRenderingValidator extends ConstraintValidator
         try {
             $this->pageController->setHost($value->getHost());
             $this->pageController->showPage($value);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->context->buildViolation($constraint->message)
                 ->addViolation();
             $this->context->buildViolation($exception->getMessage())

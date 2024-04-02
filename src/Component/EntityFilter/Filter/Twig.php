@@ -2,14 +2,14 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
-use Pushword\Core\AutowiringTrait\RequiredEntityTrait;
-use Pushword\Core\AutowiringTrait\RequiredTwigTrait;
-use Pushword\Core\Entity\PageInterface;
+use Pushword\Core\Entity\Page;
+use Twig\Environment as TwigEnv;
 
 class Twig extends AbstractFilter
 {
-    use RequiredEntityTrait;
-    use RequiredTwigTrait;
+    public Page $page;
+
+    public TwigEnv $twig;
 
     public function apply(mixed $propertyValue): string
     {
@@ -24,6 +24,6 @@ class Twig extends AbstractFilter
 
         $templateWrapper = $this->twig->createTemplate($string);
 
-        return $templateWrapper->render($this->entity instanceof PageInterface ? ['page' => $this->entity] : []);
+        return $templateWrapper->render(['page' => $this->page]);
     }
 }

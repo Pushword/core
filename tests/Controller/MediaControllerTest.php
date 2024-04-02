@@ -2,16 +2,17 @@
 
 namespace Pushword\Core\Tests\Controller;
 
+use Pushword\Core\Controller\MediaController;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class MediaControllerTest extends KernelTestCase
 {
-    public function testDownload()
+    public function testDownload(): void
     {
         self::bootKernel();
 
-        $mediaController = self::$kernel->getContainer()->get('Pushword\Core\Controller\MediaController');
+        $mediaController = self::getContainer()->get(MediaController::class);
         $response = $mediaController->download('piedweb-logo.png');
-        $this->assertTrue(200 === $response->getStatusCode());
+        self::assertSame(200, $response->getStatusCode());
     }
 }

@@ -3,35 +3,31 @@
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Pushword\Core\AutowiringTrait\RequiredApps;
-use Pushword\Core\AutowiringTrait\RequiredAppTrait;
-use Pushword\Core\AutowiringTrait\RequiredTwigTrait;
-use Pushword\Core\Repository\Repository;
+use Exception;
+use Pushword\Core\Component\App\AppConfig;
+use Pushword\Core\Component\App\AppPool;
+use Pushword\Core\Entity\Page;
 use Pushword\Core\Router\PushwordRouteGenerator;
-use Pushword\Core\Twig\LinkTwigTrait;
+use Pushword\Core\Service\LinkProvider;
 
 use function Safe\preg_match_all;
 
+use Twig\Environment;
+
+/** @psalm-suppress MissingConstructor */
 final class HtmlLinkMultisite extends AbstractFilter
 {
-    use LinkTwigTrait;
-    use RequiredApps;
-    use RequiredAppTrait;
-    use RequiredTwigTrait;
+    public LinkProvider $linkProvider;
 
-    private EntityManagerInterface $entityManager;
+    public AppPool $apps;
 
-    public function setEntityManager(EntityManagerInterface $entityManager): void
-    {
-        $this->entityManager = $entityManager;
-    }
+    public AppConfig $app;
 
-    private PushwordRouteGenerator $router;
+    public Environment $twig;
 
-    public function setRouter(PushwordRouteGenerator $router): void
-    {
-        $this->router = $router;
-    }
+    public EntityManagerInterface $entityManager;
+
+    public PushwordRouteGenerator $router;
 
     /**
      * @var string
@@ -60,6 +56,8 @@ final class HtmlLinkMultisite extends AbstractFilter
         if (! isset($matches[1])) {
             return $body;
         }
+
+        /** @var array<int|string, array<int, string>> $matches */
 
         return $this->replaceLinks($body, $matches);
     }
@@ -96,8 +94,8 @@ final class HtmlLinkMultisite extends AbstractFilter
         }
 
         $newHref = substr($href, 1);
-        if (($page = Repository::getPageRepository($this->entityManager, $currentPage::class)
-            ->findOneBy(['slug' => $newHref, 'host' => $currentPage->getHost()])) !== null) {
+        $page = $this->entityManager->getRepository(Page::class)->findOneBy(['slug' => $newHref, 'host' => $currentPage->getHost()]);
+        if (null !== $page) {
             return $this->router->generate($page);
         }
 
@@ -115,6 +113,6 @@ final class HtmlLinkMultisite extends AbstractFilter
             }
         }
 
-        throw new \Exception();
+        throw new Exception();
     }
 }

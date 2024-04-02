@@ -13,50 +13,48 @@ use Symfony\Component\Yaml\Yaml;
 
 class PushwordConfigFactoryTest extends TestCase
 {
-    public function testWithoutConfiguration()
+    public function testWithoutConfiguration(): void
     {
         $container = new ContainerBuilder(new ParameterBag([]));
         $config = (new Processor())->processConfiguration(new Configuration(), []);
         $factory = new PushwordConfigFactory($container, $config, new Configuration());
         $factory->loadConfigToParams();
         $factory->loadApps();
-        $this->assertSame('App\Entity\Page', $container->getParameter('pw.entity_page'));
-        $this->assertTrue(! empty($container->getParameter('pw.apps')));
+        self::assertNotEmpty($container->getParameter('pw.apps')); // @phpstan-ignore-line
     }
 
-    public function testIt()
+    public function testIt(): void
     {
         $container = new ContainerBuilder(new ParameterBag([]));
 
         $factory = new PushwordConfigFactory($container, $this->getConfigArray(), new Configuration());
         $factory->loadConfigToParams();
 
-        $this->assertSame('App\Entity\Page', $container->getParameter('pw.entity_page'));
-        $this->assertFalse($container->hasParameter('pw.custom_property'));
-        $this->assertFalse($container->hasParameter('pw.apps'));
+        self::assertFalse($container->hasParameter('pw.custom_property')); // @phpstan-ignore-line
+        self::assertFalse($container->hasParameter('pw.apps')); // @phpstan-ignore-line
 
         $factory->loadApps();
 
-        $this->assertTrue($container->hasParameter('pw.apps'));
-        $this->assertSame('Pushword', $container->getParameter('pw.apps')['localhost.dev']['name']);
+        self::assertTrue($container->hasParameter('pw.apps'));
+        self::assertSame('Pushword', $container->getParameter('pw.apps')['localhost.dev']['name']);
 
         $apps = $container->getParameter('pw.apps');
 
         $factory->processAppsConfiguration(); // no need for it because loadApps ever did it
 
-        $this->assertSame($apps, $container->getParameter('pw.apps'));
+        self::assertSame($apps, $container->getParameter('pw.apps'));
 
         $factory = new PushwordConfigFactory($container, $this->getPwExtensionConfig(), new Configuration(), 'anPushwordExtension');
         $factory->processAppsConfiguration(); // no need for it because loadApps ever did it
 
-        $this->assertFalse($container->hasParameter('pw.anPushwordExtension.randomConfigParamsNeededForApp'));
-        $this->assertFalse($container->hasParameter('pw.randomConfigParamsNeededForApp'));
-        $this->assertSame('ok', $container->getParameter('pw.apps')['localhost.dev']['randomConfigParamsNeededForApp']);
-        $this->assertSame('blabla', $container->getParameter('pw.apps')['localhost.dev']['custom_properties']['firstCP']);
-        $this->assertSame('blablabla', $container->getParameter('pw.apps')['localhost.dev']['custom_properties']['otherCustomProperty']);
+        self::assertFalse($container->hasParameter('pw.anPushwordExtension.randomConfigParamsNeededForApp')); // @phpstan-ignore-line
+        self::assertFalse($container->hasParameter('pw.randomConfigParamsNeededForApp')); // @phpstan-ignore-line
+        self::assertSame('ok', $container->getParameter('pw.apps')['localhost.dev']['randomConfigParamsNeededForApp']); // @phpstan-ignore-line
+        self::assertSame('blabla', $container->getParameter('pw.apps')['localhost.dev']['custom_properties']['firstCP']);
+        self::assertSame('blablabla', $container->getParameter('pw.apps')['localhost.dev']['custom_properties']['otherCustomProperty']);
     }
 
-    public function testBadFormattedConfigException()
+    public function testBadFormattedConfigException(): void
     {
         $container = new ContainerBuilder(new ParameterBag([]));
         $factory = new PushwordConfigFactory($container, $this->getBadConfigArray(), new Configuration());
@@ -71,9 +69,8 @@ class PushwordConfigFactoryTest extends TestCase
     {
         $config = Yaml::parse(file_get_contents(__DIR__.'/../../../skeleton/config/packages/pushword.yaml'));
         $config['pushword']['apps'][0]['custom_properties'] = array_merge($config['pushword']['apps'][0]['custom_properties'] ?? [], ['firstCP' => 'blabla']);
-        $config = (new Processor())->processConfiguration(new Configuration(), [$config['pushword']]);
 
-        return $config;
+        return (new Processor())->processConfiguration(new Configuration(), [$config['pushword']]);
     }
 
     private function getBadConfigArray(): array
