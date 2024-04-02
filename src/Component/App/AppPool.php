@@ -2,6 +2,8 @@
 
 namespace Pushword\Core\Component\App;
 
+use Exception;
+use LogicException;
 use Pushword\Core\Entity\Page;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Twig\Environment as Twig;
@@ -66,7 +68,7 @@ final class AppPool
         }
 
         if (! isset($app)) {
-            throw new \Exception('No AppConfig found (`'.($host ?? '').'`)');
+            throw new Exception('No AppConfig found (`'.($host ?? '').'`)');
         }
 
         /** @var AppConfig $app */
@@ -104,7 +106,7 @@ final class AppPool
     public function safegetCurrentPage(): Page
     {
         if (null === $this->currentPage) {
-            throw new \LogicException();
+            throw new LogicException();
         }
 
         return $this->currentPage;

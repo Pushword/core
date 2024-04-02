@@ -2,6 +2,8 @@
 
 namespace Pushword\Core\Controller;
 
+use DateTime;
+use LogicException;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Entity\Page;
 use Pushword\Core\Repository\PageRepository;
@@ -32,7 +34,7 @@ final class PageController extends AbstractController
         private readonly PageRepository $pageRepository,
     ) {
         if (! $translator instanceof DataCollectorTranslator && ! $translator instanceof Translator) {
-            throw new \LogicException('A symfony codebase changed make this hack impossible (cf setLocale). Get `'.$translator::class.'`');
+            throw new LogicException('A symfony codebase changed make this hack impossible (cf setLocale). Get `'.$translator::class.'`');
         }
 
         $this->initHost($requestStack);
@@ -290,7 +292,7 @@ final class PageController extends AbstractController
         $this->translator->setLocale($page->getLocale());
 
         // Check if page is public
-        if ($page->getCreatedAt() > new \DateTime() && ! $this->isGranted('ROLE_EDITOR')) {
+        if ($page->getCreatedAt() > new DateTime() && ! $this->isGranted('ROLE_EDITOR')) {
             if ($throwException) {
                 throw $this->createNotFoundException();
             }

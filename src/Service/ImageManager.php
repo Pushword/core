@@ -3,6 +3,7 @@
 namespace Pushword\Core\Service;
 
 use Cocur\Slugify\Slugify;
+use Exception;
 use Intervention\Image\Encoders\AutoEncoder;
 use Intervention\Image\ImageManager as InteventionImageManager;
 use Intervention\Image\Interfaces\ImageInterface;
@@ -156,7 +157,7 @@ final class ImageManager
 
         $size = @getimagesize($path);
         if (false === $size) {
-            throw new \Exception('`'.$path.'` not found');
+            throw new Exception('`'.$path.'` not found');
         }
 
         return [$size[0], $size[1]];
@@ -171,8 +172,8 @@ final class ImageManager
 
         try {
             return InteventionImageManager::gd()->read($path); // default driver GD
-        } catch (\Exception) {
-            throw new \Exception($path);
+        } catch (Exception) {
+            throw new Exception($path);
         }
     }
 
@@ -208,7 +209,7 @@ final class ImageManager
         $imageLocalImport = $this->cacheExternalImage($image);
 
         if (false === $imageLocalImport || ($imgSize = getimagesize($imageLocalImport)) === false) {
-            throw new \Exception('Image `'.$image.'` was not imported.');
+            throw new Exception('Image `'.$image.'` was not imported.');
         }
 
         $fileName = $this->generateFileName($image, $imgSize['mime'], '' !== $slug ? $slug : $name, $hashInFilename);

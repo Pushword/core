@@ -3,6 +3,7 @@
 namespace Pushword\Core\Entity\PageTrait;
 
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use Pushword\Core\Entity\Media;
 
 trait PageMainImageTrait
@@ -19,7 +20,7 @@ trait PageMainImageTrait
     {
         // TODO: Déplacer en Assert pour éviter une erreur dégueu ?!
         if (null !== $media && null === $media->getWidth()) {
-            throw new \Exception('mainImage must be an Image. Media imported is not an image');
+            throw new Exception('mainImage must be an Image. Media imported is not an image');
         }
 
         $this->mainImage = $media;

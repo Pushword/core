@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
+use LogicException;
 use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\EntityFilter\Manager;
 use Pushword\Core\Entity\Page;
@@ -25,6 +26,6 @@ class ElseH1 extends AbstractFilter
             return $return;
         }
 
-        throw new \LogicException();
+        throw new LogicException();
     }
 }

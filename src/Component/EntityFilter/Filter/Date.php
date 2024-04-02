@@ -2,6 +2,8 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
+use Exception;
+use IntlDateFormatter;
 use Pushword\Core\Component\App\AppConfig;
 
 use function Safe\preg_replace;
@@ -18,7 +20,7 @@ class Date extends AbstractFilter
     private function convertDateShortCode(string $string, ?string $locale = null): string
     {
         $locale = null !== $locale ? $this->convertLocale($locale) : 'fr_FR';
-        $intlDateFormatter = new \IntlDateFormatter($locale, \IntlDateFormatter::FULL, \IntlDateFormatter::NONE);
+        $intlDateFormatter = new IntlDateFormatter($locale, IntlDateFormatter::FULL, IntlDateFormatter::NONE);
 
         // $string = preg_replace('/date\([\'"]?([a-z% ]+)[\'"]?\)/i',
         //  strftime(strpos('\1', '%') ? '\1': '%\1'), $string);
@@ -38,7 +40,7 @@ class Date extends AbstractFilter
 
         $string = preg_replace('/date\([\'"]?%?e[\'"]?\)/i', (string) $intlDateFormatter->format(time()), $string);
 
-        return \is_string($string) ? $string : throw new \Exception();
+        return \is_string($string) ? $string : throw new Exception();
     }
 
     private function getWinterYear(): string

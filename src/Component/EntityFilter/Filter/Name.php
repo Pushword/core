@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
+use Exception;
 use Pushword\Core\AutowiringTrait\RequiredManagerTrait;
 use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\EntityFilter\Manager;
@@ -19,7 +20,7 @@ class Name extends AbstractFilter
     public function apply(mixed $propertyValue): ?string
     {
         if (! \is_string($propertyValue)) {
-            throw new \Exception();
+            throw new Exception();
         }
 
         $names = explode("\n", $this->string($propertyValue));

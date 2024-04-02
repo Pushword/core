@@ -5,6 +5,7 @@ namespace Pushword\Core\Entity\PageTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use LogicException;
 use Pushword\Core\Entity\Page;
 
 trait PageParentTrait
@@ -39,7 +40,7 @@ trait PageParentTrait
     public function setParentPage(?Page $page): self
     {
         if (null !== $page && ! $this->validateParentPage($page)) {
-            throw new \LogicException("Current Page can't be it own parent page.");
+            throw new LogicException("Current Page can't be it own parent page.");
         }
 
         $this->parentPage = $page;

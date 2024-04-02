@@ -5,6 +5,9 @@ namespace Pushword\Core\Utils;
 use Doctrine\Common\Collections\ArrayCollection;
 use Pushword\Core\Entity\Page;
 
+/**
+ * @see packages/docs/content/pages-list.md
+ */
 class StringToDQLCriteria
 {
     /** @var array<int, string|array{0: string, 1: string, 2: string|int|float|int[]}|array{0: string, 1: string, 2: string|int|float|int[]}[]> */
@@ -17,17 +20,19 @@ class StringToDQLCriteria
     /** @return array<int, string|array{0: string, 1: string, 2: string|int|float|int[]}|array{0: string, 1: string, 2: string|int|float|int[]}[]> */
     public function retrieve(): array
     {
-        if (str_contains($this->search, ' OR ')) {
-            $searchToParse = explode(' OR ', $this->search);
-            foreach ($searchToParse as $singleSearchToParse) {
-                // $where = array_merge($where, $this->stringToSearch($s), ['OR']);
-                $this->simpleStringToSearch($singleSearchToParse);
-                $this->where[] = 'OR';
+        foreach (['OR', 'AND'] as $operator) {
+            if (str_contains($this->search, ' '.$operator.' ')) {
+                $searchToParse = explode(' '.$operator.' ', $this->search);
+                foreach ($searchToParse as $singleSearchToParse) {
+                    // $where = array_merge($where, $this->stringToSearch($s), ['OR']);
+                    $this->simpleStringToSearch($singleSearchToParse);
+                    $this->where[] = $operator;
+                }
+
+                array_pop($this->where);
+
+                return $this->where;
             }
-
-            array_pop($this->where);
-
-            return $this->where;
         }
 
         $this->simpleStringToSearch($this->search);
@@ -37,6 +42,8 @@ class StringToDQLCriteria
 
     private function simpleStringToSearch(string $search): void
     {
+        $search = trim($search);
+
         if ($this->simpleStringToSearchChildren($search)) {
             return;
         }
@@ -60,7 +67,22 @@ class StringToDQLCriteria
             return;
         }
 
-        if (str_starts_with($search, 'slug:')) {
+        if (($searchTitle = str_starts_with($search, 'title:')) || str_starts_with($search, 'content:')) {
+            $search = substr($search, $searchTitle ? \strlen('title:') : \strlen('content:'));
+
+            $where = [['h1',  'LIKE',  '%'.$search.'%'], 'OR', ['title',  'LIKE',  '%'.$search.'%']];
+
+            if (! $searchTitle) {
+                $where[] = 'OR';
+                $where[] = ['mainContent',  'LIKE',  '%'.$search.'%'];
+            }
+
+            $this->where[] = $where;
+
+            return;
+        }
+
+        if (str_starts_with($search, 'slug:') || str_starts_with($search, 'page:')) {
             $search = substr($search, \strlen('slug:'));
 
             $this->where[] = ['slug',  'LIKE',  $search];
@@ -68,7 +90,8 @@ class StringToDQLCriteria
             return;
         }
 
-        $this->where[] = ['mainContent',  'LIKE',  '%'.$search.'%'];
+        $this->where[] = ['tags',  'LIKE',  '%"'.$search.'"%'];
+        // $this->where[] = ['mainContent',  'LIKE',  '%'.$search.'%'];
     }
 
     private function simpleStringToSearchChildren(string $search): bool
@@ -96,13 +119,13 @@ class StringToDQLCriteria
             return true;
         }
 
-        if ('parent_children' === $searchLowerCased) {
+        if (\in_array($searchLowerCased, ['parent_children', 'sisters'], true)) {
             $this->where[] = ['parentPage', '=', $this->currentPage?->getParentPage()?->getId() ?? 0];
 
             return true;
         }
 
-        if ('children_children' === $searchLowerCased) {
+        if (\in_array($searchLowerCased, ['children_children', 'grandchildren'], true)) {
             /** @psalm-suppress all  */
             $childrenPage = ($this->currentPage?->getChildrenPages() ?? new ArrayCollection([]))
                 ->map(static fn ($page): int => $page->getId() ?? 0)->toArray();

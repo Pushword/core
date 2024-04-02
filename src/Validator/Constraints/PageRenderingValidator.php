@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\Validator\Constraints;
 
+use Exception;
 use Pushword\Core\Controller\PageController;
 use Pushword\Core\Entity\Page;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
@@ -38,7 +39,7 @@ class PageRenderingValidator extends ConstraintValidator
         try {
             $this->pageController->setHost($value->getHost());
             $this->pageController->showPage($value);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->context->buildViolation($constraint->message)
                 ->addViolation();
             $this->context->buildViolation($exception->getMessage())

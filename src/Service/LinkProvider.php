@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\Service;
 
+use Exception;
 use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Entity\Page;
@@ -36,7 +37,7 @@ final readonly class LinkProvider
         if (\is_array($path)) {
             $attr = $path;
             if (! isset($attr['href'])) {
-                throw new \Exception('attr must contain href for render a link.');
+                throw new Exception('attr must contain href for render a link.');
             }
 
             $path = $attr['href'];
@@ -129,7 +130,7 @@ final readonly class LinkProvider
 
         return trim($this->twig->render($template, [
             'number' => str_replace([' ', '&nbsp;', '.'], '', $number),
-            'number_readable' => str_replace(' ', '&nbsp;', preg_replace('#^\+\d{2} ?#', '0', $number) ?? throw new \Exception()),
+            'number_readable' => str_replace(' ', '&nbsp;', preg_replace('#^\+\d{2} ?#', '0', $number) ?? throw new Exception()),
             'class' => $class,
         ]));
     }

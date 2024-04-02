@@ -2,14 +2,17 @@
 
 namespace Pushword\Core\Repository;
 
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Selectable;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectRepository;
+use LogicException;
 use Pushword\Admin\PageCheatSheetAdmin;
 use Pushword\Core\Entity\Media;
 use Pushword\Core\Entity\Page;
+use RuntimeException;
 
 /**
  * @psalm-suppress MethodSignatureMustProvideReturnType
@@ -90,7 +93,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
 
         return $this->createQueryBuilder($alias)
             ->andWhere($alias.'.publishedAt <=  :now')
-            ->setParameter('now', new \DateTime(), 'datetime')
+            ->setParameter('now', new DateTime(), 'datetime')
             ->andWhere($alias.'.slug <> :cheatsheet')
             ->setParameter('cheatsheet', PageCheatSheetAdmin::CHEATSHEET_SLUG);
     }
@@ -198,7 +201,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
         $aliases = $queryBuilder->getRootAliases();
 
         if (! isset($aliases[0])) {
-            throw new \RuntimeException('No alias was set before invoking getRootAlias().');
+            throw new RuntimeException('No alias was set before invoking getRootAlias().');
         }
 
         return $aliases[0];
@@ -220,7 +223,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
             $direction = $this->extractDirection($key, $orderBy);
             $orderByFunc = 0 === $i ? 'orderBy' : 'addOrderBy';
             if (! method_exists($queryBuilder, $orderByFunc)) {
-                throw new \LogicException();
+                throw new LogicException();
             }
 
             $queryBuilder->$orderByFunc($this->getRootAlias($queryBuilder).'.'.$key, $direction); // @phpstan-ignore-line
@@ -314,22 +317,52 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
     }
 
     /**
+     * @param string|string[]|null $host
+     *
      * @return string[]
      */
-    public function getAllTags(): array
+    public function getAllTags(array|string|null $host = null): array
     {
         $queryBuilder = $this->createQueryBuilder('p')
-            ->select('p.tags')
-            ->getQuery();
+            ->select('p.tags');
+
+        if (null !== $host) {
+            $this->andHost($queryBuilder, $host);
+        }
 
         /** @var array{tags: string[]}[] */
-        $tags = $queryBuilder->getResult();
+        $tags = $queryBuilder->getQuery()->getResult();
 
         $allTags = [];
         foreach ($tags as $entity) {
             $allTags = array_merge($allTags, $entity['tags']);
         }
 
-        return array_unique($allTags);
+        return array_values(array_unique($allTags));
+    }
+
+    /**
+     * @param string|string[]|null $host
+     *
+     * @return string[]
+     */
+    public function getPageUriList(array|string|null $host = null): array
+    {
+        $queryBuilder = $this->createQueryBuilder('p')
+            ->select('p.slug');
+
+        if (null !== $host) {
+            $this->andHost($queryBuilder, $host);
+        }
+
+        /** @var array{slug: string[]}[] */
+        $results = $queryBuilder->getQuery()->getResult();
+
+        $pageUriList = [];
+        foreach ($results as $result) {
+            $pageUriList[] = '/'.('homepage' === $result['slug'] ? '' : $result['slug']);
+        }
+
+        return $pageUriList;
     }
 }

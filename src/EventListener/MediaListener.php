@@ -4,8 +4,10 @@ namespace Pushword\Core\EventListener;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
+use Exception;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ImageInterface;
+use LogicException;
 use Pushword\Core\Entity\Media;
 use Pushword\Core\Repository\MediaRepository;
 use Pushword\Core\Service\ImageManager;
@@ -52,7 +54,7 @@ final class MediaListener
     {
         $media = $event->getObject();
         if (! $media instanceof Media) {
-            throw new \LogicException();
+            throw new LogicException();
         }
 
         return $media;
@@ -138,12 +140,12 @@ final class MediaListener
             if (file_exists($media->getPath())) {
                 $media->setMedia($media->getMediaBeforeUpdate());
 
-                throw new \Exception('Impossible to rename '.$media->getMediaBeforeUpdate().' in '.$media->getMedia().'. File ever exist');
+                throw new Exception('Impossible to rename '.$media->getMediaBeforeUpdate().' in '.$media->getMedia().'. File ever exist');
             }
 
             if ('' === $media->getMediaBeforeUpdate()) {
                 // dd($media->getMediaBeforeUpdate());
-                throw new \LogicException();
+                throw new LogicException();
             }
 
             $this->filesystem->rename(
@@ -229,7 +231,7 @@ final class MediaListener
         $this->renamer->rename($media);
 
         if (10 === $this->renamer->getIteration()) {
-            throw new \Exception('Too much file with similar name `'.$media->getMedia().'`');
+            throw new Exception('Too much file with similar name `'.$media->getMedia().'`');
         }
 
         if (1 === $this->renamer->getIteration()) {

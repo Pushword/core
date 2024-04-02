@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\Entity;
 
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Pushword\Core\Entity\PageTrait\PageEditorTrait;
 use Pushword\Core\Entity\PageTrait\PageExtendedTrait;
@@ -48,7 +49,7 @@ class Page implements IdInterface
     {
         if ($initDateTimeProperties) {
             $this->initTimestampableProperties();
-            $this->publishedAt = new \DateTime();
+            $this->publishedAt = new DateTime();
         }
     }
 

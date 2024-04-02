@@ -2,6 +2,8 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
+use Exception;
+
 use function Safe\preg_match_all;
 
 final class HtmlEncryptedLink extends EncryptedLink
@@ -80,6 +82,6 @@ final class HtmlEncryptedLink extends EncryptedLink
             }
         }
 
-        throw new \Exception();
+        throw new Exception();
     }
 }

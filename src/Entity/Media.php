@@ -3,11 +3,13 @@
 namespace Pushword\Core\Entity;
 
 use Cocur\Slugify\Slugify;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
+use LogicException;
 use Pushword\Core\Entity\MediaTrait\ImageTrait;
 use Pushword\Core\Entity\MediaTrait\MediaHashTrait;
 use Pushword\Core\Entity\MediaTrait\MediaNameTrait;
@@ -45,8 +47,8 @@ class Media implements IdInterface
     public function __construct()
     {
         $this->mainImagePages = new ArrayCollection();
-        $this->updatedAt ??= new \DateTime();
-        $this->createdAt ??= new \DateTime();
+        $this->updatedAt ??= new DateTime();
+        $this->createdAt ??= new DateTime();
     }
 
     #[ORM\Column(type: Types::STRING, length: 255)]
@@ -102,7 +104,7 @@ class Media implements IdInterface
             return '';
         }
 
-        return preg_replace('/.*(\\.[^.\\s]{3,4})$/', '$1', $string) ?? throw new \Exception();
+        return preg_replace('/.*(\\.[^.\\s]{3,4})$/', '$1', $string) ?? throw new Exception();
     }
 
     private function extractExtensionFromFile(): string
@@ -110,7 +112,7 @@ class Media implements IdInterface
         $mediaFile = $this->getMediaFile();
 
         if (null === $mediaFile) {
-            throw new \Exception();
+            throw new Exception();
         }
 
         $extension = $mediaFile->guessExtension(); // From MimeType
@@ -166,7 +168,7 @@ class Media implements IdInterface
         $this->mediaFile = $file;
 
         if (null !== $file) {
-            $this->updatedAt = new \DateTime();
+            $this->updatedAt = new DateTime();
         }
     }
 
@@ -178,7 +180,7 @@ class Media implements IdInterface
     public function getMediaFileName(): string
     {
         if (! $this->mediaFile instanceof File) {
-            throw new \Exception('MediaFile is not setted');
+            throw new Exception('MediaFile is not setted');
         }
 
         if ($this->mediaFile instanceof UploadedFile) {
@@ -211,7 +213,7 @@ class Media implements IdInterface
     public function getStoreIn(): string
     {
         if ('' === $this->projectDir) {
-            throw new \Exception('must set project dir before');
+            throw new Exception('must set project dir before');
         }
 
         return str_replace('%kernel.project_dir%', $this->projectDir, $this->storeIn);
@@ -220,7 +222,7 @@ class Media implements IdInterface
     public function setStoreIn(string $pathToDir): self
     {
         if ('' === $this->projectDir) {
-            throw new \Exception('must set project dir before');
+            throw new Exception('must set project dir before');
         }
 
         $this->storeIn = rtrim(str_replace($this->projectDir, '%kernel.project_dir%', $pathToDir), '/');
@@ -231,7 +233,7 @@ class Media implements IdInterface
     public function getPath(): string
     {
         if ('' === $this->media) {
-            throw new \LogicException();
+            throw new LogicException();
         }
 
         return $this->getStoreIn().'/'.$this->media;
@@ -272,7 +274,7 @@ class Media implements IdInterface
      */
     public function getMainImagePages(): Collection
     {
-        return $this->mainImagePages ?? throw new \Exception();
+        return $this->mainImagePages ?? throw new Exception();
     }
 
     #[ORM\PreRemove]
@@ -393,7 +395,7 @@ class Media implements IdInterface
     {
         $filename = '' !== $filename ? $filename : $this->getMediaFileName();
         if ('' === $filename) {
-            throw new \Exception('debug... '); // dd($this->mediaFile);
+            throw new Exception('debug... '); // dd($this->mediaFile);
         }
 
         $extension = $this->extractExtensionFromFile();

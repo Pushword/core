@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\Twig;
 
+use Exception;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Entity\Media;
 use Pushword\Core\Entity\Page;
@@ -98,7 +99,7 @@ class MediaExtension extends AbstractExtension
         }
 
         if (! $src instanceof Media) {
-            throw new \Exception("Can't handle the value submitted (".$src.')');
+            throw new Exception("Can't handle the value submitted (".$src.')');
         }
 
         return $src;

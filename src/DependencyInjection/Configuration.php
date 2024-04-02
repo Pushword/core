@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\DependencyInjection;
 
+use locale;
 use Pushword\Core\Entity\Media;
 use Pushword\Core\Entity\Page;
 use Pushword\Core\Entity\User;
@@ -16,7 +17,7 @@ final class Configuration implements ConfigurationInterface
     public const DEFAULT_TEMPLATE = '@Pushword';
 
     /**
-     * @var string[]|class-string<\locale>[]
+     * @var string[]|class-string<locale>[]
      */
     public const DEFAULT_APP_FALLBACK = [
         'hosts',

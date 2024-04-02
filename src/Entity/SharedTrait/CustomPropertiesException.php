@@ -2,7 +2,9 @@
 
 namespace Pushword\Core\Entity\SharedTrait;
 
-class CustomPropertiesException extends \Exception
+use Exception;
+
+class CustomPropertiesException extends Exception
 {
     public function __construct(string $name)
     {

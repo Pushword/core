@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
+use Exception;
 use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Service\LinkProvider;
 
@@ -32,7 +33,7 @@ class Email extends AbstractFilter
         preg_match_all($rgx, $body, $matches);
 
         if (null === $matches) {
-            throw new \Exception();
+            throw new Exception();
         }
 
         $nbrMatch = is_countable($matches[0]) ? \count($matches[0]) : 0;

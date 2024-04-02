@@ -3,6 +3,7 @@
 namespace Pushword\Core\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Pushword\Core\Entity\User;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -81,7 +82,7 @@ final class UserCreateCommand extends Command
         }
 
         if (! \is_scalar($argumentValue)) {
-            throw new \Exception();
+            throw new Exception();
         }
 
         return \strval($argumentValue);

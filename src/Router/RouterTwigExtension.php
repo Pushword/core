@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\Router;
 
+use Exception;
 use Pushword\Core\Entity\Page;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Twig\Extension\AbstractExtension;
@@ -28,9 +29,9 @@ final class RouterTwigExtension extends AbstractExtension
 
     private function getPageUri(mixed ...$args): string
     {
-        $slug = $args[0] ?? throw new \Exception('must use a string or page object');
+        $slug = $args[0] ?? throw new Exception('must use a string or page object');
         if (! \is_string($slug) && ! $slug instanceof Page) {
-            throw new \Exception('`page()` first argument must be a string or a Page Object');
+            throw new Exception('`page()` first argument must be a string or a Page Object');
         }
 
         $arg2 = $args[1] ?? null;

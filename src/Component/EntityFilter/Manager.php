@@ -3,12 +3,15 @@
 namespace Pushword\Core\Component\EntityFilter;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use LogicException;
 use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Component\EntityFilter\Filter\FilterInterface;
 use Pushword\Core\Entity\Page;
 use Pushword\Core\Router\PushwordRouteGenerator;
 use Pushword\Core\Service\LinkProvider;
+use ReflectionClass;
 
 use function Safe\preg_match;
 
@@ -60,13 +63,13 @@ final readonly class Manager
         $this->eventDispatcher->dispatch($filterEvent, FilterEvent::NAME_BEFORE);
 
         if (! \is_callable($pageMethod = [$this->page, $method])) {
-            throw new \LogicException();
+            throw new LogicException();
         }
 
         $returnValue = [] !== $arguments ? \call_user_func_array($pageMethod, $arguments) : \call_user_func($pageMethod);
 
         if (! \is_scalar($returnValue)) {
-            throw new \LogicException();
+            throw new LogicException();
         }
 
         $returnValue = $this->filter(substr($method, 3), $returnValue);
@@ -95,7 +98,7 @@ final readonly class Manager
 
     private function camelCaseToSnakeCase(string $string): string
     {
-        return strtolower(preg_replace('/[A-Z]/', '_\\0', lcfirst($string)) ?? throw new \Exception());
+        return strtolower(preg_replace('/[A-Z]/', '_\\0', lcfirst($string)) ?? throw new Exception());
     }
 
     /**
@@ -131,7 +134,7 @@ final readonly class Manager
             return false;
         }
 
-        $reflectionClass = new \ReflectionClass($filterClass);
+        $reflectionClass = new ReflectionClass($filterClass);
         if (! $reflectionClass->implementsInterface(FilterInterface::class)) {
             return false;
         }
@@ -142,7 +145,7 @@ final readonly class Manager
     private function getFilterClass(string $filter): FilterInterface
     {
         if (false === ($filterClassName = $this->isFilter($filter))) {
-            throw new \Exception('Filter `'.$filter.'` not found');
+            throw new Exception('Filter `'.$filter.'` not found');
         }
 
         /** @var class-string<FilterInterface> $filterClassName */

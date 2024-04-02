@@ -2,6 +2,8 @@
 
 namespace Pushword\Core\Twig;
 
+use InvalidArgumentException;
+use LogicException;
 use Pagerfanta\Adapter\ArrayAdapter;
 use Pagerfanta\Pagerfanta;
 use Pagerfanta\PagerfantaInterface;
@@ -39,6 +41,7 @@ final class PageExtension extends AbstractExtension
     {
         return [
             new TwigFunction('pages', $this->getPublishedPages(...)),
+            new TwigFunction('page_uri_list', $this->getPageUriList(...)),
             new TwigFunction('p', $this->getPublishedPage(...)),
             new TwigFunction('pw', $this->entityFilterManagerPool->getProperty(...)),
             new TwigFunction('breadcrumb_list_position', $this->getBreadcrumbListPosition(...)),
@@ -55,6 +58,14 @@ final class PageExtension extends AbstractExtension
         }
 
         return 1;
+    }
+
+    /**
+     * @param string|string[]|null $host
+     */
+    public function getPageUriList(string|array|null $host = null): array
+    {
+        return $this->pageRepo->getPageUriList($host ?? $this->apps->getMainHost() ?? []);
     }
 
     /**
@@ -177,7 +188,7 @@ final class PageExtension extends AbstractExtension
             }
 
             if ($max[0] < 1) {
-                throw new \LogicException();
+                throw new LogicException();
             }
 
             $pagerfanta = (new Pagerfanta(new ArrayAdapter($pages)))
@@ -203,7 +214,7 @@ final class PageExtension extends AbstractExtension
      * @param array<string, mixed>       $options
      * @param PagerfantaInterface<mixed> $pagerfanta
      *
-     * @throws \InvalidArgumentException if the $viewName argument is an invalid type
+     * @throws InvalidArgumentException if the $viewName argument is an invalid type
      */
     public function renderPager(
         PagerfantaInterface $pagerfanta,

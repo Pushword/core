@@ -3,6 +3,7 @@
 namespace Pushword\Core\DependencyInjection;
 
 use Exception;
+use LogicException;
 
 use function Safe\file_get_contents;
 
@@ -37,7 +38,7 @@ trait ExtensionTrait
         foreach ($finder as $singleFinder) {
             $configs = $parser->parse(file_get_contents($singleFinder->getRealPath()));
             if (! \is_array($configs)) {
-                throw new \Exception($singleFinder->getRealPath().' is malformed');
+                throw new Exception($singleFinder->getRealPath().' is malformed');
             }
 
             $this->prependExtensionConfigs($configs, $container);
@@ -48,7 +49,7 @@ trait ExtensionTrait
             /** @psalm-suppress UnresolvableInclude */
             $configs = @include $singleFinder->getRealPath();
             if (! \is_array($configs)) {
-                throw new \Exception();
+                throw new Exception();
             }
 
             $this->prependExtensionConfigs($configs, $container);
@@ -66,7 +67,7 @@ trait ExtensionTrait
             }
 
             if (! \is_array($config)) {
-                throw new \Exception('Malformed config named `'.((string) $name).'`');
+                throw new Exception('Malformed config named `'.((string) $name).'`');
             }
 
             /** @var array<string, mixed> $config */
@@ -84,7 +85,7 @@ trait ExtensionTrait
      */
     protected function loadInternal(array $mergedConfig, ContainerBuilder $container): void
     {
-        $configuration = $this->getConfiguration($mergedConfig, $container) ?? throw new \LogicException(); // @phpstan-ignore-line
+        $configuration = $this->getConfiguration($mergedConfig, $container) ?? throw new LogicException(); // @phpstan-ignore-line
 
         (new PushwordConfigFactory($container, $mergedConfig, $configuration, $this->getAlias()))
             ->loadConfigToParams()

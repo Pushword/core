@@ -2,10 +2,13 @@
 
 namespace Pushword\Core\Entity;
 
+use DateTime;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Pushword\Core\Entity\SharedTrait\CustomPropertiesTrait;
 use Pushword\Core\Repository\UserRepository;
+use Stringable;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -16,7 +19,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity('email', message: 'user.email.already_used')]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'user')]
-class User implements UserInterface, PasswordAuthenticatedUserInterface, \Stringable
+class User implements UserInterface, PasswordAuthenticatedUserInterface, Stringable
 {
     use CustomPropertiesTrait;
 
@@ -30,7 +33,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
     protected ?int $id = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    protected ?\DateTimeInterface $createdAt = null;
+    protected ?DateTimeInterface $createdAt = null;
 
     #[ORM\Column(type: Types::STRING, length: 180, unique: true)]
     #[Assert\Email(message: 'user.email.invalid', mode: 'strict')]
@@ -151,17 +154,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \String
     #[ORM\PrePersist]
     public function updatedTimestamps(): self
     {
-        $this->setCreatedAt(new \DateTime('now'));
+        $this->setCreatedAt(new DateTime('now'));
 
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    public function setCreatedAt(DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
 

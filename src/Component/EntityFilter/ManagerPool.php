@@ -3,6 +3,7 @@
 namespace Pushword\Core\Component\EntityFilter;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Entity\Page;
 use Pushword\Core\Router\PushwordRouteGenerator;
@@ -50,7 +51,7 @@ final class ManagerPool
         }
 
         if (! method_exists($manager, $property)) {
-            throw new \Exception('Property `'.$property."` doesn't exist");
+            throw new Exception('Property `'.$property."` doesn't exist");
         }
 
         return $manager->$property(); // @phpstan-ignore-line

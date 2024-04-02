@@ -3,6 +3,7 @@
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Entity\Page;
@@ -112,6 +113,6 @@ final class HtmlLinkMultisite extends AbstractFilter
             }
         }
 
-        throw new \Exception();
+        throw new Exception();
     }
 }

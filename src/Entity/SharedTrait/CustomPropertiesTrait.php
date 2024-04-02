@@ -4,6 +4,8 @@ namespace Pushword\Core\Entity\SharedTrait;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
+use LogicException;
 
 use function Safe\preg_match;
 
@@ -81,7 +83,7 @@ trait CustomPropertiesTrait
         $standAloneProperties = '' !== $this->standAloneCustomProperties ? Yaml::parse($this->standAloneCustomProperties)
             : [];
         if (! \is_array($standAloneProperties)) {
-            throw new \Exception('standAloneProperties are not a valid yaml array');
+            throw new Exception('standAloneProperties are not a valid yaml array');
         }
 
         $this->standAloneCustomProperties = '';
@@ -156,7 +158,7 @@ trait CustomPropertiesTrait
     {
         $return = $this->customProperties[$name] ?? null;
         if (null !== $return && ! \is_scalar($return)) {
-            throw new \LogicException(\gettype($return));
+            throw new LogicException(\gettype($return));
         }
 
         return $return;
@@ -170,12 +172,12 @@ trait CustomPropertiesTrait
         $value = $this->customProperties[$name] ?? null;
 
         if (! \is_array($value)) {
-            throw new \LogicException(\gettype($value));
+            throw new LogicException(\gettype($value));
         }
 
         $toReturn = [];
         foreach ($value as $v) {
-            $toReturn[] = \is_string($v) ? $v : throw new \Exception();
+            $toReturn[] = \is_string($v) ? $v : throw new Exception();
         }
 
         return $toReturn;
@@ -201,7 +203,7 @@ trait CustomPropertiesTrait
         }
 
         if (1 === preg_match('/^get/', $method)) {
-            $property = lcfirst(preg_replace('/^get/', '', $method) ?? throw new \Exception());
+            $property = lcfirst(preg_replace('/^get/', '', $method) ?? throw new Exception());
             if (! property_exists(static::class, $property)) {
                 return $this->getCustomProperty($property) ?? null;
             }

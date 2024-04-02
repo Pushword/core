@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\Service;
 
+use Exception;
 use Imagine\Draw\DrawerInterface;
 use Imagine\Gd\Font;
 use Imagine\Image\Box;
@@ -52,7 +53,7 @@ class PageOpenGraphImageGenerator
 
     public function getPage(): Page
     {
-        return $this->page ?? throw new \Exception();
+        return $this->page ?? throw new Exception();
     }
 
     public function getPath(bool $browserPath = false): string
