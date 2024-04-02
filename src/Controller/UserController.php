@@ -2,7 +2,6 @@
 
 namespace Pushword\Core\Controller;
 
-use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -28,6 +27,6 @@ final class UserController extends AbstractController
 
     public function logout(): never
     {
-        throw new LogicException('This method can be blank');
+        throw new \LogicException('This method can be blank');
     }
 }

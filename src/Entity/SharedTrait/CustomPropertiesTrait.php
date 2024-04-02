@@ -4,8 +4,7 @@ namespace Pushword\Core\Entity\SharedTrait;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
-use LogicException;
+use Pushword\Core\Utils\F;
 
 use function Safe\preg_match;
 
@@ -32,13 +31,17 @@ trait CustomPropertiesTrait
 
     protected string $buildValidationAtPath = 'standAloneCustomProperties';
 
-    /** @return array<mixed> */
+    /**
+     * @return array<mixed>
+     */
     public function getCustomProperties(): array
     {
         return $this->customProperties;
     }
 
-    /** @param array<mixed> $customProperties */
+    /**
+     * @param array<mixed> $customProperties
+     */
     public function setCustomProperties(array $customProperties): self
     {
         $this->customProperties = $customProperties;
@@ -83,7 +86,7 @@ trait CustomPropertiesTrait
         $standAloneProperties = '' !== $this->standAloneCustomProperties ? Yaml::parse($this->standAloneCustomProperties)
             : [];
         if (! \is_array($standAloneProperties)) {
-            throw new Exception('standAloneProperties are not a valid yaml array');
+            throw new \Exception('standAloneProperties are not a valid yaml array');
         }
 
         $this->standAloneCustomProperties = '';
@@ -91,15 +94,15 @@ trait CustomPropertiesTrait
         // remove the standAlone which were removed
         $existingPropertyNames = array_keys($this->getCustomProperties());
         foreach ($existingPropertyNames as $existingPropertyName) {
-            if (! $this->isStandAloneCustomProperty((string) $existingPropertyName)) {
+            if (! $this->isStandAloneCustomProperty($existingPropertyName)) {
                 continue;
             }
 
-            if (isset($standAloneProperties[(string) $existingPropertyName])) {
+            if (isset($standAloneProperties[$existingPropertyName])) {
                 continue;
             }
 
-            $this->removeCustomProperty((string) $existingPropertyName);
+            $this->removeCustomProperty($existingPropertyName);
         }
 
         // nothing to add
@@ -108,11 +111,11 @@ trait CustomPropertiesTrait
         }
 
         foreach ($standAloneProperties as $name => $value) {
-            if (! $this->isStandAloneCustomProperty((string) $name)) {
-                throw new CustomPropertiesException((string) $name);
+            if (! $this->isStandAloneCustomProperty($name)) {
+                throw new CustomPropertiesException($name);
             }
 
-            $this->setCustomProperty((string) $name, $value);
+            $this->setCustomProperty($name, $value);
         }
     }
 
@@ -139,14 +142,11 @@ trait CustomPropertiesTrait
         return ! method_exists($this, 'set'.ucfirst($name)) && ! method_exists($this, 'set'.$name);
     }
 
-    public function setCustomProperty(string $name, mixed $value): void
+    public function setCustomProperty(string $name, mixed $value): self
     {
         $this->customProperties[$name] = $value;
-    }
 
-    public function hasCustomProperty(string $name): bool
-    {
-        return isset($this->customProperties[$name]);
+        return $this;
     }
 
     public function getCustomProperty(string $name): mixed
@@ -158,29 +158,10 @@ trait CustomPropertiesTrait
     {
         $return = $this->customProperties[$name] ?? null;
         if (null !== $return && ! \is_scalar($return)) {
-            throw new LogicException(\gettype($return));
+            throw new \LogicException(\gettype($return));
         }
 
         return $return;
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function getCustomPropertyList(string $name): array
-    {
-        $value = $this->customProperties[$name] ?? null;
-
-        if (! \is_array($value)) {
-            throw new LogicException(\gettype($value));
-        }
-
-        $toReturn = [];
-        foreach ($value as $v) {
-            $toReturn[] = \is_string($v) ? $v : throw new Exception();
-        }
-
-        return $toReturn;
     }
 
     public function removeCustomProperty(string $name): void
@@ -198,12 +179,12 @@ trait CustomPropertiesTrait
      */
     public function __call(string $method, array $arguments = [])
     {
-        if ('_actions' === $method) {
+        if ('_actions' == $method) {
             return; // avoid error with sonata
         }
 
         if (1 === preg_match('/^get/', $method)) {
-            $property = lcfirst(preg_replace('/^get/', '', $method) ?? throw new Exception());
+            $property = lcfirst(F::preg_replace_str('/^get/', '', $method));
             if (! property_exists(static::class, $property)) {
                 return $this->getCustomProperty($property) ?? null;
             }

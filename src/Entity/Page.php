@@ -2,7 +2,6 @@
 
 namespace Pushword\Core\Entity;
 
-use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Pushword\Core\Entity\PageTrait\PageEditorTrait;
 use Pushword\Core\Entity\PageTrait\PageExtendedTrait;
@@ -13,22 +12,18 @@ use Pushword\Core\Entity\PageTrait\PageParentTrait;
 use Pushword\Core\Entity\PageTrait\PageRedirectionTrait;
 use Pushword\Core\Entity\PageTrait\PageSearchTrait;
 use Pushword\Core\Entity\PageTrait\PageTrait;
+use Pushword\Core\Entity\PageTrait\PageTwitterCardTrait;
 use Pushword\Core\Entity\SharedTrait\CustomPropertiesTrait;
 use Pushword\Core\Entity\SharedTrait\HostTrait;
-use Pushword\Core\Entity\SharedTrait\IdInterface;
 use Pushword\Core\Entity\SharedTrait\IdTrait;
-use Pushword\Core\Entity\SharedTrait\TagsTrait;
 use Pushword\Core\Entity\SharedTrait\TimestampableTrait;
-use Pushword\Core\Repository\PageRepository;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 
 #[ORM\MappedSuperclass]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['host', 'slug'], errorPath: 'slug', message: 'page.slug.already_used')]
-#[ORM\Entity(repositoryClass: PageRepository::class)]
-#[ORM\Table(name: 'page')]
-class Page implements IdInterface
+class Page implements PageInterface
 {
     use CustomPropertiesTrait;
     use HostTrait;
@@ -42,14 +37,14 @@ class Page implements IdInterface
     use PageRedirectionTrait;
     use PageSearchTrait;
     use PageTrait;
-    use TagsTrait;
+    use PageTwitterCardTrait;
     use TimestampableTrait;
 
     public function __construct(bool $initDateTimeProperties = true)
     {
         if ($initDateTimeProperties) {
             $this->initTimestampableProperties();
-            $this->publishedAt = new DateTime();
+            $this->publishedAt = new \DateTime();
         }
     }
 

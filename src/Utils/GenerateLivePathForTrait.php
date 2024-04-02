@@ -2,7 +2,7 @@
 
 namespace Pushword\Core\Utils;
 
-use Pushword\Core\Entity\Page;
+use Pushword\Core\Entity\PageInterface;
 use Pushword\Core\Router\PushwordRouteGenerator;
 
 trait GenerateLivePathForTrait
@@ -12,16 +12,19 @@ trait GenerateLivePathForTrait
     /**
      * @param array<string, string> $params
      */
-    public function generateLivePathFor(Page|string $host, string $route = 'pushword_page', array $params = []): string
+    public function generateLivePathFor(PageInterface|string $host, string $route = 'pushword_page', array $params = []): string
     {
         if (isset($params['locale'])) {
             $params['_locale'] = $params['locale'].'/';
             unset($params['locale']);
         }
 
-        if ($host instanceof Page) {
+        if ($host instanceof PageInterface) {
             $page = $host;
             $host = $page->getHost();
+        }
+
+        if (isset($page)) {
             $params['slug'] = $page->getRealSlug();
         }
 

@@ -8,7 +8,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 class UserCommandTest extends KernelTestCase
 {
-    public function testExecute(): void
+    public function testExecute()
     {
         $kernel = static::createKernel();
         $application = new Application($kernel);
@@ -23,6 +23,6 @@ class UserCommandTest extends KernelTestCase
 
         // the output of the command in the console
         $output = $commandTester->getDisplay();
-        self::assertTrue(str_contains($output, 'success'));
+        $this->assertTrue(str_contains($output, 'success'));
     }
 }

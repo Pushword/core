@@ -3,23 +3,23 @@
 namespace Pushword\Core\Entity\PageTrait;
 
 // use Pushword\Core\Entity\PageHasEditor;
-use Pushword\Core\Entity\User;
+use Pushword\Core\Entity\UserInterface;
 
 interface PageEditorInterface
 {
-    public function getEditedBy(): ?User;
+    public function getEditedBy(): ?UserInterface;
 
-    public function setEditedBy(?User $user): void;
-
-    /**
-     * Get targetEntity="Pushword\Core\Entity\User",.
-     */
-    public function getCreatedBy(): ?User;
+    public function setEditedBy(?UserInterface $user): void;
 
     /**
-     * Set targetEntity="Pushword\Core\Entity\User",.
+     * Get targetEntity="Pushword\Core\Entity\UserInterface",.
      */
-    public function setCreatedBy(?User $user): void;
+    public function getCreatedBy(): ?UserInterface;
+
+    /**
+     * Set targetEntity="Pushword\Core\Entity\UserInterface",.
+     */
+    public function setCreatedBy(?UserInterface $user): void;
 
     public function getEditMessage(): string;
 

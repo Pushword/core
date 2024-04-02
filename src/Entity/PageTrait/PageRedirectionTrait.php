@@ -2,8 +2,7 @@
 
 namespace Pushword\Core\Entity\PageTrait;
 
-use Exception;
-use LogicException;
+use Pushword\Core\Utils\F;
 
 use function Safe\preg_match;
 
@@ -28,9 +27,8 @@ trait PageRedirectionTrait
         if (str_starts_with($content, 'Location:')) {
             $url = trim(substr($content, 9));
             if (1 === preg_match('/ [1-5]\d{2}$/', $url, $match)) {
-                /** @var array{0:string} $match */
-                $code = (int) trim($match[0]);
-                $url = preg_replace('/ [1-5]\d{2}$/', '', $url) ?? throw new Exception();
+                $code = (int) trim((string) $match[0]);
+                $url = F::preg_replace_str('/ [1-5]\d{2}$/', '', $url);
             }
 
             if (false !== filter_var($url, \FILTER_VALIDATE_URL) || 1 === preg_match('/^[^ ]+$/', $url)) {
@@ -61,7 +59,7 @@ trait PageRedirectionTrait
         }
 
         if (false === $this->redirectionUrl) {
-            throw new LogicException('You may check a redirection exist before to get the redirection url');
+            throw new \LogicException('You may check a redirection exist before to get the redirection url');
         }
 
         // @phpstan-ignore-next-line
@@ -71,7 +69,7 @@ trait PageRedirectionTrait
     public function getRedirectionCode(): int
     {
         if (null === $this->redirectionCode) {
-            throw new LogicException('You may check a redirection exist before to get the redirection code');
+            throw new \LogicException('You may check a redirection exist before to get the redirection code');
         }
 
         return $this->redirectionCode;

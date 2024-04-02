@@ -13,8 +13,6 @@ class OptimizerChainFactory
 {
     /**
      * @param array<string, string> $config
-     *
-     * @psalm-suppress all
      */
     public static function create(array $config = []): OptimizerChain
     {

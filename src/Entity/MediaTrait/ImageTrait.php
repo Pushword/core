@@ -91,11 +91,11 @@ trait ImageTrait
 
     public function getMainColorOpposite(): ?string
     {
-        if (null === $this->mainColor) {
+        if (null === $this->getMainColor()) {
             return null;
         }
 
-        return Color::fromHex($this->mainColor)->invert(true);
+        return Color::fromHex($this->getMainColor())->invert(true);
     }
 
     public function setMainColor(?string $mainColor): self

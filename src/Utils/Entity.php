@@ -3,14 +3,11 @@
 namespace Pushword\Core\Utils;
 
 use Doctrine\ORM\Mapping\Column;
-use ReflectionAttribute;
-use ReflectionClass;
-use ReflectionProperty;
 
 class Entity
 {
     /**
-     * @param ReflectionAttribute[] $attributes
+     * @param \ReflectionAttribute[] $attributes
      */
     private static function containAttribute(array $attributes, string $searchedName): bool // @phpstan-ignore-line
     {
@@ -28,8 +25,8 @@ class Entity
      */
     public static function getProperties(object $object): array
     {
-        $reflectionClass = new ReflectionClass($object::class);
-        $properties = array_filter($reflectionClass->getProperties(), static function (ReflectionProperty $property) {
+        $reflectionClass = new \ReflectionClass($object::class);
+        $properties = array_filter($reflectionClass->getProperties(), static function (\ReflectionProperty $property) {
             if (self::containAttribute($property->getAttributes(),  Column::class)) {
                 return true;
             }

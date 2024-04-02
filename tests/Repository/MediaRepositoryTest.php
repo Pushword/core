@@ -2,32 +2,28 @@
 
 namespace Pushword\Core\Tests\Controller;
 
-use Pushword\Core\Entity\Media;
-use Pushword\Core\Repository\MediaRepository;
+use App\Entity\Media;
+use Pushword\Core\Entity\MediaInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class MediaRepositoryTest extends KernelTestCase
 {
-    public function testFindDuplicate(): void
+    public function testFindDuplicate()
     {
         self::bootKernel();
 
-        $em = self::getContainer()->get('doctrine.orm.default_entity_manager');
+        $em = self::$kernel->getContainer()->get('doctrine.orm.default_entity_manager');
+        $duplicate = $em->getRepository('App\Entity\Media')->findDuplicate((new Media())->setHash('testFakeHash'));
+        $this->assertNull($duplicate);
 
-        /** @var MediaRepository */
-        $mediaRepo = $em->getRepository(Media::class);
-
-        $duplicate = $mediaRepo->findDuplicate((new Media())->setHash('testFakeHash'));
-        self::assertNull($duplicate);
-
-        $duplicate = $em->getRepository(Media::class)->findDuplicate($this->getMediaToTestDuplicate());
-        self::assertInstanceOf(Media::class, $duplicate);
+        $duplicate = $em->getRepository('App\Entity\Media')->findDuplicate($this->getMediaToTestDuplicate());
+        $this->assertInstanceOf(MediaInterface::class, $duplicate);
     }
 
-    public function getMediaToTestDuplicate(): Media
+    public function getMediaToTestDuplicate()
     {
-        return (new Media())->setProjectDir(self::getContainer()->getParameter('kernel.project_dir'))
-            ->setStoreIn(self::getContainer()->getParameter('pw.media_dir'))
+        return (new Media())->setProjectDir($this->getContainer()->getParameter('kernel.project_dir'))
+            ->setStoreIn($this->getContainer()->getParameter('pw.media_dir'))
             ->setMimeType('image/jpg')
             ->setSize(2)
             ->setDimensions([1000, 1000])

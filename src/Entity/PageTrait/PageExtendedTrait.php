@@ -3,19 +3,19 @@
 namespace Pushword\Core\Entity\PageTrait;
 
 use Doctrine\ORM\Mapping as ORM;
-use Pushword\Core\Entity\Page;
+use Pushword\Core\Entity\PageInterface;
 
 trait PageExtendedTrait
 {
-    #[ORM\ManyToOne(targetEntity: Page::class)]
-    protected ?Page $extendedPage = null;  // @phpstan-ignore-line
+    #[ORM\ManyToOne(targetEntity: PageInterface::class)]
+    protected ?PageInterface $extendedPage = null;  // @phpstan-ignore-line
 
-    public function getExtendedPage(): ?Page
+    public function getExtendedPage(): ?PageInterface
     {
         return $this->extendedPage;
     }
 
-    public function setExtendPage(?Page $page): Page
+    public function setExtendPage(?PageInterface $page): PageInterface
     {
         $this->extendedPage = $page;
 

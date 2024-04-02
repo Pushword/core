@@ -4,12 +4,9 @@ namespace Pushword\Core\EventListener;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
-use Exception;
 use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ImageInterface;
-use LogicException;
-use Pushword\Core\Entity\Media;
-use Pushword\Core\Repository\MediaRepository;
+use Pushword\Core\Entity\MediaInterface;
 use Pushword\Core\Service\ImageManager;
 use Pushword\Core\Utils\MediaRenamer;
 
@@ -37,6 +34,7 @@ final class MediaListener
 
     private readonly MediaRenamer $renamer;
 
+    /** @psalm-suppress  UndefinedInterfaceMethod */
     public function __construct(
         private readonly string $projectDir,
         private readonly EntityManagerInterface $em,
@@ -44,23 +42,24 @@ final class MediaListener
         private readonly ImageManager $imageManager,
         private readonly RequestStack $requestStack,
         private readonly RouterInterface $router,
-        private readonly TranslatorInterface $translator,
-        private readonly MediaRepository $mediaRepo,
+        private readonly TranslatorInterface $translator
     ) {
         $this->renamer = new MediaRenamer();
     }
 
-    private function getMediaFromEvent(Event $event): Media
+    private function getMediaFromEvent(Event $event): MediaInterface
     {
         $media = $event->getObject();
-        if (! $media instanceof Media) {
-            throw new LogicException();
+        if (! $media instanceof MediaInterface) {
+            throw new \LogicException();
         }
 
         return $media;
     }
 
     /**
+     * @psalm-suppress InternalMethod
+     *
      * - warned if file ever exist
      * - Set Name if not setted (from filename)
      * - Check if name exist.
@@ -85,9 +84,11 @@ final class MediaListener
     }
 
     /**
+     * @psalm-suppress InternalMethod
+     *
      * - Update storeIn
      * - generate image cache
-     * - updateMainColor.
+     * - updateMainColor
      */
     public function onVichUploaderPostUpload(Event $event): void
     {
@@ -106,24 +107,25 @@ final class MediaListener
         }
     }
 
-    public function postLoad(Media $media): void
+    public function postLoad(MediaInterface $media): void
     {
         $media->setProjectDir($this->projectDir);
     }
 
-    public function prePersist(Media $media): void
+    public function prePersist(MediaInterface $media): void
     {
         $media->setHash();
     }
 
-    public function postPersist(Media $media): void
+    public function postPersist(MediaInterface $media): void
     {
-        $duplicate = $this->mediaRepo->findDuplicate($media);
+        $duplicate = $this->em->getRepository($media::class) // @phpstan-ignore-line
+            ->findDuplicate($media);
 
         if (null !== $duplicate) {
             $this->alert('warning', 'media.duplicate_warning', [
-                '%deleteMediaUrl%' => $this->router->generate('admin_media_delete', ['id' => $media->getId()]),
-                '%sameMediaEditUrl%' => $this->router->generate('admin_media_edit', ['id' => $duplicate->getId()]),
+                '%deleteMediaUrl%' => $this->router->generate('admin_app_media_delete', ['id' => $media->getId()]),
+                '%sameMediaEditUrl%' => $this->router->generate('admin_app_media_edit', ['id' => $duplicate->getId()]),
                 '%name%' => $duplicate->getName(),
             ]);
         }
@@ -132,7 +134,7 @@ final class MediaListener
     /**
      * renameMediaOnMediaNameUpdate.
      */
-    public function preUpdate(Media $media, PreUpdateEventArgs $preUpdateEventArgs): void
+    public function preUpdate(MediaInterface $media, PreUpdateEventArgs $preUpdateEventArgs): void
     {
         if ($preUpdateEventArgs->hasChangedField('media')) {
             $this->renameIfIdentifiersAreToken($media);
@@ -140,12 +142,12 @@ final class MediaListener
             if (file_exists($media->getPath())) {
                 $media->setMedia($media->getMediaBeforeUpdate());
 
-                throw new Exception('Impossible to rename '.$media->getMediaBeforeUpdate().' in '.$media->getMedia().'. File ever exist');
+                throw new \Exception('Impossible to rename '.$media->getMediaBeforeUpdate().' in '.$media->getMedia().'. File ever exist');
             }
 
             if ('' === $media->getMediaBeforeUpdate()) {
                 // dd($media->getMediaBeforeUpdate());
-                throw new LogicException();
+                throw new \LogicException();
             }
 
             $this->filesystem->rename(
@@ -162,7 +164,7 @@ final class MediaListener
         }
     }
 
-    public function preRemove(Media $media): void
+    public function preRemove(MediaInterface $media): void
     {
         if (str_starts_with($media->getStoreIn(), $this->projectDir)) {
             $this->filesystem->remove($media->getStoreIn().'/'.$media->getMedia());
@@ -171,7 +173,7 @@ final class MediaListener
         $this->imageManager->remove($media);
     }
 
-    private function setNameIfEmpty(Media $media): void
+    private function setNameIfEmpty(MediaInterface $media): void
     {
         if ('' !== $media->getName(true)) {
             return;
@@ -186,7 +188,7 @@ final class MediaListener
         $media->setName($name);
     }
 
-    private function getMediaString(Media $media): string
+    private function getMediaString(MediaInterface $media): string
     {
         if (($return = $media->getMedia()) !== '') {
             return $return;
@@ -198,7 +200,7 @@ final class MediaListener
         return $media->getName().('' !== $extension ? '.'.$extension : '');
     }
 
-    private function identifiersAreToken(Media $media): bool
+    private function identifiersAreToken(MediaInterface $media): bool
     {
         /*
         if (substr($media->getPath(), -1) !== '/' // debug why path is not always
@@ -220,7 +222,7 @@ final class MediaListener
         return null !== $sameMedia && $media->getId() !== $sameMedia->getId();
     }
 
-    private function renameIfIdentifiersAreToken(Media $media): void
+    private function renameIfIdentifiersAreToken(MediaInterface $media): void
     {
         if (! $this->identifiersAreToken($media)) {
             $this->renamer->reset();
@@ -231,7 +233,7 @@ final class MediaListener
         $this->renamer->rename($media);
 
         if (10 === $this->renamer->getIteration()) {
-            throw new Exception('Too much file with similar name `'.$media->getMedia().'`');
+            throw new \Exception('Too much file with similar name `'.$media->getMedia().'`');
         }
 
         if (1 === $this->renamer->getIteration()) {
@@ -250,9 +252,6 @@ final class MediaListener
         // else log TODO
     }
 
-    /**
-     * @psalm-suppress all
-     */
     private function getFlashBag(): ?FlashBagInterface
     {
         if (null !== $this->flashBag) {
@@ -263,7 +262,7 @@ final class MediaListener
                 $this->flashBag = $request->getSession()->getFlashBag() : null;
     }
 
-    private function updateMainColor(Media $media, ?ImageInterface $image = null): void
+    private function updateMainColor(MediaInterface $media, ?ImageInterface $image = null): void
     {
         if (! $image instanceof Image) {
             return;

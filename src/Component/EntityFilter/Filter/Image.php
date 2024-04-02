@@ -2,17 +2,15 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
-use Pushword\Core\Component\App\AppConfig;
+use Pushword\Core\AutowiringTrait\RequiredAppTrait;
+use Pushword\Core\AutowiringTrait\RequiredTwigTrait;
 
 use function Safe\preg_match_all;
 
-use Twig\Environment;
-
 class Image extends AbstractFilter
 {
-    public AppConfig $app;
-
-    public Environment $twig;
+    use RequiredAppTrait;
+    use RequiredTwigTrait;
 
     public function apply(mixed $propertyValue): string
     {
@@ -20,7 +18,7 @@ class Image extends AbstractFilter
     }
 
     /**
-     * @psalm-suppress all
+     * @psalm-suppress PossiblyUndefinedMethod
      */
     public function convertMarkdownImage(string $body): string
     {

@@ -4,6 +4,7 @@ namespace Pushword\Core\Router;
 
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Entity\Page;
+use Pushword\Core\Entity\PageInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface as SfRouterInterface;
 
@@ -28,8 +29,7 @@ final class PushwordRouteGenerator
         private readonly AppPool $apps,
         RequestStack $requestStack
     ) {
-        $currentRequest = $requestStack->getCurrentRequest();
-        $this->currentHost = null !== $currentRequest ? $currentRequest->getHost() : '';
+        $this->currentHost = null !== $requestStack->getCurrentRequest() ? $requestStack->getCurrentRequest()->getHost() : '';
     }
 
     /**
@@ -37,7 +37,7 @@ final class PushwordRouteGenerator
      * and / for YY page home if your default language is YY
      * X/Y may be en/fr/...
      */
-    public function generatePathForHomePage(?Page $page = null, bool $canonical = false): string
+    public function generatePathForHomePage(?PageInterface $page = null, bool $canonical = false): string
     {
         $homepage = (new Page())->setSlug('');
 
@@ -55,13 +55,13 @@ final class PushwordRouteGenerator
     }
 
     /**
-     * @param string|Page $slug
+     * @param string|PageInterface $slug
      */
     public function generate($slug = 'homepage', bool $canonical = false, ?int $pager = null, ?string $host = null): string
     {
         $page = null;
 
-        if ($slug instanceof Page) {
+        if ($slug instanceof PageInterface) {
             $page = $slug;
             $slug = $slug->getRealSlug();
         } elseif ('homepage' == $slug) {
@@ -84,12 +84,10 @@ final class PushwordRouteGenerator
         }
 
         if ($canonical && (null !== $page || null !== $host)) {
-            $baseUrl = $this->apps->get(null !== $page ? $page->getHost() : $host)->getStr('baseUrl', '');
-        } else {
-            $baseUrl = '';
+            $baseUrl = $this->apps->getAppValue('baseUrl', null !== $page ? $page->getHost() : $host); // @phpstan-ignore-line
         }
 
-        $url = $baseUrl.$this->router->generate(self::PATH, ['slug' => $slug]);
+        $url = ($baseUrl ?? '').$this->router->generate(self::PATH, ['slug' => $slug]);
 
         if (null !== $pager && 1 !== $pager) {
             return rtrim($url, '/').'/'.$pager;

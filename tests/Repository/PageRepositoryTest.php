@@ -2,33 +2,27 @@
 
 namespace Pushword\Core\Tests\Controller;
 
-use Pushword\Core\Entity\Page;
-use Pushword\Core\Repository\PageRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class PageRepositoryTest extends KernelTestCase
 {
-    public function testPageRepo(): void
+    public function testPageRepo()
     {
         self::bootKernel();
 
-        $em = self::getContainer()->get('doctrine.orm.default_entity_manager');
+        $em = self::$kernel->getContainer()->get('doctrine.orm.default_entity_manager');
+        $pages = $em->getRepository('App\Entity\Page')->getIndexablePagesQuery('', 'en', 2)
+            ->getQuery()->getResult();
 
-        /** @var PageRepository */
-        $pageRepo = $em->getRepository(Page::class);
+        $this->assertSame(2, \count($pages)); // depend on AppFixtures
 
-        $pages = $pageRepo->getIndexablePagesQuery('', 'en', 2)->getQuery()->getResult();
-
-        self::assertIsIterable($pages);
-        self::assertCount(2, $pages); // depend on AppFixtures
-
-        $pages = $pageRepo->getPublishedPages(
+        $pages = $em->getRepository('App\Entity\Page')->getPublishedPages(
             '',
             [['key' => 'slug', 'operator' => '=', 'value' => 'homepage']],
             ['key' => 'publishedAt', 'direction' => 'DESC'],
             1
         );
 
-        self::assertSame($pages[0]->getSlug(), 'homepage');
+        $this->assertSame($pages[0]->getSlug(), 'homepage');
     }
 }

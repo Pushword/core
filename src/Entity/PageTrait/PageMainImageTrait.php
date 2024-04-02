@@ -3,24 +3,23 @@
 namespace Pushword\Core\Entity\PageTrait;
 
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
-use Pushword\Core\Entity\Media;
+use Pushword\Core\Entity\MediaInterface;
 
 trait PageMainImageTrait
 {
-    #[ORM\ManyToOne(targetEntity: Media::class, cascade: ['persist'], inversedBy: 'mainImagePages')]
-    protected ?Media $mainImage = null;  // @phpstan-ignore-line
+    #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'], inversedBy: 'mainImagePages')]
+    protected ?MediaInterface $mainImage = null;  // @phpstan-ignore-line
 
-    public function getMainImage(): ?Media
+    public function getMainImage(): ?MediaInterface
     {
         return $this->mainImage;
     }
 
-    public function setMainImage(?Media $media): self
+    public function setMainImage(?MediaInterface $media): self
     {
         // TODO: Déplacer en Assert pour éviter une erreur dégueu ?!
         if (null !== $media && null === $media->getWidth()) {
-            throw new Exception('mainImage must be an Image. Media imported is not an image');
+            throw new \Exception('mainImage must be an Image. Media imported is not an image');
         }
 
         $this->mainImage = $media;

@@ -5,58 +5,67 @@ namespace Pushword\Core\Tests\Controller;
 use Pushword\Core\Controller\PageController;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PageControllerTest extends KernelTestCase
 {
-    public function testShowHomepage(): void
+    public function testShowHomepage()
     {
         $slug = 'homepage';
-        $response = $this->getPageController()->show(Request::create($slug), $slug);
-        self::assertSame(Response::HTTP_OK, $response->getStatusCode(), (string) $response->getContent());
+        $response = $this->getPageController()->show(Request::create($slug), $slug, 'localhost.dev');
+        $this->assertSame(200, $response->getStatusCode());
     }
 
-    public function testShowAnotherPage(): void
+    public function testShowAnotherPage()
     {
         $slug = 'kitchen-sink';
-        $response = $this->getPageController()->show(Request::create($slug), $slug);
+        $response = $this->getPageController()->show(Request::create($slug), $slug, '');
         // file_put_contents('debug.html', $response->getContent());
-        self::assertSame(Response::HTTP_OK, $response->getStatusCode(), (string) $response->getContent());
+        $this->assertSame(200, $response->getStatusCode());
 
         $slug = 'kitchen-sink';
         $this->expectException(NotFoundHttpException::class);
-        $response = $this->getPageController()->show(Request::create('/en/'.$slug), '/en/'.$slug);
+        $response = $this->getPageController()->show(Request::create('/en/'.$slug), '/en/'.$slug, '');
         // $this->assertSame(404, $response->getStatusCode());
     }
 
-    public function testShowFeed(): void
+    public function testShowFeed()
     {
         $slug = 'homepage';
-        $response = $this->getPageController()->showFeed(Request::create('/'.$slug.'.xml'), $slug);
-        self::assertSame(Response::HTTP_MOVED_PERMANENTLY, $response->getStatusCode(), (string) $response->getContent());
+        $response = $this->getPageController()->showFeed(Request::create('/'.$slug.'.xml'), $slug, 'localhost.dev');
+        $this->assertSame(301, $response->getStatusCode());
     }
 
-    public function testShowMainFeed(): void
+    public function testShowMainFeed()
     {
-        $response = $this->getPageController()->showMainFeed(Request::create('/feed.xml'));
-        self::assertSame(Response::HTTP_OK, $response->getStatusCode(), (string) $response->getContent());
+        $response = $this->getPageController()->showMainFeed(Request::create('/feed.xml'), 'localhost.dev');
+        $this->assertSame(200, $response->getStatusCode());
     }
 
-    public function testShowSitemap(): void
+    public function testShowSitemap()
     {
-        $response = $this->getPageController()->showSitemap(Request::create('/sitemap.xml'), 'xml');
-        self::assertSame(Response::HTTP_OK, $response->getStatusCode(), (string) $response->getContent());
+        $response = $this->getPageController()->showSitemap(Request::create('/sitemap.xml'), 'xml', 'localhost.dev');
+        $this->assertSame(200, $response->getStatusCode());
     }
 
-    public function testShowRobotsTxt(): void
+    public function testShowRobotsTxt()
     {
-        $response = $this->getPageController()->showRobotsTxt();
-        self::assertSame(Response::HTTP_OK, $response->getStatusCode(), (string) $response->getContent());
+        $response = $this->getPageController()->showRobotsTxt(Request::create('/robots.txt'), 'localhost.dev');
+        $this->assertSame(200, $response->getStatusCode());
     }
 
-    public function getPageController(): PageController
+    /**
+     * @return PageController
+     */
+    public function getPageController()
     {
-        return self::getContainer()->get(PageController::class);
+        return $this->getService('Pushword\Core\Controller\PageController');
+    }
+
+    public function getService(string $service)
+    {
+        self::bootKernel();
+
+        return self::$kernel->getContainer()->get($service);
     }
 }

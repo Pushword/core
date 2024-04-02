@@ -2,6 +2,7 @@
 
 namespace Pushword\Core\Controller;
 
+use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -9,13 +10,14 @@ final class MediaController extends AbstractController
 {
     public function __construct(
         private readonly string $publicMediaDir,
-        private readonly string $projectDir,
+        private readonly Kernel $kernel
     ) {
     }
 
     public function download(string $media): BinaryFileResponse
     {
-        $pathToFile = $this->projectDir.'/'.$this->publicMediaDir.'/'.str_replace('..', '', $media);
+        $projectDir = $this->kernel->getProjectDir();
+        $pathToFile = $projectDir.'/'.$this->publicMediaDir.'/'.str_replace('..', '', $media);
 
         if (! file_exists($pathToFile)) {
             throw $this->createNotFoundException('The media does not exist...');

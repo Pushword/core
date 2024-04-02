@@ -3,16 +3,12 @@
 namespace Pushword\Core\Component\EntityFilter;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use LogicException;
 use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Component\EntityFilter\Filter\FilterInterface;
-use Pushword\Core\Component\EntityFilter\Filter\MainContentSplitter;
-use Pushword\Core\Entity\Page;
+use Pushword\Core\Entity\SharedTrait\CustomPropertiesInterface;
 use Pushword\Core\Router\PushwordRouteGenerator;
-use Pushword\Core\Service\LinkProvider;
-use ReflectionClass;
+use Pushword\Core\Utils\F;
 
 use function Safe\preg_match;
 
@@ -20,7 +16,7 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment as Twig;
 
 /**
- * @method MainContentSplitter getMainContent()
+ * @template T of object
  */
 final readonly class Manager
 {
@@ -34,22 +30,27 @@ final readonly class Manager
 
     private EntityManagerInterface $entityManager;
 
+    /** @param T $entity
+     * @param ManagerPool<T> $managerPool
+     */
     public function __construct(
         private ManagerPool $managerPool,
         private EventDispatcherInterface $eventDispatcher,
-        private LinkProvider $linkProvider,
-        public readonly Page $page
+        private object $entity
     ) {
         $this->apps = $managerPool->apps;
         $this->twig = $managerPool->twig;
         $this->router = $managerPool->router;
         $this->entityManager = $managerPool->entityManager;
-        $this->app = $this->apps->get($page->getHost());
+        $this->app = method_exists($entity, 'getHost') ? $this->apps->get($entity->getHost()) : $this->apps->get();
     }
 
-    public function getPage(): Page
+    /**
+     * @return T
+     */
+    public function getEntity(): object
     {
-        return $this->page;
+        return $this->entity;
     }
 
     /**
@@ -66,14 +67,11 @@ final readonly class Manager
         $filterEvent = new FilterEvent($this, substr($method, 3));
         $this->eventDispatcher->dispatch($filterEvent, FilterEvent::NAME_BEFORE);
 
-        if (! \is_callable($pageMethod = [$this->page, $method])) {
-            throw new LogicException();
-        }
-
-        $returnValue = [] !== $arguments ? \call_user_func_array($pageMethod, $arguments) : \call_user_func($pageMethod);
+        $returnValue = [] !== $arguments ? \call_user_func_array([$this->entity, $method], $arguments) // @phpstan-ignore-line
+            : \call_user_func([$this->entity, $method]);    // @phpstan-ignore-line
 
         if (! \is_scalar($returnValue)) {
-            throw new LogicException();
+            throw new \LogicException();
         }
 
         $returnValue = $this->filter(substr($method, 3), $returnValue);
@@ -102,29 +100,29 @@ final readonly class Manager
 
     private function camelCaseToSnakeCase(string $string): string
     {
-        return strtolower(preg_replace('/[A-Z]/', '_\\0', lcfirst($string)) ?? throw new Exception());
+        return strtolower(F::preg_replace_str('/[A-Z]/', '_\\0', lcfirst($string)));
     }
 
-    /**
-     * @return string[]
-     *
-     * @psalm-suppress all
-     */
+    /** @return string[] */
     private function getFilters(string $label): array
     {
-        if ($this->app->entityCanOverrideFilters()) {
-            $filters = $this->page->getCustomProperty($label.'_filters');
+        if ($this->app->entityCanOverrideFilters() && $this->entity instanceof CustomPropertiesInterface) {
+            $filters = $this->entity->getCustomProperty($label.'_filters');
         }
 
-        if (! isset($filters) || \is_string($filters) && \in_array($filters, [[], '', null], true)) {
+        if (! isset($filters) || \in_array($filters, [[], '', null], true)) {
             $appFilters = $this->app->getFilters();
             $filters = $appFilters[$label] ?? null;
         }
 
-        return \is_string($filters) ? explode(',', $filters) : (\is_array($filters) ? $filters : []);
+        $filters = \is_string($filters) ? explode(',', $filters) : $filters;
+
+        return $filters ?: []; // @phpstan-ignore-line
     }
 
     /**
+     * @noRector
+     *
      * @return false|class-string
      */
     private function isFilter(string $className): false|string
@@ -136,7 +134,7 @@ final readonly class Manager
             return false;
         }
 
-        $reflectionClass = new ReflectionClass($filterClass);
+        $reflectionClass = new \ReflectionClass($filterClass);
         if (! $reflectionClass->implementsInterface(FilterInterface::class)) {
             return false;
         }
@@ -147,23 +145,29 @@ final readonly class Manager
     private function getFilterClass(string $filter): FilterInterface
     {
         if (false === ($filterClassName = $this->isFilter($filter))) {
-            throw new Exception('Filter `'.$filter.'` not found');
+            throw new \Exception('Filter `'.$filter.'` not found');
         }
 
-        /** @var class-string<FilterInterface> $filterClassName */
         $filterClass = new $filterClassName();
 
-        $toAutowire = [
-            'page', 'app', 'apps', 'twig', 'entityFilterManager', 'managerPool', 'router', 'entityManager', 'linkProvider',
+        $toCheck = [
+            'setEntity' => 'entity',
+            'setApp' => 'app',
+            'setApps' => 'apps',
+            'setTwig' => 'twig',
+            'setManager' => '',
+            'setManagerPool' => 'managerPool',
+            'setRouter' => 'router',
+            'setEntityManager' => 'entityManager',
         ];
 
-        foreach ($toAutowire as $property) {
-            if (property_exists($filterClass, $property)) {
-                $filterClass->$property = 'entityFilterManager' === $property ? $this : $this->$property; // @phpstan-ignore-line
+        foreach ($toCheck as $method => $property) {
+            if (method_exists($filterClass, $method)) {
+                $filterClass->$method('' === $property ? $this : $this->$property); // @phpstan-ignore-line
             }
         }
 
-        return $filterClass;
+        return $filterClass; // @phpstan-ignore-line
     }
 
     /**
@@ -172,7 +176,8 @@ final readonly class Manager
     private function applyFilters(string $property, bool|float|int|string|null $propertyValue, array $filters): mixed
     {
         foreach ($filters as $filter) {
-            if (\in_array($this->page->getCustomProperty('filter_'.$this->className($filter)), [0, false], true)) {
+            if ($this->entity instanceof CustomPropertiesInterface
+                && \in_array($this->entity->getCustomProperty('filter_'.$this->className($filter)), [0, false], true)) {
                 continue;
             }
 

@@ -4,7 +4,6 @@ namespace Pushword\Core\Entity\MediaTrait;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
 
 use function Safe\sha1_file;
 
@@ -44,19 +43,13 @@ trait MediaHashTrait
             return $this;
         }
 
-        if (($mediaFile = $this->getMediaFile()) !== null && file_exists($mediaFile->getPathname())) {
+        if (($mediaFile = $this->getMediaFile()) !== null && file_exists((string) $mediaFile)) {
             $this->hash = sha1_file($mediaFile->getPathname(), true);
 
             return $this;
         }
 
-        $mediaFilePath = $this->getStoreIn().'/'.$this->getMedia();
-
-        if (! file_exists($mediaFilePath) || ! is_file($mediaFilePath)) {
-            throw new Exception('incredible ! `'.$mediaFilePath.'`');
-        }
-
-        $this->hash = sha1_file($mediaFilePath, true);
+        $this->hash = sha1_file($this->getStoreIn().'/'.$this->getMedia(), true);
 
         return $this;
     }

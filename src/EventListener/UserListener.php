@@ -2,7 +2,7 @@
 
 namespace Pushword\Core\EventListener;
 
-use Pushword\Core\Entity\User;
+use Pushword\Core\Entity\UserInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -17,15 +17,15 @@ final readonly class UserListener
     /**
      * Set Password on database update if PlainPassword is set.
      */
-    public function preUpdate(User $user): void
+    public function preUpdate(UserInterface $user): void
     {
-        if ('' !== $user->getPlainPassword()) {
+        if (\is_string($user->getPlainPassword()) && '' !== $user->getPlainPassword()) {
             $user->setPassword($this->passwordEncoder->hashPassword($user, $user->getPlainPassword()));
             $user->eraseCredentials();
         }
     }
 
-    public function prePersist(User $user): void
+    public function prePersist(UserInterface $user): void
     {
         $this->preUpdate($user);
     }

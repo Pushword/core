@@ -33,7 +33,8 @@ trait PageSearchTrait
 
     public function getTemplate(): ?string
     {
-        return $this->hasCustomProperty('template') ? (string) $this->getCustomPropertyScalar('template') : null;
+        // @phpstan-ignore-next-line
+        return $this->getCustomProperty('template');
     }
 
     /*
@@ -59,15 +60,10 @@ trait PageSearchTrait
         return $this;
     }
 
-    abstract public function getCustomPropertyScalar(string $name): bool|float|int|string|null;
-
-    abstract public function hasCustomProperty(string $name): bool;
-
-    abstract public function setCustomProperty(string $name, mixed $value): void;
-
     public function getSearchExcrept(): ?string
     {
-        return $this->hasCustomProperty('searchExcrept') ? (string) $this->getCustomPropertyScalar('searchExcrept') : null;
+        // @phpstan-ignore-next-line
+        return $this->getCustomProperty('searchExcrept');
     }
 
     public function setSearchExcrept(?string $searchExcrept): self

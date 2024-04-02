@@ -2,20 +2,17 @@
 
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
-use Pushword\Core\Component\App\AppConfig;
-use Pushword\Core\Service\LinkProvider;
+use Pushword\Core\AutowiringTrait\RequiredAppTrait;
+use Pushword\Core\AutowiringTrait\RequiredTwigTrait;
+use Pushword\Core\Twig\PhoneNumberTwigTrait;
 
 use function Safe\preg_match_all;
 
-use Twig\Environment;
-
 class PhoneNumber extends AbstractFilter
 {
-    public LinkProvider $linkProvider;
-
-    public AppConfig $app;
-
-    public Environment $twig;
+    use PhoneNumberTwigTrait;
+    use RequiredAppTrait;
+    use RequiredTwigTrait;
 
     public function apply(mixed $propertyValue): string
     {
@@ -28,14 +25,13 @@ class PhoneNumber extends AbstractFilter
         $rgx = '/ (?:(?:\+|00)33|0)(\s|&nbsp;|\xC2\xA0)*[1-9](?:([\s.-]|&nbsp;|\xC2\xA0)*\d{2}){4}(?P<after>( |&nbsp;)|\.<\/|\. |$)/iU';
         preg_match_all($rgx, $body, $matches);
 
-        /** @var array{0: ?string[], 'after': string[] } $matches */
         if (! isset($matches[0])) {
             return $body;
         }
 
         foreach ($matches[0] as $k => $m) {
-            $after = $matches['after'][$k] ?? '';
-            $body = str_replace($m, ' '.$this->linkProvider->renderPhoneNumber(trim(substr($m, 0, -\strlen($after)))).$after, $body);
+            $after = $matches['after'][$k];
+            $body = str_replace($m, ' '.$this->renderPhoneNumber(trim(substr((string) $m, 0, -\strlen((string) $after)))).$after, $body);
         }
 
         return $body;

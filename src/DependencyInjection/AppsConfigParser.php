@@ -2,8 +2,6 @@
 
 namespace Pushword\Core\DependencyInjection;
 
-use Exception;
-use LogicException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class AppsConfigParser
@@ -18,8 +16,7 @@ final class AppsConfigParser
         $result = [];
         foreach ($apps as $app) {
             $app = self::parseAppConfig($app, $containerBuilder);
-            $key = \is_string($key = $app['hosts'][0] ?? null) ? $key : throw new Exception(); // @phpstan-ignore-line
-            $result[$key] = $app;
+            $result[$app['hosts'][0]] = $app; // @phpstan-ignore-line
         }
 
         return $result;
@@ -42,11 +39,8 @@ final class AppsConfigParser
             if (! isset($app[$property])) {
                 $app[$property] = $containerBuilder->getParameter('pw.'.$property); // '%'.'pw.'.$p.'%';
             } elseif ('custom_properties' == $property) {
-                if (! \is_array($app['custom_properties'])) {
-                    throw new Exception();
-                }
-
-                $app['custom_properties'] = array_merge(self::getParameterArray($containerBuilder, 'pw.'.$property), $app['custom_properties']);
+                $app[$property] = array_merge(self::getParameterArray($containerBuilder, 'pw.'.$property), $app[$property]); // @phpstan-ignore-line
+                // var_dump($app[$p]); exit;
             }
         }
 
@@ -60,7 +54,7 @@ final class AppsConfigParser
     {
         $return = $containerBuilder->getParameter($parameterName);
         if (! \is_array($return)) {
-            throw new LogicException('Parameter '.$parameterName.' must be an array');
+            throw new \LogicException('Parameter '.$parameterName.' must be an array');
         }
 
         return $return;

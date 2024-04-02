@@ -16,12 +16,16 @@ doctrine:
     auto_mapping: true
     enable_lazy_ghost_objects: true
     mappings:
-      # App:
-      #   type: attribute
-      #   prefix: Pushword\Core\Entity
-      #   dir: "%kernel.project_dir%/src/Entity"
-      #   is_bundle: false
+      App:
+        type: attribute
+        prefix: App\Entity
+        dir: "%kernel.project_dir%/src/Entity"
+        is_bundle: false
       PushwordCoreBundle:
         type: attribute
         dir: "Entity"
         alias: PushwordCore
+    resolve_target_entities:
+      Pushword\Core\Entity\PageInterface: "%pw.entity_page%"
+      Pushword\Core\Entity\MediaInterface: "%pw.entity_media%"
+      Pushword\Core\Entity\UserInterface: "%pw.entity_user%"

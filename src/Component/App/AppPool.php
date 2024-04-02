@@ -2,9 +2,7 @@
 
 namespace Pushword\Core\Component\App;
 
-use Exception;
-use LogicException;
-use Pushword\Core\Entity\Page;
+use Pushword\Core\Entity\PageInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Twig\Environment as Twig;
 
@@ -17,7 +15,7 @@ final class AppPool
 
     /**
      * Why there ? Because often, need to check current page don't override App Config. */
-    private ?Page $currentPage = null;
+    private ?PageInterface $currentPage = null;
 
     /** @param array<string, array<string, mixed>> $rawApps */
     public function __construct(array $rawApps, Twig $twig, ParameterBagInterface $parameterBag)
@@ -32,16 +30,16 @@ final class AppPool
         $this->switchCurrentApp($firstHost);
     }
 
-    public function setCurrentPage(Page $page): self
+    public function setCurrentPage(PageInterface $page): self
     {
         $this->currentPage = $page;
 
         return $this;
     }
 
-    public function switchCurrentApp(Page|string $host): self
+    public function switchCurrentApp(PageInterface|string $host): self
     {
-        if ($host instanceof Page) {
+        if ($host instanceof PageInterface) {
             $this->currentPage = $host;
             $host = $host->getHost();
         }
@@ -68,10 +66,9 @@ final class AppPool
         }
 
         if (! isset($app)) {
-            throw new Exception('No AppConfig found (`'.($host ?? '').'`)');
+            throw new \Exception('No AppConfig found (`'.$host.'`)');
         }
 
-        /** @var AppConfig $app */
         return $app;
     }
 
@@ -98,15 +95,15 @@ final class AppPool
         return $this->apps;
     }
 
-    public function getCurrentPage(): ?Page
+    public function getCurrentPage(): ?PageInterface
     {
         return $this->currentPage;
     }
 
-    public function safegetCurrentPage(): Page
+    public function safegetCurrentPage(): PageInterface
     {
         if (null === $this->currentPage) {
-            throw new LogicException();
+            throw new \LogicException();
         }
 
         return $this->currentPage;

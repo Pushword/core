@@ -17,7 +17,6 @@ class Mozjpeg extends BaseOptimizer
         return 'image/jpeg' === $image->mime();
     }
 
-    /** @psalm-suppress all */
     public function getCommand(): string
     {
         $command = parent::getCommand();

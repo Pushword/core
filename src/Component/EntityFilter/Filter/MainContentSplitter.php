@@ -3,13 +3,18 @@
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
 use Knp\Menu\ItemInterface;
-use Pushword\Core\Entity\Page;
+use Pushword\Core\AutowiringTrait\RequiredAppTrait;
+use Pushword\Core\AutowiringTrait\RequiredEntityTrait;
+use Pushword\Core\AutowiringTrait\RequiredTwigTrait;
+use Pushword\Core\Entity\SharedTrait\CustomPropertiesInterface;
 use TOC\MarkupFixer;
 use TOC\TocGenerator;
 
 class MainContentSplitter extends AbstractFilter
 {
-    public Page $page;
+    use RequiredAppTrait;
+    use RequiredEntityTrait;
+    use RequiredTwigTrait;
 
     private string $chapeau = '';
 
@@ -38,13 +43,17 @@ class MainContentSplitter extends AbstractFilter
         $this->chapeau = isset($parsedContent[1]) ? $parsedContent[0] : '';
         $this->content = $parsedContent[1] ?? $parsedContent[0];
 
-        if (null !== $this->page->getCustomProperty('toc') || null !== $this->page->getCustomProperty('tocTitle')) {
+        if ($this->entity instanceof CustomPropertiesInterface
+            && (null !== $this->entity->getCustomProperty('toc') || null !== $this->entity->getCustomProperty('tocTitle'))) {
             $this->parseToc();
         }
 
         $this->splitContentToParts();
     }
 
+    /**
+     * @psalm-suppress RedundantCast, RedundantFunctionCall
+     */
     private function splitContentToParts(): void
     {
         $parsedContent = explode('<!--break-->', $this->content);

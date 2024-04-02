@@ -5,24 +5,19 @@ namespace Pushword\Core\Repository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Collections\Selectable;
-use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectRepository;
-use Pushword\Core\Entity\Media;
+use Pushword\Core\Entity\MediaInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 /**
- * @extends ServiceEntityRepository<Media>
+ * @extends ServiceEntityRepository<MediaInterface>
  *
- * @implements Selectable<int, Media>
- * @implements ObjectRepository<Media>
+ * @implements Selectable<int, MediaInterface>
+ * @implements ObjectRepository<MediaInterface>
  */
+#[AutoconfigureTag('doctrine.repository_service')]
 class MediaRepository extends ServiceEntityRepository implements ObjectRepository, Selectable
 {
-    public function __construct(
-        ManagerRegistry $registry,
-    ) {
-        parent::__construct($registry, Media::class);
-    }
-
     /**
      * @return string[]
      */
@@ -39,7 +34,7 @@ class MediaRepository extends ServiceEntityRepository implements ObjectRepositor
         return array_column($results, 'mimeType');
     }
 
-    public function findDuplicate(Media $media): ?Media
+    public function findDuplicate(MediaInterface $media): ?MediaInterface
     {
         $duplicates = $this->findBy(['hash' => $media->getHash()]);
 

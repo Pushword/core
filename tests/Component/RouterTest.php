@@ -2,34 +2,34 @@
 
 namespace Pushword\Core\Tests\Component;
 
-use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Router\PushwordRouteGenerator;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class RouterTest extends KernelTestCase
 {
-    public function testRouter(): void
+    public function testRouter()
     {
         self::bootKernel();
 
         $router = new PushwordRouteGenerator(
-            self::getContainer()->get('router'),
-            self::getContainer()->get(AppPool::class),
+            self::$kernel->getContainer()->get('router'),
+            self::$kernel->getContainer()->get(\Pushword\Core\Component\App\AppPool::class),
             new RequestStack(),
+            'fr'
         );
 
-        self::assertSame('/', $router->generatePathForHomePage());
-        self::assertSame('/', $router->generate('homepage'));
-        self::assertSame('/page', $router->generate('page'));
+        $this->assertSame('/', $router->generatePathForHomePage());
+        $this->assertSame('/', $router->generate('homepage'));
+        $this->assertSame('/page', $router->generate('page'));
     }
 
-    public function testRouterTwigExtension(): void
+    public function testRouterTwigExtension()
     {
         self::bootKernel();
-        $twig = self::getContainer()->get('twig');
+        $twig = self::$kernel->getContainer()->get('test.service_container')->get('twig');
 
-        self::assertSame($twig->createTemplate('{{ homepage() }}', null)->render(), '/');
-        self::assertSame($twig->createTemplate('{{ page("homepage") }}', null)->render(), '/');
+        $this->assertSame($twig->createTemplate('{{ homepage() }}', null)->render(), '/');
+        $this->assertSame($twig->createTemplate('{{ page("homepage") }}', null)->render(), '/');
     }
 }
