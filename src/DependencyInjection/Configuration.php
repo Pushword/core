@@ -2,7 +2,6 @@
 
 namespace Pushword\Core\DependencyInjection;
 
-use locale;
 use Pushword\Core\Entity\Media;
 use Pushword\Core\Entity\Page;
 use Pushword\Core\Entity\User;

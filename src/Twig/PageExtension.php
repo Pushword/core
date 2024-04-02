@@ -62,6 +62,8 @@ final class PageExtension extends AbstractExtension
 
     /**
      * @param string|string[]|null $host
+     *
+     * @return string[]
      */
     public function getPageUriList(string|array|null $host = null): array
     {

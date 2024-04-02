@@ -8,20 +8,19 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class PageRepositoryTest extends KernelTestCase
 {
-    public function testPageRepo()
+    public function testPageRepo(): void
     {
         self::bootKernel();
 
-        $em = self::$kernel->getContainer()->get('doctrine.orm.default_entity_manager');
+        $em = self::getContainer()->get('doctrine.orm.default_entity_manager');
 
         /** @var PageRepository */
         $pageRepo = $em->getRepository(Page::class);
-        $this->assertInstanceOf(PageRepository::class, $pageRepo);
 
-        $pages = $pageRepo->getIndexablePagesQuery('', 'en', 2)
-            ->getQuery()->getResult();
+        $pages = $pageRepo->getIndexablePagesQuery('', 'en', 2)->getQuery()->getResult();
 
-        $this->assertSame(2, \count($pages)); // depend on AppFixtures
+        self::assertIsIterable($pages);
+        self::assertCount(2, $pages); // depend on AppFixtures
 
         $pages = $pageRepo->getPublishedPages(
             '',
@@ -30,6 +29,6 @@ class PageRepositoryTest extends KernelTestCase
             1
         );
 
-        $this->assertSame($pages[0]->getSlug(), 'homepage');
+        self::assertSame($pages[0]->getSlug(), 'homepage');
     }
 }

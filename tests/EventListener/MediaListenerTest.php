@@ -2,29 +2,31 @@
 
 namespace Pushword\Core\Tests\Controller;
 
+use Exception;
 use Pushword\Admin\Tests\AbstractAdminTestClass;
 use Pushword\Core\Entity\Media;
+use Pushword\Core\Repository\MediaRepository;
 use Pushword\Core\Service\ImageManager;
 use Pushword\Core\Tests\PathTrait;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\Panther\PantherTestCase;
+use Symfony\Component\HttpFoundation\Response;
 
 class MediaListenerTest extends AbstractAdminTestClass // PantherTestCase // KernelTestCase
 {
     use PathTrait;
 
-    public function testRenameMediaOnNameUpdate()
+    public function testRenameMediaOnNameUpdate(): void
     {
         self::bootKernel();
 
-        $em = self::$kernel->getContainer()->get('doctrine.orm.default_entity_manager');
+        $em = self::getContainer()->get('doctrine.orm.default_entity_manager');
         /** @var MediaRepository */
         $mediaRepo = $em->getRepository(Media::class);
 
-        $media = $mediaRepo->findOneBy(['media' => 'piedweb-logo.png']);
+        $media = $mediaRepo->findOneBy(['media' => 'piedweb-logo.png']) ?? throw new Exception();
         $media->setMedia('piedweb.png');
+
         $em->flush();
-        $this->assertSame(file_exists($this->mediaDir.'/piedweb.png'), true);
+        self::assertSame(file_exists($this->mediaDir.'/piedweb.png'), true);
 
         $media->setMedia('piedweb-logo.png');
         $em->flush();
@@ -33,24 +35,24 @@ class MediaListenerTest extends AbstractAdminTestClass // PantherTestCase // Ker
     /**
      * // This is not testing MediaListner bug ImageImport (ImageManager Service).
      */
-    public function testRenameAndCo()
+    public function testRenameAndCo(): void
     {
         self::bootKernel();
 
         $mediaEntity = $this->getImageManager()->importExternal(__DIR__.'/media/2.jpg', '1', '', false);
         // $em->persist($mediaEntity);
-        $this->assertFileExists($this->mediaDir.'/1-2.jpg');
+        self::assertFileExists($this->mediaDir.'/1-2.jpg');
 
         // If import twice, return the existing one and not create a new copy
         $mediaEntity = $this->getImageManager()->importExternal(__DIR__.'/media/2.jpg', '1', '', false);
-        $this->assertFileDoesNotExist($this->mediaDir.'/1-3.jpg');
-        $this->assertSame($mediaEntity->getMedia(), '1-2.jpg');
+        self::assertFileDoesNotExist($this->mediaDir.'/1-3.jpg');
+        self::assertSame($mediaEntity->getMedia(), '1-2.jpg');
         unlink(__DIR__.'/../../../skeleton/media/1-2.jpg');
-        $this->assertFileDoesNotExist($this->mediaDir.'/1-2.jpg');
+        self::assertFileDoesNotExist($this->mediaDir.'/1-2.jpg');
     }
 
     // 1. Si une nouvelle image se renomme bien dans le cas d'une image existante avec le même nom (pas d'écrasement)
-    public function testRenameNewMediaIfAnotherMediaHasSameName()
+    public function testRenameNewMediaIfAnotherMediaHasSameName(): void
     {
         $files = [
             __DIR__.'/media/2.jpg',
@@ -63,37 +65,37 @@ class MediaListenerTest extends AbstractAdminTestClass // PantherTestCase // Ker
             $client = $this->loginUser();
             $client->catchExceptions(false);
             $crawler = $client->request('GET', '/admin/media/create');
-            $formId = strtok($crawler->filter('[type="file"]')->getNode(0)->getAttribute('name'), '[');
+            $formId = strtok($crawler->filter('[type="file"]')->getNode(0)->getAttribute('name'), '['); // @phpstan-ignore-line
             $form = $crawler->filter('[role="form"]')->form([
                 $formId.'[mediaFile]' => $file,
             ]);
             $client->submit($form);
-            $this->assertEquals(302, $client->getResponse()->getStatusCode());
-            $this->assertFileExists($this->mediaDir.'/2-2.jpg');
+            self::assertSame(Response::HTTP_FOUND, $client->getResponse()->getStatusCode(), (string) $client->getResponse()->getContent());
+            self::assertFileExists($this->mediaDir.'/2-2.jpg');
 
             $crawler = $client->request('GET', '/admin/media/create');
-            $formId = strtok($crawler->filter('[type="file"]')->getNode(0)->getAttribute('name'), '[');
+            $formId = strtok($crawler->filter('[type="file"]')->getNode(0)->getAttribute('name'), '['); // @phpstan-ignore-line
             $form = $crawler->filter('[role="form"]')->form([
                 $formId.'[mediaFile]' => $file,
                 $formId.'[name]' => '1',
             ]);
 
             $client->submit($form);
-            $this->assertEquals(302, $client->getResponse()->getStatusCode());
-            $this->assertFileExists($this->mediaDir.'/1-2.jpg');
+            self::assertSame(Response::HTTP_FOUND, $client->getResponse()->getStatusCode(), (string) $client->getResponse()->getContent());
+            self::assertFileExists($this->mediaDir.'/1-2.jpg');
 
             $crawler = $client->request('GET', '/admin/media/create');
-            $formId = strtok($crawler->filter('[type="file"]')->getNode(0)->getAttribute('name'), '[');
+            $formId = strtok($crawler->filter('[type="file"]')->getNode(0)->getAttribute('name'), '['); // @phpstan-ignore-line
             $form = $crawler->filter('[role="form"]')->form([
                 $formId.'[mediaFile]' => $file,
                 $formId.'[slugForce]' => '1',
             ]);
 
             $client->submit($form);
-            $this->assertEquals(302, $client->getResponse()->getStatusCode());
-            $this->assertFileExists($this->mediaDir.'/1-3.jpg');
+            self::assertSame(Response::HTTP_FOUND, $client->getResponse()->getStatusCode(), (string) $client->getResponse()->getContent());
+            self::assertFileExists($this->mediaDir.'/1-3.jpg');
 
-            $em = self::$kernel->getContainer()->get('doctrine.orm.default_entity_manager');
+            $em = self::getContainer()->get('doctrine.orm.default_entity_manager');
 
             /** @var MediaRepository */
             $mediaRepo = $em->getRepository(Media::class);
@@ -102,9 +104,10 @@ class MediaListenerTest extends AbstractAdminTestClass // PantherTestCase // Ker
             foreach ($medias as $m) {
                 $em->remove($m);
             }
+
             $em->flush();
-            $this->assertFileDoesNotExist($this->mediaDir.'/1-4.jpg');
-            $this->assertFileDoesNotExist($this->mediaDir.'/1-3.jpg');
+            self::assertFileDoesNotExist($this->mediaDir.'/1-4.jpg');
+            self::assertFileDoesNotExist($this->mediaDir.'/1-3.jpg');
         }
     }
 
@@ -117,7 +120,7 @@ class MediaListenerTest extends AbstractAdminTestClass // PantherTestCase // Ker
 
     private function getImageManager(): ImageManager
     {
-        if ($this->imageManager) {
+        if (null !== $this->imageManager) {
             return $this->imageManager;
         }
 

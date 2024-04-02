@@ -14,10 +14,10 @@ class ConfigurationTest extends TestCase
     {
         $config = $this->process([]);
 
-        $this->assertSame($config['locale'], '%kernel.default_locale%');
+        self::assertSame($config['locale'], '%kernel.default_locale%');
     }
 
-    protected function process($configs): array
+    protected function process(array $configs): array // @phpstan-ignore-line
     {
         $processor = new Processor();
 

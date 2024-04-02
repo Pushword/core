@@ -7,22 +7,22 @@ use Pushword\Core\Entity\Media;
 
 class MediaTest extends TestCase
 {
-    public function testBasic()
+    public function testBasic(): void
     {
         $media = new Media();
-        $this->assertEmpty($media->getName());
+        self::assertEmpty($media->getName());
 
         $media->setName('test');
-        $this->assertSame('test', $media->getName());
+        self::assertSame('test', $media->getName());
     }
 
-    public function testLoad()
+    public function testLoad(): void
     {
         // Default is the liip filter
         $src = '/media/default/test.jpg';
         $media = Media::loadFromSrc($src);
 
-        $this->assertStringNotContainsString('media/default', $media->getMedia());
-        $this->assertSame('test', $media->getSlug());
+        self::assertStringNotContainsString('media/default', $media->getMedia());
+        self::assertSame('test', $media->getSlug());
     }
 }

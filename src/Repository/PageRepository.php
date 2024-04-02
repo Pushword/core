@@ -355,7 +355,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
             $this->andHost($queryBuilder, $host);
         }
 
-        /** @var array{slug: string[]}[] */
+        /** @var array{slug: string}[] */
         $results = $queryBuilder->getQuery()->getResult();
 
         $pageUriList = [];

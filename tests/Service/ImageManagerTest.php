@@ -10,62 +10,64 @@ class ImageManagerTest extends KernelTestCase
 {
     use PathTrait;
 
-    private $imageManager;
+    private ?ImageManager $imageManager = null;
 
     private function getManager(): ImageManager
     {
-        if ($this->imageManager) {
+        if (null !== $this->imageManager) {
             return $this->imageManager;
         }
 
         return $this->imageManager = new ImageManager([], $this->publicDir, $this->projectDir, $this->publicMediaDir, $this->mediaDir);
     }
 
-    public function testBrowserAndFilterPath()
+    public function testBrowserAndFilterPath(): void
     {
-        $this->assertSame('/'.$this->publicMediaDir.'/default/test.png', $this->getManager()->getBrowserPath('test.png'));
-        $this->assertSame('/'.$this->publicMediaDir.'/xs/test.png', $this->getManager()->getBrowserPath('test.png', 'xs'));
-        $this->assertSame($this->publicDir.'/'.$this->publicMediaDir.'/default/test.png', $this->getManager()->getFilterPath('test.png', 'default'));
-        $this->assertSame($this->publicDir.'/'.$this->publicMediaDir.'/default/test.webp', $this->getManager()->getFilterPath('test.png', 'default', 'webp'));
+        self::assertSame('/'.$this->publicMediaDir.'/default/test.png', $this->getManager()->getBrowserPath('test.png'));
+        self::assertSame('/'.$this->publicMediaDir.'/xs/test.png', $this->getManager()->getBrowserPath('test.png', 'xs'));
+        self::assertSame($this->publicDir.'/'.$this->publicMediaDir.'/default/test.png', $this->getManager()->getFilterPath('test.png', 'default'));
+        self::assertSame($this->publicDir.'/'.$this->publicMediaDir.'/default/test.webp', $this->getManager()->getFilterPath('test.png', 'default', 'webp'));
     }
 
-    public function testFilterCache()
+    public function testFilterCache(): void
     {
         $image = __DIR__.'/blank.jpg';
         $filters = ['xl' => ['quality' => 80, 'filters' => ['scaleDown' => [1600]]]];
         $this->getManager()->generateFilteredCache($image, $filters);
 
-        $this->assertFileExists($this->publicDir.'/'.$this->publicMediaDir.'/xl/blank.jpg');
+        self::assertFileExists($this->publicDir.'/'.$this->publicMediaDir.'/xl/blank.jpg');
 
         $imgSize = getimagesize($this->publicDir.'/'.$this->publicMediaDir.'/xl/blank.jpg');
-        $this->assertSame(1, $imgSize[0]);
-        $this->assertSame(1, $imgSize[1]);
+        self::assertIsArray($imgSize);
+        self::assertSame(1, $imgSize[0]);
+        self::assertSame(1, $imgSize[1]);
 
         $this->getManager()->remove($image);
         $image = __DIR__.'/blank.jpg';
         $filters = ['xl' => ['quality' => 80, 'filters' => ['scale' => 1600]]];
         $this->getManager()->generateFilteredCache($image, $filters);
         $imgSize = getimagesize($this->publicDir.'/'.$this->publicMediaDir.'/xl/blank.jpg');
-        $this->assertSame(1600, $imgSize[0]);
+        self::assertIsArray($imgSize);
+        self::assertSame(1600, $imgSize[0]);
 
         $this->getManager()->setFilters($filters);
         $this->getManager()->remove($image);
-        $this->assertFileDoesNotExist($this->publicDir.'/'.$this->publicMediaDir.'/xl/blank.jpg');
+        self::assertFileDoesNotExist($this->publicDir.'/'.$this->publicMediaDir.'/xl/blank.jpg');
     }
 
-    public function testImportExternal()
+    public function testImportExternal(): void
     {
         $media = $this->getManager()->importExternal('https://piedweb.com/assets/pw/favicon-32x32.png', 'favicon', 'favicon');
-        $this->assertSame('favicon', $media->getName());
-        $this->assertSame('favicon-dd93.png', $media->getMedia());
-        $this->assertFileExists($this->mediaDir.'/'.$media->getMedia());
+        self::assertSame('favicon', $media->getName());
+        self::assertSame('favicon-dd93.png', $media->getMedia());
+        self::assertFileExists($this->mediaDir.'/'.$media->getMedia());
 
         $media = $this->getManager()->importExternal('https://piedweb.com/assets/pw/favicon-32x32.png', 'favicon', 'favicon', false);
-        $this->assertSame('favicon.png', $media->getMedia());
-        $this->assertFileExists($this->mediaDir.'/'.$media->getMedia());
+        self::assertSame('favicon.png', $media->getMedia());
+        self::assertFileExists($this->mediaDir.'/'.$media->getMedia());
 
         $media = $this->getManager()->importExternal('https://piedweb.com/assets/pw/favicon-32x32.png', 'favicon from pied web');
-        $this->assertSame('favicon-from-pied-web-dd93.png', $media->getMedia());
-        $this->assertFileExists($this->mediaDir.'/'.$media->getMedia());
+        self::assertSame('favicon-from-pied-web-dd93.png', $media->getMedia());
+        self::assertFileExists($this->mediaDir.'/'.$media->getMedia());
     }
 }

@@ -4,11 +4,11 @@ namespace Pushword\Core\Tests;
 
 trait PathTrait
 {
-    private $publicDir = __DIR__.'/../../skeleton/public';
+    private string $publicDir = __DIR__.'/../../skeleton/public';
 
-    private $projectDir = __DIR__.'/../../skeleton';
+    private string $projectDir = __DIR__.'/../../skeleton';
 
-    private $publicMediaDir = 'media';
+    private string $publicMediaDir = 'media';
 
-    private $mediaDir = __DIR__.'/../../skeleton/media';
+    private string $mediaDir = __DIR__.'/../../skeleton/media';
 }

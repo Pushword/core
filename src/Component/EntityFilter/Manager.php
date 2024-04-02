@@ -8,6 +8,7 @@ use LogicException;
 use Pushword\Core\Component\App\AppConfig;
 use Pushword\Core\Component\App\AppPool;
 use Pushword\Core\Component\EntityFilter\Filter\FilterInterface;
+use Pushword\Core\Component\EntityFilter\Filter\MainContentSplitter;
 use Pushword\Core\Entity\Page;
 use Pushword\Core\Router\PushwordRouteGenerator;
 use Pushword\Core\Service\LinkProvider;
@@ -18,6 +19,9 @@ use function Safe\preg_match;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Twig\Environment as Twig;
 
+/**
+ * @method MainContentSplitter getMainContent()
+ */
 final readonly class Manager
 {
     private AppConfig $app;
@@ -121,8 +125,6 @@ final readonly class Manager
     }
 
     /**
-     * @noRector
-     *
      * @return false|class-string
      */
     private function isFilter(string $className): false|string
