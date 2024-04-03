@@ -30,7 +30,7 @@ pushword_page_feed:
 custom_host_pushword_page:
   path: /{host}/{slug}
   controller: Pushword\Core\Controller\PageController::show
-  methods: [GET, HEAD]
+  methods: [GET, HEAD, POST]
   trailing_slash_on_root: true
   requirements:
     slug: '[A-Za-z0-9_\/\.\-]*$'
@@ -41,7 +41,7 @@ custom_host_pushword_page:
 pushword_page:
   path: /{slug}
   controller: Pushword\Core\Controller\PageController::show
-  methods: [GET, HEAD]
+  methods: [GET, HEAD, POST]
   requirements:
     slug: '[A-Za-z0-9_\/\.\-]*$'
 
@@ -49,7 +49,7 @@ pushword_page:
 pushword_page_homepage_pager:
   path: /{pager}
   controller: Pushword\Core\Controller\PageController::show
-  methods: [GET, HEAD]
+  methods: [GET, HEAD, POST]
   requirements:
     pager: '\d+'
   defaults:
@@ -59,7 +59,7 @@ pushword_page_homepage_pager:
 pushword_page_pager:
   path: /{slug}/{pager}
   controller: Pushword\Core\Controller\PageController::show
-  methods: [GET, HEAD]
+  methods: [GET, HEAD, POST]
   requirements:
     slug: '[A-Za-z0-9_\/\.\-]*[A-Za-z0-9]+$'
     pager: '\d+'
@@ -70,7 +70,7 @@ pushword_page_pager:
 custom_host_pushword_page_homepage_pager:
   path: /{host}/{pager}
   controller: Pushword\Core\Controller\PageController::show
-  methods: [GET, HEAD]
+  methods: [GET, HEAD, POST]
   requirements:
     host: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9]*[A-Za-z0-9])$'
     pager: '(|\d+)'
@@ -80,7 +80,7 @@ custom_host_pushword_page_homepage_pager:
 custom_host_pushword_page_pager:
   path: /{host}/{slug}/{pager}
   controller: Pushword\Core\Controller\PageController::show
-  methods: [GET, HEAD]
+  methods: [GET, HEAD, POST]
   requirements:
     slug: '[A-Za-z0-9_\/\.\-]*$'
     host: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9]*[A-Za-z0-9])$'
