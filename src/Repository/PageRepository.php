@@ -324,7 +324,8 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
     public function getAllTags(array|string|null $host = null): array
     {
         $queryBuilder = $this->createQueryBuilder('p')
-            ->select('p.tags');
+            ->select('p.tags')
+            ->setMaxResults(30000); // some kind of arbitrary parapet
 
         if (null !== $host) {
             $this->andHost($queryBuilder, $host);
@@ -349,7 +350,8 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
     public function getPageUriList(array|string|null $host = null): array
     {
         $queryBuilder = $this->createQueryBuilder('p')
-            ->select('p.slug');
+            ->select('p.slug')
+            ->setMaxResults(30000); // some kind of arbitrary parapet
 
         if (null !== $host) {
             $this->andHost($queryBuilder, $host);

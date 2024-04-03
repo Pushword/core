@@ -41,8 +41,8 @@ trait TagsTrait
         }
 
         $tags = array_filter(array_map('trim', $tags));
-        $tags = array_map(static fn (string $tag): string => (string) u($tag)->camel(), $tags);
-        $tags = array_diff($tags, $this->reservedTags); // if count != exception ?!
+        $tags = array_diff($tags, $this->reservedTags);
+        // tag disappear without message for user ➜ if count != exception ?!
         $this->tags = array_values($tags);
 
         return $this;
@@ -56,7 +56,6 @@ trait TagsTrait
         }
 
         $tags = explode(',', $tags);
-        $tags = array_filter(array_map('trim', $tags));
         $tags = array_map(static fn (string $tag): string => (string) u($tag)->camel(), $tags);
 
         return $this->manageTagsString(implode(' ', $tags));
