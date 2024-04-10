@@ -199,7 +199,7 @@ trait CustomPropertiesTrait
     public function __call(string $method, array $arguments = [])
     {
         if ('_actions' === $method) {
-            return; // avoid error with sonata
+            return null; // avoid error with sonata
         }
 
         if (1 === preg_match('/^get/', $method)) {

@@ -52,10 +52,9 @@ final class Configuration implements ConfigurationInterface
      * @var array<string, array<string>>
      */
     public const DEFAULT_ASSETS = [
-        'stylesheets' => [
-            '/bundles/pushwordcore/style.css',
-        ],
-        'javascripts' => ['/bundles/pushwordcore/app.js'],
+        'stylesheets' => ['bundles/pushwordcore/style.css'],
+        'javascripts' => ['bundles/pushwordcore/app.js'],
+        'favicon' => ['bundles/pushwordcore/app.js'],
     ];
 
     /**
@@ -186,6 +185,7 @@ final class Configuration implements ConfigurationInterface
                 '%vendor_dir%/fortawesome/font-awesome/svgs/regular',
                 '%vendor_dir%/fortawesome/font-awesome/free/svgs/brands',
                 '%vendor_dir%/fortawesome/font-awesome/svgs/brands',
+                '%kernel.project_dir%/public/bundles/pushwordcore',
             ])->cannotBeEmpty()->end()
 
         ->end();

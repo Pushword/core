@@ -12,6 +12,11 @@ var watchFiles = [
 
 var tailwindConfig = EncoreHelper.getTailwindConfig(watchFiles)
 
-EncoreHelper.getEncore(Encore, watchFiles, tailwindConfig, __dirname + '/src/Resources/public', '/bundles/pushwordcore', 'bundles/pushwordcore', [])
+EncoreHelper.getEncore(Encore, watchFiles, tailwindConfig, __dirname + '/src/Resources/public', '/bundles/pushwordcore', 'bundles/pushwordcore', [
+  {
+    from: __dirname + '/src/Resources/assets/favicons',
+    to: '[name].[ext]',
+  },
+])
 
 module.exports = Encore.getWebpackConfig()

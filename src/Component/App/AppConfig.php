@@ -35,7 +35,7 @@ final class AppConfig
     /** @psalm-suppress PropertyNotSetInConstructor */
     private bool $entityCanOverrideFilters;
 
-    /** @var array<string, array<string>> */
+    /** @var array{}|array{javascripts: ?string[], stylesheets: ?string[]} */
     private array $assets = [];
 
     /** @psalm-suppress PropertyNotSetInConstructor */
@@ -219,29 +219,16 @@ final class AppConfig
         return $this->entityCanOverrideFilters;
     }
 
-    /** @return array<string, array<string>> */
-    public function getAssets(): array
+    /** @return string[] */
+    public function getJavascripts(): array
     {
-        return $this->assets;
+        return $this->assets['javascripts'] ?? [];
     }
 
-    /** @return array{javascripts: string[], stylesheets: string[]} */
-    public function getAssetsVersionned(): array
+    /** @return string[] */
+    public function getStylesheets(): array
     {
-        $assetsVersionned = ['javascripts' => [], 'stylesheets' => []];
-        foreach (['javascripts', 'stylesheets'] as $row) {
-            if (! isset($this->assets[$row])) {
-                continue;
-            }
-
-            foreach ($this->assets[$row] as $key => $asset) {
-                $filepath = $this->params->get('pw.public_dir').$asset;
-                $assetsVersionned[$row][$key] = $asset.
-                    (file_exists($filepath) ? '?'.substr(md5(\Safe\filemtime($filepath).$filepath), 2, 9) : '');
-            }
-        }
-
-        return $assetsVersionned;
+        return $this->assets['stylesheets'] ?? [];
     }
 
     public function getView(?string $path = null, string $fallback = '@Pushword'): string

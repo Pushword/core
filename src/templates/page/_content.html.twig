@@ -1,11 +1,12 @@
 {% block content %}
-<!--{{ pw(page).mainContent.chapeau|raw }}--> {# TODO: fix bug, if pw(page).ma... is not called before we really need it, it don't work #}
+{# TODO: fix bug, if pw(page).ma... is not called before we really need it, it don't work #}
+<!--{{ pw(page).mainContent.chapeau|raw }}-->
 <div class="{{ content_container_class|default('prose mx-auto py-12 px-3 md:px-0') }}">
 
     {% block content_header %}
         {% block h1 %}
-            {% set h1_class= page.h1_class|default(h1_class|default('')) %}
-            <h1{{ (h1_class ? ' class="'~h1_class~'"':'')|raw }}>{{ pw(page).h1|raw }}</h1>
+            {% set h1_class = page.h1_class|default(h1_class|default('')) %}
+            <h1{{ (h1_class ? ' class="' ~ h1_class ~ '"' : '')|raw }}>{{ pw(page).h1|raw }}</h1>
         {% endblock %}
 
         {% block description %}
@@ -24,12 +25,11 @@
         {% endblock %}
     {% endblock %}
 
-
     {% block main_content %}
         {% if page.toc is not null or page.tocTitle is not null %}
             {% block toc %}
                 {{ pw(page).mainContent.intro|raw }}
-                <h3>{{ page.tocTitle|default('Nav')}}</h3>
+                <h3>{{ page.tocTitle|default('Nav') }}</h3>
                 {{ pw(page).mainContent.toc|raw }}
                 {{ pw(page).mainContent.content|raw }}
                 {% endblock %}

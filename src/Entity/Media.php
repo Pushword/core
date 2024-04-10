@@ -85,7 +85,7 @@ class Media implements IdInterface
      * @var Collection<int, Page>
      */
     #[ORM\OneToMany(targetEntity: Page::class, mappedBy: 'mainImage')]
-    protected ?Collection $mainImagePages = null; // @phpstan-ignore-line TODO drop Page
+    protected ?Collection $mainImagePages; // @phpstan-ignore-line TODO drop Page
 
     public function setProjectDir(string $projectDir): self
     {

@@ -5,8 +5,8 @@
     <img srcset="{{ image|image(filter) }} 576w"
       src="{{ image|image('default') }}"
       loading=lazy
-      width="{{ filter == 'thumb' ? '1' : image.width }}"
-      height="{{ filter == 'thumb' ? '1' :  image.height }}"
+      width="{{ filter == 'thumb' ? '1000' : image.width }}"
+      height="{{ filter == 'thumb' ? '1000' : image.height }}"
       {% if otherAttributes.alt is not defined %}
         alt="{{ image.nameByLocale(page is not null ? page.locale : '') }}"
       {% endif %}

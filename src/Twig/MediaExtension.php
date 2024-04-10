@@ -72,7 +72,7 @@ class MediaExtension extends AbstractExtension
 
     private function normalizeMediaPath(string $src): string
     {
-        if (1 === preg_match('/^[a-z-]+$/', $src)) {
+        if (1 === preg_match('/^[0-9a-z-]+$/', $src)) {
             return '/media/default/'.$src.'.jpg';
         }
 

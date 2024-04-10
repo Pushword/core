@@ -60,13 +60,13 @@ final readonly class LinkProvider
             $attr = [...$attr, ...['data-rot' => self::encrypt($path)]];
             $template = $this->getApp()->getView('/component/link_js.html.twig');
 
-            return $this->twig->render($template, ['anchor' => $anchor, 'attr' => $attr]);
+            return trim($this->twig->render($template, ['anchor' => $anchor, 'attr' => $attr]));
         }
 
         $attr = [...$attr, ...['href' => $path]];
         $template = $this->getApp()->getView('/component/link.html.twig');
 
-        return $this->twig->render($template, ['anchor' => $anchor, 'attr' => $attr]);
+        return trim($this->twig->render($template, ['anchor' => $anchor, 'attr' => $attr]));
     }
 
     public static function encrypt(string $path): string

@@ -33,10 +33,10 @@
         </div>
 {% endblock %}
 
-
 {% macro gallery_part(image, gallery_id, page = null, default_filter = 'xs', image_container = null, image_otherAttributes = {}) %}
     {% import view('/component/image_helper.html.twig') as helper %}
     {% import view('/component/image_inline.html.twig') as image_inline %}
+
     {% set image_html = default_filter == 'thumb'
             ? helper.thumb(image, page, default_filter, image_otherAttributes)
             : image_inline.renderImage(image, image_otherAttributes.class|default(null))

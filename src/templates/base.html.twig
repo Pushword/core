@@ -7,39 +7,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     {% block favicon %}
-      {% set favicon_path = apps.get().get('favicon_path') ?? '/bundles/pushwordcore/favicons/' %}
-      <link rel="apple-touch-icon" sizes="180x180" href="{{ favicon_path }}apple-touch-icon.png">
-      <link rel="icon" type="image/png" sizes="32x32" href="{{ favicon_path }}favicon-32x32.png">
-      <link rel="icon" type="image/png" sizes="16x16" href="{{ favicon_path }}favicon-16x16.png">
-      <link rel="manifest" href="{{ favicon_path }}site.webmanifest">
-      <link rel="mask-icon" href="{{ favicon_path }}safari-pinned-tab.svg" color="#000000">
-      <link rel="shortcut icon" href="{{ favicon_path }}favicon.ico">
-      <meta name="apple-mobile-web-app-title" content="{{ apps.get().get('name') }}">
-      <meta name="application-name" content="{{ apps.get().get('name') }}">
-      <meta name="msapplication-TileColor" content="{{ app_color ?? '#fff' }}">
-      <meta name="msapplication-config" content="{{ favicon_path }}browserconfig.xml">
-      <meta name="theme-color" content="{{ app_color ?? '#fff' }}">
+      {% if apps.get().get('favicon_path') is not null %}
+        {# permit retrocompatibility with a feature previous v1 wich is deprecated ! Prefer override base.html.twig ➜ favicon block #}
+        {% include view('/component/favicon.html.twig') with {favicon_path: apps.get().get('favicon_path')} only %}
+      {% else %}
+      <link rel="icon" href="{{ asset(apps.get().get('assets:favicon') ?? 'bundles/pushwordcore/favicon.ico') }}" />
+      {% endif %}
     {% endblock %}
 
     <title>{% block title %}Pushword CMS !{% endblock %}</title>
 
     {% block css %}
       {% block css_stylesheets %}
-        {% set stylesheets = apps.get().get('assetsVersionned').stylesheets %}
-        {% for stylesheet in stylesheets %}
-          <link rel="stylesheet" href="{{ stylesheet }}">
+        {% for stylesheet in apps.get().getStylesheets() %}
+          <link rel="stylesheet" href="{{ asset(stylesheet) }}">
         {% endfor %}
       {% endblock %}
-      {% block css_var %}
+
+      {% set default_font = 'Inter var, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol' %}
+
       <style>
-      :root {
-      --primary: {{ apps.get().get('css_var:color_primary') ?? '#EF8206' }};
-      --secondary: {{ apps.get().get('css_var:color_secondary') ?? '#d97706' }};
-      --font-family: {{ apps.get().get('css_var:font_family') ?? 'Inter var, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol' }};
-      }
+        {% block css_var %}
+          :root {
+            --primary: {{ apps.get().get('css_var:color_primary') ?? '#0ea5e9' }};
+            --secondary: {{ apps.get().get('css_var:color_secondary') ?? '#0369a1' }};
+            --font-family: {{ apps.get().get('css_var:font_family') ?? default_font }}
+          }
+        {% endblock %}
+        .nojs{display:inline-block}
       </style>
-      {% endblock %}
-      <style>.nojs{display:inline-block}</style>
       <script>document.head.insertAdjacentHTML('beforeend', '<style>.nojs{display:none !important}</style>');</script>
     {% endblock %}
 
@@ -53,16 +49,16 @@
   </head>
 {% endblock %}
 
+  {% block body_opener %}
   <body{% if body_class is defined %} class="{{ body_class|default('') }}"{% endif %}{% if body_style is defined %} style="{{ body_style|default('') }}"{% endif %}>
+  {% endblock %}
 
     {% block body %}{% endblock %}
 
     {% block script %}
-      {% set javascripts = apps.get().get('assetsVersionned').javascripts %}
-      {% for javascript in javascripts %}
-        <script{% if javascript is iterable %}{{ attr(javascript) }}{% else %} src="{{ javascript }}" async{% endif %}></script>
+      {% for javascript in apps.get().getJavascripts() %}
+        <script{% if javascript is iterable %}{{ attr(javascript) }}{% else %} src="{{ asset(javascript) }}" async{% endif %}></script>
       {% endfor %}
-      {# <script src="{{ asset('assets/app.js') }}"></script> #}
     {% endblock %}
 
   </body>
