@@ -90,8 +90,5 @@
     "pushword/static-generator": "Generate a static website serve by github pages, apaches with one command or via the admin.",
     "pushword/template-editor": "Edit view file online in the admin.",
     "pushword/version": "Versioning pages with Pushword CMS."
-  },
-  "allow-plugins": {
-    "symfony/runtime": true
   }
 }
