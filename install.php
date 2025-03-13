@@ -31,8 +31,10 @@ echo '~~ Adding Puswhord Routes'.chr(10);
 PostInstall::addOnTop('config/routes.yaml', "pushword:\n    resource: '@PushwordCoreBundle/Resources/config/routes/all.yaml'\n");
 
 echo '~~ Create database'.chr(10);
+// if it's a default symfony installation, switch from postgresql to sqlite
 PostInstall::replace('.env', 'postgresql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=16&charset=utf8', 'sqlite:///%kernel.project_dir%/var/app.db');
-PostInstall::replace('.env', "APP_SECRET=\n", 'APP_SECRET='.sha1(md5(uniqid())));
+// and define an APP_SECRET
+PostInstall::replace('.env', "APP_SECRET=\n", 'APP_SECRET='.sha1(md5(uniqid())).chr(10));
 PostInstall::mirror('vendor/pushword/skeleton/media~', 'media');
 exec('php bin/console doctrine:schema:create -q');
 exec('php bin/console doctrine:fixtures:load -q &');
