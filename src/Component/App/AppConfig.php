@@ -17,12 +17,16 @@ final class AppConfig
     private string $locale;
 
     /** @var string|string[]|null */
-    private string|array|null $locales = null;  // @phpstan-ignore-line
+    private string|array|null $locales = null;
 
     private string $baseUrl;
 
     private string $name;
 
+    /**
+     * Defined in packages/core/src/DependencyInjection/Configuration.php / pushword.{yaml|php}
+     * Default value : @Pushword.
+     */
     private string $template;
 
     /** @var array<string, string> */
@@ -30,8 +34,13 @@ final class AppConfig
 
     private bool $entityCanOverrideFilters;
 
-    /** @var array{}|array{javascripts: ?string[], stylesheets: ?string[]} */
-    private array $assets = []; // @phpstan-ignore-line
+    /** @var array{}|array{
+     *   javascripts: ?string[],
+     *   stylesheets: ?string[],
+     *   vite_stylesheets: ?string[],
+     *   vite_javascripts: ?string[]
+     * } */
+    private array $assets = [];
 
     private Twig $twig;
 
@@ -223,6 +232,18 @@ final class AppConfig
     public function getJavascripts(): array
     {
         return $this->assets['javascripts'] ?? [];
+    }
+
+    /** @return string[] */
+    public function getViteStylesheets(): array
+    {
+        return $this->assets['vite_stylesheets'] ?? [];
+    }
+
+    /** @return string[] */
+    public function getViteJavascripts(): array
+    {
+        return $this->assets['vite_javascripts'] ?? [];
     }
 
     /** @return string[] */

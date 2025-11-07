@@ -12,6 +12,7 @@ use Pushword\Core\Component\EntityFilter\Filter\MainContentSplitter;
 use Pushword\Core\Entity\Page;
 use Pushword\Core\Router\PushwordRouteGenerator;
 use Pushword\Core\Service\LinkProvider;
+use Pushword\Core\Service\Markdown\MarkdownParser;
 use ReflectionClass;
 
 use function Safe\preg_match;
@@ -32,16 +33,19 @@ final readonly class Manager
 
     private PushwordRouteGenerator $router;
 
+    private MarkdownParser $markdownParser;
+
     private EntityManagerInterface $entityManager;
 
     public function __construct(
         private ManagerPool $managerPool,
         private EventDispatcherInterface $eventDispatcher,
         private LinkProvider $linkProvider,
-        public Page $page
+        public Page $page,
     ) {
         $this->apps = $managerPool->apps;
         $this->twig = $managerPool->twig;
+        $this->markdownParser = $managerPool->markdownParser;
         $this->router = $managerPool->router;
         $this->entityManager = $managerPool->entityManager;
         $this->app = $this->apps->get($page->getHost());
@@ -96,7 +100,7 @@ final readonly class Manager
         }
 
         return [] !== $filters
-            ? $this->applyFilters($property, '' !== \strval($propertyValue) ? $propertyValue : '', $filters)
+            ? $this->applyFilters('' !== \strval($propertyValue) ? $propertyValue : '', $filters)
             : $propertyValue;
     }
 
@@ -161,7 +165,16 @@ final readonly class Manager
         $filterClass = new $filterClassName();
 
         $toAutowire = [
-            'page', 'app', 'apps', 'twig', 'entityFilterManager', 'managerPool', 'router', 'entityManager', 'linkProvider',
+            'page',
+            'app',
+            'apps',
+            'twig',
+            'entityFilterManager',
+            'managerPool',
+            'router',
+            'entityManager',
+            'linkProvider',
+            'markdownParser',
         ];
 
         foreach ($toAutowire as $property) {
@@ -176,7 +189,7 @@ final readonly class Manager
     /**
      * @param string[] $filters
      */
-    private function applyFilters(string $property, bool|float|int|string|null $propertyValue, array $filters): mixed
+    public function applyFilters(bool|float|int|string|null $propertyValue, array $filters): mixed
     {
         foreach ($filters as $filter) {
             if (\in_array($this->page->getCustomProperty('filter_'.$this->className($filter)), [0, false], true)) {
@@ -185,9 +198,13 @@ final readonly class Manager
 
             $filterClass = $this->getFilterClass($filter);
 
-            if (method_exists($filterClass, 'setProperty')) {
-                $filterClass->setProperty($property);
+            if (property_exists($filterClass, 'manager')) {
+                $filterClass->manager = $this;
             }
+
+            // if (method_exists($filterClass, 'setProperty')) {
+            //     $filterClass->setProperty($property);
+            // }
 
             $propertyValue = $filterClass->apply($propertyValue);
         }

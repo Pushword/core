@@ -30,7 +30,7 @@ PostInstall::mirror('vendor/pushword/skeleton/src/DataFixtures', 'src/DataFixtur
 echo '~~ Adding Puswhord Routes'.chr(10);
 PostInstall::insertIn(
     'config/routes.yaml',
-    "\npushword:\n    resource: '@PushwordCoreBundle/Resources/config/routes/all.yaml'\n",
+    "\npushword:\n    resource: '@PushwordCoreBundle/Resources/config/routes/all.php'\n",
     PostInstall::INSERT_AT_END
 );
 
@@ -54,11 +54,13 @@ PostInstall::dumpFile('public/build/manifest.json', '{}');
 echo '~~ Copy assets file in ./assets'.chr(10);
 PostInstall::remove(['package.json', 'webpack.config.js', 'assets']);
 PostInstall::mirror('vendor/pushword/skeleton/assets', 'assets');
+PostInstall::mirror('vendor/pushword/skeleton/vite.config.js', 'vite.config.js');
+PostInstall::mirror('vendor/pushword/skeleton/package.json', 'package.json');
 
 $defaultConfig = 'pushword:'.chr(10)
     .'    # Documention'.chr(10)
     .'    # https://pushword.piedweb.com/configuration'.chr(10)
     .'    # Example'.chr(10)
-    .'    # https://github.com/Pushword/Pushword/blob/main/packages/skeleton/config/packages/pushword.yaml'.chr(10);
+    .'    # https://github.com/Pushword/Pushword/blob/main/packages/skeleton/config/packages/pushword.php'.chr(10);
 
 PostInstall::dumpFile('config/packages/pushword.yaml', $defaultConfig);

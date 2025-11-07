@@ -20,7 +20,7 @@ trait TagsTrait
     protected array $tags = [];
 
     /** @var string[] */
-    protected array $reservedTags = ['children', 'sisters', 'grandchildren', 'related'];
+    public const array ReservedTags = ['children', 'sisters', 'grandchildren', 'related'];
 
     public function getTags(): string
     {
@@ -35,6 +35,11 @@ trait TagsTrait
         return $this->tags;
     }
 
+    public function addTag(string $tag): void
+    {
+        $this->setTags($this->getTags().' '.$tag);
+    }
+
     /** @param string[]|string|null $tags */
     public function setTags(array|string|null $tags): self
     {
@@ -46,10 +51,12 @@ trait TagsTrait
             $tags = $this->manageTagsString($tags);
         }
 
-        $tags = array_filter(array_map('trim', $tags), fn (string $tag): bool => '' !== $tag);
-        $tags = array_diff($tags, $this->reservedTags);
+        $tags = array_filter(array_map(trim(...), $tags), fn (string $tag): bool => '' !== $tag);
+        $tags = array_diff($tags, self::ReservedTags);
         // tag disappear without message for user ➜ if count != exception ?!
-        $this->tags = array_values($tags);
+        $tags = array_unique($tags);
+        sort($tags);
+        $this->tags = $tags;
 
         return $this;
     }

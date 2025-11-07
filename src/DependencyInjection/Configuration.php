@@ -42,16 +42,20 @@ final class Configuration implements ConfigurationInterface
      * @var array<string, string>
      */
     public const array DEFAULT_FILTERS = [
-        'main_content' => 'showMore,twig,date,email,htmlLinkMultisite,obfuscateLink,htmlObfuscateLink,image,phoneNumber,markdown,mainContentSplitter,extended',
+        // date,email,phoneNumber ➜ managed by markdown extension in main_content
+        'main_content' => 'showMore,markdown,htmlLinkMultisite,htmlObfuscateLink,mainContentSplitter,extended',
         'name' => 'twig,date,name,extended',
         'title' => 'elseH1,twig,date,extended',
-        'string' => 'twig,date,email,obfuscateLink,phoneNumber,extended',
+        // fallback for all other properties like title, description, ...
+        'string' => 'twig,date,extended',
     ];
 
     /**
      * @var array<string, array<string>>
      */
     public const array DEFAULT_ASSETS = [
+        'vite_stylesheets' => [],
+        'vite_javascripts' => [],
         'stylesheets' => ['bundles/pushwordcore/style.css'],
         'javascripts' => ['bundles/pushwordcore/app.js'],
         'favicon' => ['bundles/pushwordcore/app.js'],
