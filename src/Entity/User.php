@@ -4,6 +4,7 @@ namespace Pushword\Core\Entity;
 
 use DateTime;
 use DateTimeInterface;
+use Deprecated;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
@@ -131,6 +132,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Stringa
     public function setPassword(string $password): self
     {
         $this->password = $password;
+        $this->plainPassword = null;
 
         return $this;
     }
@@ -144,12 +146,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, Stringa
         return '';
     }
 
-    /**
-     * @see User
-     */
+    #[Deprecated()]
     public function eraseCredentials(): void
     {
-        $this->plainPassword = null;
     }
 
     #[ORM\PrePersist]
