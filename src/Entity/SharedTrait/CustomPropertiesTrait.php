@@ -22,7 +22,7 @@ trait CustomPropertiesTrait
      *
      * @var array<mixed>
      */
-    #[ORM\Column(type: Types::JSON, options: ['default' => '{}'])]
+    #[ORM\Column(type: Types::JSON)]
     protected array $customProperties = [];
 
     /**
