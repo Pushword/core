@@ -195,7 +195,7 @@ final class PageController extends AbstractPushwordController
         string &$slug,
         bool $extractPager = false
     ): ?Page {
-        $slug = $this->normalizeSlug($slug);
+        $slug = $this->noramlizeSlug($slug);
         $page = $this->pageRepository->getPage($slug, $this->apps->get()->getHostForDoctrineSearch(), true);
 
         if (! $page instanceof Page && $extractPager) {
@@ -223,7 +223,7 @@ final class PageController extends AbstractPushwordController
         return $page;
     }
 
-    private function normalizeSlug(?string $slug): string
+    private function noramlizeSlug(?string $slug): string
     {
         return (null === $slug || '' === $slug) ? 'homepage' : rtrim(strtolower($slug), '/');
     }

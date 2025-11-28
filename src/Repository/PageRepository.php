@@ -25,8 +25,6 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  */
 class PageRepository extends ServiceEntityRepository implements ObjectRepository, Selectable
 {
-    use TagsRepositoryTrait;
-
     public function __construct(
         ManagerRegistry $registry,
         // #[Autowire('%pw.public_media_dir%')]
@@ -346,7 +344,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
     {
         $queryBuilder = $this->createQueryBuilder('p')
             ->select('p.tags')
-            ->setMaxResults(30000);
+            ->setMaxResults(30000); // some kind of arbitrary parapet
 
         if (null !== $host) {
             $this->andHost($queryBuilder, $host);
@@ -355,7 +353,12 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
         /** @var array{tags: string[]}[] */
         $tags = $queryBuilder->getQuery()->getResult();
 
-        return $this->flattenTags($tags);
+        $allTags = [];
+        foreach ($tags as $entity) {
+            $allTags = array_merge($allTags, $entity['tags']);
+        }
+
+        return array_values(array_unique($allTags));
     }
 
     /**

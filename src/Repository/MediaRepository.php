@@ -22,8 +22,6 @@ use Symfony\Contracts\Service\Attribute\Required;
  */
 class MediaRepository extends ServiceEntityRepository implements ObjectRepository, Selectable
 {
-    use TagsRepositoryTrait;
-
     #[Required]
     public PageRepository $pageRepository;
 
@@ -174,12 +172,16 @@ class MediaRepository extends ServiceEntityRepository implements ObjectRepositor
 
         $queryBuilder = $this->createQueryBuilder('m')
             ->select('m.tags')
-            ->setMaxResults(30000);
+            ->setMaxResults(30000); // some kind of arbitrary parapet
 
         /** @var array{tags: string[]}[] */
-        $mediaTags = $queryBuilder->getQuery()->getResult();
+        $tags = $queryBuilder->getQuery()->getResult();
 
-        return array_values(array_unique([...$allTags, ...$this->flattenTags($mediaTags)]));
+        foreach ($tags as $entity) {
+            $allTags = array_merge($allTags, $entity['tags']);
+        }
+
+        return array_values(array_unique($allTags));
     }
 
     public function getExprToFilterMedia(string $alias, string $filterValue): Orx
