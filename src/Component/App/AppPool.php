@@ -221,4 +221,16 @@ final class AppPool
     {
         return $this->getApp($host)->get($key);
     }
+
+    /**
+     * Returns the current locale, prioritizing page locale over app locale.
+     */
+    public function getLocale(): string
+    {
+        $currentPageLocale = null !== $this->currentPage ? $this->currentPage->locale : '';
+
+        return '' !== $currentPageLocale
+          ? $currentPageLocale
+          : $this->get()->getLocale();
+    }
 }
