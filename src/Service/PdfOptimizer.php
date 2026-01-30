@@ -3,7 +3,10 @@
 namespace Pushword\Core\Service;
 
 use Psr\Log\LoggerInterface;
+use Pushword\Core\BackgroundTask\BackgroundTaskDispatcherInterface;
 use Pushword\Core\Entity\Media;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -15,8 +18,9 @@ final class PdfOptimizer
 
     public function __construct(
         private readonly MediaStorageAdapter $mediaStorage,
-        private readonly string $projectDir,
+        private readonly BackgroundTaskDispatcherInterface $backgroundTaskDispatcher,
         private readonly LoggerInterface $logger,
+        private readonly Filesystem $filesystem = new Filesystem(),
         private readonly string $pdfPreset = 'ebook',
         private readonly bool $pdfLinearize = true,
     ) {
@@ -62,7 +66,7 @@ final class PdfOptimizer
         }
 
         $localPath = $this->mediaStorage->getLocalPath($media->getFileName());
-        if (! file_exists($localPath)) {
+        if (! $this->filesystem->exists($localPath)) {
             $this->logger->error('PDF optimization failed: file not found', ['file' => $localPath]);
 
             return false;
@@ -85,15 +89,17 @@ final class PdfOptimizer
                 'original' => $this->formatBytes($originalSize),
                 'compressed' => $this->formatBytes($newSize ?: 0),
             ]);
-            @unlink($optimizedPath);
+            $this->filesystem->remove($optimizedPath);
 
             return false;
         }
 
         // Replace original with optimized version
-        if (! rename($optimizedPath, $localPath)) {
+        try {
+            $this->filesystem->rename($optimizedPath, $localPath, true);
+        } catch (IOException) {
             $this->logger->error('PDF optimization failed: could not replace original file');
-            @unlink($optimizedPath);
+            $this->filesystem->remove($optimizedPath);
 
             return false;
         }
@@ -145,8 +151,8 @@ final class PdfOptimizer
 
         // Clean up intermediate temp files (keep only final result)
         foreach ($tempFiles as $tempFile) {
-            if ($tempFile !== $currentPath && file_exists($tempFile)) {
-                @unlink($tempFile);
+            if ($tempFile !== $currentPath) {
+                $this->filesystem->remove($tempFile);
             }
         }
 
@@ -181,7 +187,7 @@ final class PdfOptimizer
         $process->setTimeout(300); // 5 minutes max
         $process->run();
 
-        if (! $process->isSuccessful() || ! file_exists($outputPath)) {
+        if (! $process->isSuccessful() || ! $this->filesystem->exists($outputPath)) {
             $this->logger->warning('Ghostscript compression failed', [
                 'error' => $process->getErrorOutput(),
             ]);
@@ -207,7 +213,7 @@ final class PdfOptimizer
         $process->setTimeout(120); // 2 minutes max
         $process->run();
 
-        if (! $process->isSuccessful() || ! file_exists($outputPath)) {
+        if (! $process->isSuccessful() || ! $this->filesystem->exists($outputPath)) {
             $this->logger->warning('qpdf linearization failed', [
                 'error' => $process->getErrorOutput(),
             ]);
@@ -223,15 +229,11 @@ final class PdfOptimizer
      */
     public function runBackgroundOptimization(string $fileName): void
     {
-        $process = new Process([
-            'php',
-            'bin/console',
+        $this->backgroundTaskDispatcher->dispatch(
+            'pdf-optimize-'.md5($fileName),
+            ['php', 'bin/console', 'pw:pdf:optimize', $fileName],
             'pw:pdf:optimize',
-            $fileName,
-        ]);
-        $process->setWorkingDirectory($this->projectDir);
-        $process->disableOutput();
-        $process->start();
+        );
     }
 
     private function formatBytes(int $bytes): string
