@@ -1,9 +1,11 @@
 <?php
 
-namespace Pushword\Core\Component\EntityFilter;
+namespace Pushword\Core\Content;
 
 use Exception;
 use LogicException;
+use Pushword\Core\Component\EntityFilter\FilterEvent;
+use Pushword\Core\Component\EntityFilter\FilterRegistry;
 use Pushword\Core\Entity\Page;
 use Pushword\Core\Site\SiteConfig;
 use Pushword\Core\Site\SiteRegistry;
@@ -12,14 +14,9 @@ use function Safe\preg_match;
 
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
-/**
- * @method string getMainContent()
- */
-final class Manager
+final class ContentPipeline
 {
-    private readonly SiteConfig $app;
-
-    private readonly SiteRegistry $apps;
+    private readonly SiteConfig $site;
 
     /** @var array<string, mixed> */
     private array $propertyCache = [];
@@ -28,54 +25,65 @@ final class Manager
     private static array $snakeCaseCache = [];
 
     public function __construct(
-        private readonly ManagerPool $managerPool,
+        private readonly ContentPipelineFactory $factory,
         private readonly EventDispatcherInterface $eventDispatcher,
         private readonly FilterRegistry $filterRegistry,
         public readonly Page $page,
+        SiteRegistry $apps,
     ) {
-        $this->apps = $managerPool->apps;
-        $this->app = $this->apps->get($page->host);
+        $this->site = $apps->get($page->host);
     }
 
-    public function getPage(): Page
+    public function getMainContent(): string
     {
-        return $this->page;
+        $value = $this->getFilteredProperty('MainContent');
+        assert(\is_string($value));
+
+        return $value;
     }
 
-    public function getManagerPool(): ManagerPool
+    public function getTitle(): string
     {
-        return $this->managerPool;
+        $value = $this->getFilteredProperty('Title');
+        assert(\is_string($value));
+
+        return $value;
+    }
+
+    public function getName(): string
+    {
+        $value = $this->getFilteredProperty('Name');
+        assert(\is_string($value));
+
+        return $value;
     }
 
     /**
-     * Magic getter for Entity properties.
-     *
      * @param array<mixed> $arguments
      */
-    public function __call(string $method, array $arguments = []): mixed
+    public function getFilteredProperty(string $property, array $arguments = []): mixed
     {
-        if (preg_match('/^get/', $method) < 1) {
-            $method = 'get'.ucfirst($method);
-        }
-
-        $property = substr($method, 3);
         $cacheKey = [] !== $arguments ? $property.':'.hash('xxh3', (string) json_encode($arguments)) : $property;
 
         if (isset($this->propertyCache[$cacheKey])) {
             return $this->propertyCache[$cacheKey];
         }
 
-        $filterEvent = new FilterEvent($this, $property);
+        $filterEvent = new FilterEvent(
+            $this->factory->getLegacyManager($this->page),
+            $property,
+        );
         $this->eventDispatcher->dispatch($filterEvent, FilterEvent::NAME_BEFORE);
 
+        $method = 'get'.$property;
         if (! \is_callable($pageMethod = [$this->page, $method])) {
-            throw new LogicException();
+            throw new LogicException('Method '.$method.' is not callable on Page');
         }
 
         $returnValue = [] !== $arguments ? \call_user_func_array($pageMethod, $arguments) : \call_user_func($pageMethod);
 
         if (! \is_scalar($returnValue)) {
-            throw new LogicException();
+            throw new LogicException('Property '.$property.' must return a scalar value');
         }
 
         $returnValue = $this->filter($property, $returnValue);
@@ -88,9 +96,19 @@ final class Manager
     }
 
     /**
-     * main_content => apply filters on mainContent (*_filters => camelCase(*))
-     * string       => apply filters on each string property.
+     * Magic getter for backward compatibility.
+     *
+     * @param array<mixed> $arguments
      */
+    public function __call(string $method, array $arguments = []): mixed
+    {
+        if (preg_match('/^get/', $method) < 1) {
+            $method = 'get'.ucfirst($method);
+        }
+
+        return $this->getFilteredProperty(substr($method, 3), $arguments);
+    }
+
     private function filter(string $property, bool|float|int|string|null $propertyValue): mixed
     {
         $filters = $this->getFilters($this->camelCaseToSnakeCase($property));
@@ -111,30 +129,28 @@ final class Manager
         );
     }
 
-    /**
-     * @return string[]
-     */
+    /** @return string[] */
     private function getFilters(string $label): array
     {
-        if ($this->app->entityCanOverrideFilters()) {
+        $filters = null;
+
+        if ($this->site->entityCanOverrideFilters()) {
             $filters = $this->page->getCustomProperty($label.'_filters');
         }
 
-        if (! isset($filters) || \is_string($filters) && \in_array($filters, [[], '', null], true)) {
-            $appFilters = $this->app->getFilters();
-            $filters = $appFilters[$label] ?? null;
+        if (null === $filters || '' === $filters) {
+            $filters = $this->site->getFilters()[$label] ?? null;
         }
 
-        if (is_string($filters)) {
+        if (\is_string($filters)) {
             return explode(',', $filters);
         }
 
-        if (! is_array($filters)) {
+        if (! \is_array($filters)) {
             return [];
         }
 
-        // Ensure all elements are strings
-        return array_map(static fn ($item): string => is_scalar($item) ? (string) $item : throw new Exception(), $filters);
+        return array_map(static fn ($item): string => \is_scalar($item) ? (string) $item : throw new Exception(), $filters);
     }
 
     /**
@@ -153,7 +169,9 @@ final class Manager
                 throw new Exception('Filter `'.$filter.'` not found');
             }
 
-            $propertyValue = $filterInstance->apply($propertyValue, $this->page, $this, $property);
+            // Pass the legacy Manager for backward compatibility
+            $legacyManager = $this->factory->getLegacyManager($this->page);
+            $propertyValue = $filterInstance->apply($propertyValue, $this->page, $legacyManager, $property);
         }
 
         return $propertyValue;
