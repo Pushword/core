@@ -39,13 +39,11 @@ class Date implements FilterInterface
         );
     }
 
-    private function convertDateShortCode(string $string, ?string $locale = null): string
+    public function convertDateShortCode(string $string, ?string $locale = null): string
     {
         $locale = null !== $locale ? $this->convertLocale($locale) : 'fr_FR';
         $intlDateFormatter = $this->getFormatter($locale);
 
-        // $string = preg_replace('/date\([\'"]?([a-z% ]+)[\'"]?\)/i',
-        //  strftime(strpos('\1', '%') ? '\1': '%\1'), $string);
         $string = preg_replace('/date\([\'"]?%?S[\'"]?\)/i', $this->getSummerYear(), $string);
         $string = preg_replace('/date\([\'"]?%?W[\'"]?\)/i', $this->getWinterYear(), $string);
         $string = preg_replace('/date\([\'"]?%?Y-1[\'"]?\)/i', date('Y', strtotime('-1 year')), $string);
@@ -77,14 +75,10 @@ class Date implements FilterInterface
 
     private function convertLocale(string $locale): string
     {
-        if ('fr' === $locale) {
-            return 'fr_FR';
-        }
-
-        if ('en' === $locale) {
-            return 'en_UK';
-        }
-
-        return $locale;
+        return match ($locale) {
+            'fr' => 'fr_FR',
+            'en' => 'en_UK',
+            default => $locale,
+        };
     }
 }
