@@ -41,11 +41,7 @@ final class PdfOptimizer
 
     public function isAvailable(): bool
     {
-        if ($this->isGhostscriptAvailable()) {
-            return true;
-        }
-
-        return $this->isQpdfAvailable();
+        return $this->isGhostscriptAvailable() || $this->isQpdfAvailable();
     }
 
     /**
@@ -170,8 +166,7 @@ final class PdfOptimizer
             return false;
         }
 
-        $validPresets = ['screen', 'ebook', 'printer', 'prepress'];
-        $preset = \in_array($this->pdfPreset, $validPresets, true) ? $this->pdfPreset : 'ebook';
+        $preset = $this->pdfPreset;
 
         $process = new Process([
             $this->ghostscriptPath,

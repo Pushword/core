@@ -2,7 +2,6 @@
 
 namespace Pushword\Core\Service;
 
-use Exception;
 use Imagine\Draw\DrawerInterface;
 use Imagine\Gd\Font;
 use Imagine\Image\Box;
@@ -53,7 +52,7 @@ class PageOpenGraphImageGenerator
 
     public function getPage(): Page
     {
-        return $this->page ?? throw new Exception();
+        return $this->page ?? throw new \LogicException('Page must be set before generating OG image');
     }
 
     public function getPath(bool $browserPath = false): string
@@ -156,15 +155,11 @@ class PageOpenGraphImageGenerator
 
     private function getImagine(): ImagineInterface
     {
-        return $this->imagine ?? new Imagine();
+        return $this->imagine ??= new Imagine();
     }
 
     private function getRgb(): RGB
     {
-        if (null === $this->rgb) {
-            return $this->rgb = new RGB();
-        }
-
-        return $this->rgb;
+        return $this->rgb ??= new RGB();
     }
 }
