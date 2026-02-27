@@ -34,7 +34,6 @@ final class Configuration implements ConfigurationInterface
         'locales',
         'name',
         'base_url',
-        'base_live_url',
         'template',
         'template_dir',
         'entity_can_override_filters',
