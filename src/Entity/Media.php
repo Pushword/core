@@ -30,7 +30,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Yaml\Yaml;
-use Throwable;
 use Vich\UploaderBundle\Mapping\Attribute as Vich;
 
 #[Vich\Uploadable]
@@ -115,34 +114,6 @@ class Media implements IdInterface, Taggable, Stringable
             ->atPath('fileName')
             ->addViolation()
         ;
-    }
-
-    #[Assert\Callback]
-    public function validateAlts(ExecutionContextInterface $executionContext): void
-    {
-        if ('' === (string) $this->alts) {
-            return;
-        }
-
-        try {
-            $parsed = Yaml::parse((string) $this->alts);
-        } catch (Throwable) {
-            $executionContext
-                ->buildViolation('mediaAltsInvalidYaml')
-                ->atPath('alts')
-                ->addViolation()
-            ;
-
-            return;
-        }
-
-        if (! \is_array($parsed)) {
-            $executionContext
-                ->buildViolation('mediaAltsInvalidYaml')
-                ->atPath('alts')
-                ->addViolation()
-            ;
-        }
     }
 
     public function setMediaFile(?File $file = null): void
