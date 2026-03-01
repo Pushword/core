@@ -30,7 +30,7 @@ class BlockExtension
     public function renderAttaches(
         string $title,
         string $url,
-        int|string $size = 0, // bytes
+        int|string $size, // bytes
         string $id = '',
     ): string {
         $size = (int) $size;

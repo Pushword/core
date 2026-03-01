@@ -13,16 +13,21 @@ final class MarkdownProtectCodeBlock
     {
         $i = 0;
         $codeBlocks = [];
-        $text = preg_replace_callback(
-            '/^```(.*?)```(\n\n|$)/ms',
-            static function (array $matches) use (&$codeBlocks, &$i): string {
-                $placeholder = '___CODE_BLOCK_PLACEHOLDER_'.($i++).'___';
-                $codeBlocks[$placeholder] = trim($matches[0]);
+        $replacer = static function (array $matches) use (&$codeBlocks, &$i): string {
+            $placeholder = '___CODE_BLOCK_PLACEHOLDER_'.($i++).'___';
+            $codeBlocks[$placeholder] = trim($matches[0]); // @phpstan-ignore argument.type
 
-                return $placeholder."\n\n";
-            },
-            $text // @phpstan-ignore-line
-        ) ?? $text;
+            return $placeholder."\n\n";
+        };
+
+        $patterns = [
+            '/^```(.*?)```(\n\n|$)/ms',
+            '/^<pre(?:\s[^>]*)?>.*?<\/pre>(\n\n|$)/ms',
+        ];
+
+        foreach ($patterns as $pattern) {
+            $text = preg_replace_callback($pattern, $replacer, $text) ?? $text; // @phpstan-ignore argument.type
+        }
 
         $this->codeBlocks = $codeBlocks;
 
