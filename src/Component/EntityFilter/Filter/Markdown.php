@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Pushword\Core\Component\EntityFilter\Filter;
 
 use Exception;
@@ -33,10 +31,6 @@ class Markdown implements FilterInterface
 
     private function render(string $text, Manager $manager): string
     {
-        // Convert inline heading attributes `## Title {#id}` to block syntax `{#id}\n## Title`
-        $text = preg_replace('/^(#{1,6}\s.+?)[\t ]*(\{[#.][^}]+(?<!#)\})[\t ]*\r?$/m', "$2\n$1", $text);
-        assert(is_string($text));
-
         $textPartList = MarkdownUtils::prepareText($text);
 
         // must take care of code block
@@ -77,8 +71,6 @@ class Markdown implements FilterInterface
             $inlineCodeProtector = new MarkdownProtectInlineCode();
             $textFiltered = $codeBlockProtector->protect($blockText);
             $textFiltered = $inlineCodeProtector->protect($textFiltered);
-            $textFiltered = preg_replace('/\{#([a-zA-Z0-9_-]+)\}/', '{id=$1}', $textFiltered);
-            assert(\is_string($textFiltered));
             $textFiltered = $manager->applyFilters($textFiltered, ['twig']);
             assert(is_string($textFiltered));
             $textFiltered = $inlineCodeProtector->restore($textFiltered);

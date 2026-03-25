@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Pushword\Core\Service;
 
 use Pushword\Core\Entity\Page;
@@ -35,7 +33,7 @@ class TailwindGenerator
         $fs = new Filesystem();
         $fs->dumpFile(
             $this->projectDir.'/var/TailwindGeneratorCache/'.($page->id ?? 0),
-            $page->getMainContent()
+            serialize($page)
         );
 
         // I prefer to use npm run over yarn because if yarn is installed, so npm is

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Pushword\Core\Entity\SharedTrait;
 
 use Doctrine\DBAL\Types\Types;
@@ -11,9 +9,4 @@ trait IdTrait
 {
     #[ORM\Id, ORM\GeneratedValue, ORM\Column(type: Types::INTEGER)]
     public private(set) ?int $id = null;
-
-    public function __clone(): void
-    {
-        $this->id = null;
-    }
 }

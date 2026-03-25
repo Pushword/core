@@ -1,13 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Pushword\Core\Entity;
 
 use Cocur\Slugify\Slugify;
 use DateTime;
 use DateTimeInterface;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
@@ -75,17 +72,11 @@ class Page implements IdInterface, Taggable, Stringable, Weightable
     // --- Main image (inlined from PageMainImageTrait) ---
 
     #[ORM\ManyToOne(targetEntity: Media::class, cascade: ['persist'], inversedBy: 'mainImagePages')]
-    public ?Media $mainImage = null;
-
-    public function __clone(): void
-    {
-        $this->id = null;
-        $this->translations = new ArrayCollection();
-    }
+    protected ?Media $mainImage = null;
 
     public function getMainImage(): ?Media
     {
-        return $this->mainImage ?? $this->extendedPage?->getMainImage();
+        return $this->mainImage;
     }
 
     public function setMainImage(?Media $media): self
@@ -143,7 +134,7 @@ class Page implements IdInterface, Taggable, Stringable, Weightable
 
     /** Template - promoted to real column from customProperties */
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-    public ?string $template = null;
+    protected ?string $template = null;
 
     // --- Redirection (computed, not persisted) ---
 
@@ -173,9 +164,9 @@ class Page implements IdInterface, Taggable, Stringable, Weightable
         return $this->slug;
     }
 
-    public function setSlug(string|int|null $slug): self
+    public function setSlug(?string $slug): self
     {
-        $this->slug = is_int($slug) ? (string) $slug : $slug;
+        $this->slug = $slug;
 
         return $this;
     }
@@ -289,7 +280,7 @@ class Page implements IdInterface, Taggable, Stringable, Weightable
 
     public function getTemplate(): ?string
     {
-        return $this->template ?? $this->extendedPage?->getTemplate();
+        return $this->template;
     }
 
     public function setTemplate(?string $template): self
@@ -297,11 +288,6 @@ class Page implements IdInterface, Taggable, Stringable, Weightable
         $this->template = $template;
 
         return $this;
-    }
-
-    public function getCustomProperty(string $name): mixed
-    {
-        return $this->customProperties[$name] ?? $this->extendedPage?->getCustomProperty($name);
     }
 
     // --- Search excerpt (fixed typo: searchExcrept -> searchExcerpt) ---

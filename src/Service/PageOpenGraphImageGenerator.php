@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Pushword\Core\Service;
 
 use Imagine\Draw\DrawerInterface;
@@ -14,11 +12,9 @@ use Imagine\Image\Palette\RGB;
 use Imagine\Image\Point;
 use Imagine\Imagick\Imagine;
 use LogicException;
-use Psr\Log\LoggerInterface;
 use Pushword\Core\Entity\Page;
 use Pushword\Core\Site\SiteRegistry;
 use Symfony\Component\Filesystem\Filesystem;
-use Throwable;
 use Twig\Environment as Twig;
 
 /**
@@ -42,7 +38,6 @@ class PageOpenGraphImageGenerator
         private readonly int $imageHeight = 600,
         private readonly int $imageWidth = 1200,
         private readonly int $marginSize = 60,
-        private readonly ?LoggerInterface $logger = null,
     ) {
         if (null !== ($currentPage = $this->apps->getCurrentPage())) {
             $this->page = $currentPage;
@@ -78,26 +73,19 @@ class PageOpenGraphImageGenerator
             return;
         }
 
-        try {
-            $image = $this->getImagine()->create(
-                new Box($this->imageWidth, $this->imageHeight),
-            );
+        $image = $this->getImagine()->create(
+            new Box($this->imageWidth, $this->imageHeight),
+        );
 
-            $drawer = $image->draw();
-            $this->drawTitle($drawer);
-            $this->drawAuthorName($drawer);
-            $this->drawLogo($image);
-            $this->drawFooter($drawer);
+        $drawer = $image->draw();
+        $this->drawTitle($drawer);
+        $this->drawAuthorName($drawer);
+        $this->drawLogo($image);
+        $this->drawFooter($drawer);
 
-            $this->filesystem->mkdir($this->publicDir.'/'.$this->publicMediaDir.'/og/');
+        $this->filesystem->mkdir($this->publicDir.'/'.$this->publicMediaDir.'/og/');
 
-            $image->save($this->getPath());
-        } catch (Throwable $throwable) {
-            $this->logger?->error('OG image generation failed for page "{slug}": {message}', [
-                'slug' => $this->getPage()->getSlug(),
-                'message' => $throwable->getMessage(),
-            ]);
-        }
+        $image->save($this->getPath());
     }
 
     private function drawTitle(DrawerInterface $drawer): void
