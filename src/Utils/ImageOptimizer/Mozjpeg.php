@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Utils\ImageOptimizer;
 
 use Override;
@@ -10,7 +12,8 @@ use Symfony\Component\Process\Process;
 
 class Mozjpeg extends BaseOptimizer
 {
-    public string $binaryName = 'cjpeg';
+    /** @var string */
+    public $binaryName = 'cjpeg';
 
     public function canHandle(Image $image): bool
     {

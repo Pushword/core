@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Twig;
 
 use DateTime;
@@ -213,6 +215,7 @@ final class PageExtension
         array|string $host = '',
         ?Page $currentPage = null,
         bool $excludeAlreadyLinked = false,
+        bool $indexableOnly = true,
     ): string {
         $currentPage ??= $this->apps->getCurrentPage();
 
@@ -262,6 +265,12 @@ final class PageExtension
             }
 
             $this->pageRepo->andLocale($queryBuilder, $locale);
+        }
+
+        $this->pageRepo->andNotRedirection($queryBuilder);
+
+        if ($indexableOnly) {
+            $this->pageRepo->andIndexable($queryBuilder);
         }
 
         if (null !== $currentPage) {

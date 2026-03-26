@@ -79,6 +79,81 @@ class EntityFilterTest extends KernelTestCase
         self::assertSame($toCheck, substr(trim($splitContent->getContent()), 0, \strlen($toCheck)));
     }
 
+    public function testTocWithBlockId(): void
+    {
+        $content = "my intro...\n\n{#example-1}\n## First Title\n\nfirst paragraph\n\n{#section-2-details}\n## Second Title\n\nsecond paragraph";
+
+        $page = $this->getPage($content);
+        $splitContent = $this->getContentExtension()->mainContentSplit($page);
+
+        $body = $splitContent->getContent();
+        self::assertStringContainsString('id="example-1"', $body);
+        self::assertStringContainsString('id="section-2-details"', $body);
+        self::assertStringNotContainsString('id="first-title"', $body);
+        self::assertStringNotContainsString('id="second-title"', $body);
+
+        $toc = $splitContent->getToc();
+        self::assertIsString($toc);
+        self::assertStringContainsString('#example-1', $toc);
+        self::assertStringContainsString('#section-2-details', $toc);
+    }
+
+    public function testTocWithInlineId(): void
+    {
+        $content = "my intro...\n\n## First Title {#example-1}\n\nfirst paragraph\n\n## Second Title {#section-2}\n\nsecond paragraph";
+
+        $page = $this->getPage($content);
+        $splitContent = $this->getContentExtension()->mainContentSplit($page);
+
+        $body = $splitContent->getContent();
+        self::assertStringContainsString('id="example-1"', $body);
+        self::assertStringContainsString('id="section-2"', $body);
+        self::assertStringNotContainsString('id="first-title"', $body);
+        self::assertStringNotContainsString('id="second-title"', $body);
+
+        $toc = $splitContent->getToc();
+        self::assertIsString($toc);
+        self::assertStringContainsString('#example-1', $toc);
+        self::assertStringContainsString('#section-2', $toc);
+    }
+
+    public function testMarkdownAnchorNotInterpretedAsTwigComment(): void
+    {
+        $content = "{#difficulty}\n## Physical Difficulty\n\nSome text\n\n{#reservation}\n## Reservation\n\nMore text";
+
+        $page = $this->getPage($content);
+        $splitContent = $this->getContentExtension()->mainContentSplit($page);
+
+        $body = $splitContent->getContent();
+        self::assertStringContainsString('id="difficulty"', $body);
+        self::assertStringContainsString('id="reservation"', $body);
+    }
+
+    public function testInlineHeadingAttributeDoesNotMatchAcrossLines(): void
+    {
+        // Regression: \s* in regex matched newlines, causing {#nextblock} on a separate line
+        // to be incorrectly merged with the preceding heading
+        $content = "### Heading\n\n{#nextblock}\n## Next Section\n\ntext";
+
+        $page = $this->getPage($content);
+        $body = $this->getContentExtension()->mainContentSplit($page)->getContent();
+
+        self::assertStringContainsString('id="nextblock"', $body);
+        self::assertStringContainsString('<h3', $body);
+        self::assertStringContainsString('Heading</h3>', $body);
+        self::assertStringNotContainsString('id="nextblock">Heading</h3>', $body, 'The {#nextblock} attribute must not leak onto the preceding heading');
+        self::assertStringContainsString('<h2', $body);
+    }
+
+    public function testTwigInHeadingNotAffectedByInlineIdSupport(): void
+    {
+        $page = $this->getPage("## Title with {{ \"twig\" }}\n\nparagraph");
+        $body = $this->getContentExtension()->mainContentSplit($page)->getContent();
+
+        self::assertStringContainsString('twig', $body);
+        self::assertStringContainsString('<h2', $body);
+    }
+
     private function getPage(?string $content = null): Page
     {
         $page = new Page();
@@ -114,10 +189,6 @@ class EntityFilterTest extends KernelTestCase
 
     private function getContentReadyForToc(): string
     {
-        return 'my intro...'
-            .\chr(10).'## First Title'
-            .\chr(10).'first paragraph'
-            .\chr(10).'## Second Title'
-            .\chr(10).'second paragraph';
+        return "my intro...\n## First Title\nfirst paragraph\n## Second Title\nsecond paragraph";
     }
 }

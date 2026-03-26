@@ -66,10 +66,10 @@ final readonly class NotificationEmailSender
 
         try {
             $email = new Email()
-                ->from($envelope->from)
-                ->to(...$envelope->to)
-                ->subject($subject)
-                ->html($htmlBody);
+              ->from($envelope->from)
+              ->to(...$envelope->to)
+              ->subject($subject)
+              ->html($htmlBody);
 
             if (null !== $textBody) {
                 $email->text($textBody);
@@ -88,10 +88,13 @@ final readonly class NotificationEmailSender
 
             return true;
         } catch (Throwable $throwable) {
-            $this->logger?->error('[NotificationEmailSender] Failed to send email', [
-                'error' => $throwable->getMessage(),
-                'subject' => $subject,
-            ]);
+            $this->logger?->error(
+                '[NotificationEmailSender] Failed to send email `'.$subject.'`',
+                [
+                    'error' => $throwable->getMessage(),
+                    'subject' => $subject,
+                ],
+            );
 
             return false;
         }
@@ -114,11 +117,11 @@ final readonly class NotificationEmailSender
 
         try {
             $email = new TemplatedEmail()
-                ->from($envelope->from)
-                ->to(...$envelope->to)
-                ->subject($subject)
-                ->htmlTemplate($template)
-                ->context($context);
+              ->from($envelope->from)
+              ->to(...$envelope->to)
+              ->subject($subject)
+              ->htmlTemplate($template)
+              ->context($context);
 
             if (null !== $envelope->replyTo) {
                 $email->replyTo($envelope->replyTo);
@@ -217,8 +220,10 @@ final readonly class NotificationEmailSender
      *
      * @return string[]
      */
-    private function resolveToAddresses(SiteConfig $app, string|array|null $configKey): array
-    {
+    private function resolveToAddresses(
+        SiteConfig $app,
+        string|array|null $configKey,
+    ): array {
         // Handle array of addresses directly (for direct recipients like user email)
         if (\is_array($configKey)) {
             return array_filter($configKey, static fn (string $email): bool => '' !== $email);
@@ -228,7 +233,10 @@ final readonly class NotificationEmailSender
         if (null !== $configKey && '' !== $configKey) {
             $value = $app->get($configKey);
             if (\is_array($value)) {
-                return array_filter($value, static fn (mixed $v): bool => \is_string($v) && '' !== $v);
+                return array_filter(
+                    $value,
+                    static fn (mixed $v): bool => \is_string($v) && '' !== $v,
+                );
             }
 
             if (\is_string($value) && '' !== $value) {
@@ -239,7 +247,10 @@ final readonly class NotificationEmailSender
         // 2. Try global default
         $globalTo = $app->get('notification_email_to');
         if (\is_array($globalTo)) {
-            return array_filter($globalTo, static fn (mixed $v): bool => \is_string($v) && '' !== $v);
+            return array_filter(
+                $globalTo,
+                static fn (mixed $v): bool => \is_string($v) && '' !== $v,
+            );
         }
 
         if (\is_string($globalTo) && '' !== $globalTo) {
@@ -252,8 +263,11 @@ final readonly class NotificationEmailSender
     /**
      * @param array<string, mixed> $context
      */
-    private function renderTemplate(string $template, array $context, ?string $fallback): ?string
-    {
+    private function renderTemplate(
+        string $template,
+        array $context,
+        ?string $fallback,
+    ): ?string {
         if (null === $this->twig) {
             return $fallback;
         }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Repository;
 
 use DateTime;
@@ -377,7 +379,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
                 ->setParameter('locale', $locale);
     }
 
-    protected function andIndexable(QueryBuilder $queryBuilder): QueryBuilder
+    public function andIndexable(QueryBuilder $queryBuilder): QueryBuilder
     {
         $alias = $this->getRootAlias($queryBuilder);
 
@@ -385,7 +387,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
             ->setParameter('noi2', '%noindex%');
     }
 
-    protected function andNotRedirection(QueryBuilder $queryBuilder): QueryBuilder
+    public function andNotRedirection(QueryBuilder $queryBuilder): QueryBuilder
     {
         $alias = $this->getRootAlias($queryBuilder);
 
