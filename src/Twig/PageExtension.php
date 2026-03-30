@@ -161,6 +161,7 @@ final class PageExtension
 
     /**
      * @param array<array{
+     *      id: ?string,
      *      page: Page,
      *      image: Media|string,
      *      imageAlt: ?string,
@@ -169,6 +170,8 @@ final class PageExtension
      *      obfuscateLink: ?bool,
      *      date: DateTime|string|null,
      *      title_tag: ?string,
+     *      showInfoButton: ?bool,
+     *      infoLinkLabel: ?string,
      *      buttonLink: ?string,
      *      buttonLinkLabel: ?string,
      *      description: ?string,
