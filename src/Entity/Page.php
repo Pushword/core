@@ -5,6 +5,7 @@ namespace Pushword\Core\Entity;
 use Cocur\Slugify\Slugify;
 use DateTime;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
@@ -33,6 +34,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\Entity(repositoryClass: PageRepository::class)]
 #[ORM\Table(name: 'page')]
 #[ORM\UniqueConstraint(name: 'unique_slug_host', columns: ['slug', 'host'])]
+#[ORM\Index(name: 'idx_page_host', columns: ['host'])]
 class Page implements IdInterface, Taggable, Stringable, Weightable
 {
     use IdTrait;
@@ -72,11 +74,17 @@ class Page implements IdInterface, Taggable, Stringable, Weightable
     // --- Main image (inlined from PageMainImageTrait) ---
 
     #[ORM\ManyToOne(targetEntity: Media::class, cascade: ['persist'], inversedBy: 'mainImagePages')]
-    protected ?Media $mainImage = null;
+    public ?Media $mainImage = null;
+
+    public function __clone(): void
+    {
+        $this->id = null;
+        $this->translations = new ArrayCollection();
+    }
 
     public function getMainImage(): ?Media
     {
-        return $this->mainImage;
+        return $this->mainImage ?? $this->extendedPage?->getMainImage();
     }
 
     public function setMainImage(?Media $media): self
@@ -134,7 +142,7 @@ class Page implements IdInterface, Taggable, Stringable, Weightable
 
     /** Template - promoted to real column from customProperties */
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
-    protected ?string $template = null;
+    public ?string $template = null;
 
     // --- Redirection (computed, not persisted) ---
 
@@ -164,9 +172,9 @@ class Page implements IdInterface, Taggable, Stringable, Weightable
         return $this->slug;
     }
 
-    public function setSlug(?string $slug): self
+    public function setSlug(string|int|null $slug): self
     {
-        $this->slug = $slug;
+        $this->slug = is_int($slug) ? (string) $slug : $slug;
 
         return $this;
     }
@@ -280,7 +288,7 @@ class Page implements IdInterface, Taggable, Stringable, Weightable
 
     public function getTemplate(): ?string
     {
-        return $this->template;
+        return $this->template ?? $this->extendedPage?->getTemplate();
     }
 
     public function setTemplate(?string $template): self
@@ -288,6 +296,11 @@ class Page implements IdInterface, Taggable, Stringable, Weightable
         $this->template = $template;
 
         return $this;
+    }
+
+    public function getCustomProperty(string $name): mixed
+    {
+        return $this->customProperties[$name] ?? $this->extendedPage?->getCustomProperty($name);
     }
 
     // --- Search excerpt (fixed typo: searchExcrept -> searchExcerpt) ---

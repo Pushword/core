@@ -3,22 +3,19 @@
 namespace Pushword\Core\Image;
 
 use Exception;
-use Intervention\Image\Image;
 use Intervention\Image\Interfaces\ImageInterface;
 use Pushword\Core\BackgroundTask\BackgroundTaskDispatcherInterface;
 use Pushword\Core\Entity\Media;
 use Pushword\Core\Service\MediaStorageAdapter;
 
-final class ThumbnailGenerator
+final readonly class ImageCacheGenerator
 {
-    private ?ImageInterface $lastThumb = null;
-
     public function __construct(
-        private readonly ImageReader $imageReader,
-        private readonly ImageEncoder $imageEncoder,
-        private readonly ImageCacheManager $imageCacheManager,
-        private readonly BackgroundTaskDispatcherInterface $backgroundTaskDispatcher,
-        private readonly MediaStorageAdapter $mediaStorage,
+        private ImageReader $imageReader,
+        private ImageEncoder $imageEncoder,
+        private ImageCacheManager $imageCacheManager,
+        private BackgroundTaskDispatcherInterface $backgroundTaskDispatcher,
+        private MediaStorageAdapter $mediaStorage,
     ) {
     }
 
@@ -87,10 +84,6 @@ final class ThumbnailGenerator
                 $workImage = clone $currentImage;
                 $resultImage = $this->generateFilteredCache($media, $filterName, $workImage, skipClone: true);
                 $generated = true;
-
-                if ('thumb' === $filterName) {
-                    $this->lastThumb = $resultImage;
-                }
 
                 // Progressive downsizing: use result as base for next smaller filter
                 if (null !== $this->imageCacheManager->getFilterTargetWidth($filterName)) {
@@ -169,7 +162,7 @@ final class ThumbnailGenerator
      *
      * @return ImageInterface|null Returns null if image format is not supported by current driver
      */
-    public function generateQuickThumb(Media $media): ?ImageInterface
+    public function generateQuickPreview(Media $media): ?ImageInterface
     {
         $this->copyOriginalToFilter($media, 'md');
 
@@ -187,11 +180,6 @@ final class ThumbnailGenerator
             ['php', 'bin/console', 'pw:image:cache', $fileName],
             'pw:image:cache',
         );
-    }
-
-    public function getLastThumb(): ?ImageInterface
-    {
-        return $this->lastThumb;
     }
 
     private function runBackgroundOptimization(string $fileName): void
@@ -224,15 +212,9 @@ final class ThumbnailGenerator
         return $image;
     }
 
-    private function updateMainColor(Media $media, ?ImageInterface $image = null): void
+    private function updateMainColor(Media $media, ImageInterface $image): void
     {
-        if (! $image instanceof Image) {
-            return;
-        }
-
-        $imageForPalette = clone $image;
-        $color = $imageForPalette->pickColor(0, 0)->toHex('#');
-
+        $color = (clone $image)->colorAt(0, 0)->toHex(true);
         $media->setMainColor($color);
     }
 }

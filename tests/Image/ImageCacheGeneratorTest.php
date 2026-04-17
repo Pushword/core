@@ -5,17 +5,18 @@ namespace Pushword\Core\Tests\Image;
 use Override;
 use PHPUnit\Framework\Attributes\Group;
 use Pushword\Core\BackgroundTask\BackgroundTaskDispatcherInterface;
+use Pushword\Core\Entity\Media;
+use Pushword\Core\Image\ImageCacheGenerator;
 use Pushword\Core\Image\ImageCacheManager;
 use Pushword\Core\Image\ImageEncoder;
 use Pushword\Core\Image\ImageReader;
-use Pushword\Core\Image\ThumbnailGenerator;
 use Pushword\Core\Service\MediaStorageAdapter;
 use Pushword\Core\Tests\PathTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
 #[Group('integration')]
-class ThumbnailGeneratorTest extends KernelTestCase
+class ImageCacheGeneratorTest extends KernelTestCase
 {
     use PathTrait;
 
@@ -23,7 +24,7 @@ class ThumbnailGeneratorTest extends KernelTestCase
 
     protected function setUp(): void
     {
-        $this->tmpPublicDir = sys_get_temp_dir().'/pushword-thumb-test-'.getmypid();
+        $this->tmpPublicDir = sys_get_temp_dir().'/pushword-cache-test-'.getmypid();
         new Filesystem()->mkdir($this->tmpPublicDir);
     }
 
@@ -37,7 +38,7 @@ class ThumbnailGeneratorTest extends KernelTestCase
     /**
      * @param array<string, array<string, mixed>> $filterSets
      */
-    private function createGenerator(array $filterSets = []): ThumbnailGenerator
+    private function createGenerator(array $filterSets = []): ImageCacheGenerator
     {
         self::bootKernel();
         $mediaStorage = $this->createMediaStorageAdapter();
@@ -47,7 +48,7 @@ class ThumbnailGeneratorTest extends KernelTestCase
 
         $backgroundTaskDispatcher = self::getContainer()->get(BackgroundTaskDispatcherInterface::class);
 
-        return new ThumbnailGenerator($imageReader, $imageEncoder, $imageCacheManager, $backgroundTaskDispatcher, $mediaStorage);
+        return new ImageCacheGenerator($imageReader, $imageEncoder, $imageCacheManager, $backgroundTaskDispatcher, $mediaStorage);
     }
 
     /**
@@ -95,6 +96,30 @@ class ThumbnailGeneratorTest extends KernelTestCase
         $cacheManager = $this->createCacheManager($filters);
         $cacheManager->remove($image);
         self::assertFileDoesNotExist($this->tmpPublicDir.'/'.$this->publicMediaDir.'/xl/blank.jpg');
+    }
+
+    public function testMainColorExtraction(): void
+    {
+        $generator = $this->createGenerator([
+            'default' => ['quality' => 80, 'filters' => ['scaleDown' => [100]]],
+        ]);
+
+        $media = new Media();
+        $media->setProjectDir($this->projectDir);
+        $media->setStoreIn($this->getMediaDir());
+        $media->setFileName('blank.jpg');
+
+        // Copy test image into media dir so ImageReader can find it
+        $mediaStorage = $this->createMediaStorageAdapter();
+        $mediaPath = $mediaStorage->getLocalPath('blank.jpg');
+        if (! file_exists($mediaPath)) {
+            new Filesystem()->copy(__DIR__.'/../Service/blank.jpg', $mediaPath);
+        }
+
+        $generator->generateCache($media, force: true);
+
+        self::assertNotNull($media->getMainColor());
+        self::assertMatchesRegularExpression('/^#[0-9a-f]{6}$/i', $media->getMainColor());
     }
 
     public function testFilterCacheWithFormats(): void

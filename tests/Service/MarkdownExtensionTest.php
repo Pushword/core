@@ -141,6 +141,21 @@ class MarkdownExtensionTest extends KernelTestCase
         self::assertStringEndsWith('example.com</span> <span class="cea hidden">pbagnpg@rknzcyr.pbz</span>.</p>', $result);
     }
 
+    public function testMailWithoutArgument(): void
+    {
+        $twig = self::getContainer()->get('twig');
+        $result = $twig->render($twig->createTemplate('{{ mail() }}'));
+        self::assertStringContainsString('localhost.dev', $result);
+        self::assertStringContainsString('pbagnpg@ybpnyubfg.qri', $result); // rot13 of contact@localhost.dev
+    }
+
+    public function testTelWithoutArgument(): void
+    {
+        $twig = self::getContainer()->get('twig');
+        $result = $twig->render($twig->createTemplate('{{ tel() }}'));
+        self::assertStringContainsString('data-rot="gry:+33123456789"', $result);
+    }
+
     // ===== Tests de l'autolink téléphone =====
 
     public function testPhoneAutolink(): void
@@ -164,6 +179,52 @@ class MarkdownExtensionTest extends KernelTestCase
         $result = $parser->transform('Season date(S) / date(W)');
         self::assertStringNotContainsString('date(S)', $result);
         self::assertStringNotContainsString('date(W)', $result);
+    }
+
+    // ===== Tests du colspan dans les tableaux =====
+
+    public function testColspanInThead(): void
+    {
+        $parser = $this->getMarkdownParser();
+        $result = $parser->transform("| Service | Identifiant | -> |\n|---|---|---|\n| A | B | C |");
+
+        self::assertStringContainsString('colspan="2"', $result);
+        self::assertStringContainsString('<th colspan="2">Identifiant</th>', $result);
+        self::assertStringNotContainsString('-&gt;', $result);
+    }
+
+    public function testColspanFullRowThead(): void
+    {
+        $parser = $this->getMarkdownParser();
+        $result = $parser->transform("| A | -> | -> |\n|---|---|---|\n| 1 | 2 | 3 |");
+
+        self::assertStringContainsString('<th colspan="3">A</th>', $result);
+    }
+
+    public function testColspanInTbody(): void
+    {
+        $parser = $this->getMarkdownParser();
+        $result = $parser->transform("| A | B | C |\n|---|---|---|\n| X | -> | Z |");
+
+        self::assertStringContainsString('<td colspan="2">X</td>', $result);
+        self::assertStringContainsString('<td>Z</td>', $result);
+    }
+
+    public function testColspanArrowFirstCellIgnored(): void
+    {
+        $parser = $this->getMarkdownParser();
+        $result = $parser->transform("| -> | A | B |\n|---|---|---|\n| 1 | 2 | 3 |");
+
+        // Arrow in first position has no preceding cell — kept as-is
+        self::assertStringNotContainsString('colspan', $result);
+    }
+
+    public function testNoColspanWithoutArrow(): void
+    {
+        $parser = $this->getMarkdownParser();
+        $result = $parser->transform("| A | B | C |\n|---|---|---|\n| 1 | 2 | 3 |");
+
+        self::assertStringNotContainsString('colspan', $result);
     }
 
     // ===== Tests de non-conversion dans le code =====

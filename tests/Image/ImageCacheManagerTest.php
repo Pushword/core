@@ -5,10 +5,10 @@ namespace Pushword\Core\Tests\Image;
 use PHPUnit\Framework\Attributes\Group;
 use Pushword\Core\BackgroundTask\BackgroundTaskDispatcherInterface;
 use Pushword\Core\Entity\Media;
+use Pushword\Core\Image\ImageCacheGenerator;
 use Pushword\Core\Image\ImageCacheManager;
 use Pushword\Core\Image\ImageEncoder;
 use Pushword\Core\Image\ImageReader;
-use Pushword\Core\Image\ThumbnailGenerator;
 use Pushword\Core\Service\MediaStorageAdapter;
 use Pushword\Core\Tests\PathTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -183,7 +183,7 @@ class ImageCacheManagerTest extends KernelTestCase
         $manager = $this->createManager($filters);
 
         $backgroundTaskDispatcher = self::getContainer()->get(BackgroundTaskDispatcherInterface::class);
-        $generator = new ThumbnailGenerator($imageReader, $imageEncoder, $manager, $backgroundTaskDispatcher, $mediaStorage);
+        $generator = new ImageCacheGenerator($imageReader, $imageEncoder, $manager, $backgroundTaskDispatcher, $mediaStorage);
 
         // Generate the default filter cache first
         $generator->generateFilteredCache($image, ['default' => $filters['default']]);

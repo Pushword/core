@@ -12,7 +12,7 @@ final readonly class ImageOptimizer
 
     public function __construct(
         private ImageCacheManager $imageCacheManager,
-        private ThumbnailGenerator $thumbnailGenerator,
+        private ImageCacheGenerator $imageCacheGenerator,
     ) {
         $this->optimizer = OptimizerChainFactory::create();
     }
@@ -45,7 +45,7 @@ final readonly class ImageOptimizer
         }
 
         if ($needsGeneration) {
-            $this->thumbnailGenerator->generateFilteredCache($media, $filterName);
+            $this->imageCacheGenerator->generateFilteredCache($media, $filterName);
         }
 
         foreach ($formatExtensions as $extension) {
