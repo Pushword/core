@@ -4,9 +4,9 @@ namespace Pushword\Core\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Pushword\Core\Entity\Media;
-use Pushword\Core\Image\ImageCacheGenerator;
 use Pushword\Core\Image\ImageCacheManager;
 use Pushword\Core\Image\ImageReader;
+use Pushword\Core\Image\ThumbnailGenerator;
 use Pushword\Core\Repository\MediaRepository;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -27,7 +27,7 @@ final readonly class ImageManagerCommand
     public function __construct(
         private MediaRepository $mediaRepository,
         private EntityManagerInterface $entityManager,
-        private ImageCacheGenerator $imageCacheGenerator,
+        private ThumbnailGenerator $thumbnailGenerator,
         private ImageCacheManager $imageCacheManager,
         private ImageReader $imageReader,
         private LockFactory $lockFactory,
@@ -52,8 +52,7 @@ final readonly class ImageManagerCommand
 
         $lock = null;
         if (! $noLock) {
-            $lockKey = null !== $mediaName ? 'pw:image:cache:'.md5($mediaName) : 'pw:image:cache';
-            $lock = $this->lockFactory->createLock($lockKey);
+            $lock = $this->lockFactory->createLock('pw:image:cache');
             if (! $lock->acquire(blocking: false)) {
                 $io->info('Another instance of pw:image:cache is already running. Skipping.');
 
@@ -120,7 +119,7 @@ final readonly class ImageManagerCommand
                 $progressBar?->setMessage($media->getPath());
 
                 try {
-                    $generated = $this->imageCacheGenerator->generateCache($media, $force);
+                    $generated = $this->thumbnailGenerator->generateCache($media, $force);
                     if (! $generated) {
                         ++$skipped;
                     }

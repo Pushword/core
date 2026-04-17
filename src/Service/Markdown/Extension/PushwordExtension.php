@@ -3,7 +3,6 @@
 namespace Pushword\Core\Service\Markdown\Extension;
 
 use League\CommonMark\Environment\EnvironmentBuilderInterface;
-use League\CommonMark\Event\DocumentParsedEvent;
 use League\CommonMark\Extension\CommonMark\Node\Inline\Image;
 use League\CommonMark\Extension\ExtensionInterface;
 use Pushword\Core\Component\EntityFilter\Filter\Date;
@@ -15,7 +14,6 @@ use Pushword\Core\Service\Markdown\Extension\Parser\DateShortcodeParser;
 use Pushword\Core\Service\Markdown\Extension\Parser\EmailAutolinkParser;
 use Pushword\Core\Service\Markdown\Extension\Parser\ObfuscatedLinkParser;
 use Pushword\Core\Service\Markdown\Extension\Parser\PhoneAutolinkParser;
-use Pushword\Core\Service\Markdown\Extension\Processor\ColspanProcessor;
 use Pushword\Core\Service\Markdown\Extension\Renderer\ImageRenderer;
 use Pushword\Core\Service\Markdown\Extension\Renderer\ObfuscatedEmailRenderer;
 use Pushword\Core\Service\Markdown\Extension\Renderer\ObfuscatedLinkRenderer;
@@ -67,7 +65,5 @@ final readonly class PushwordExtension implements ExtensionInterface
             new ImageRenderer($this->twig, $this->apps),
             10 // Priorité haute pour surcharger le renderer par défaut
         );
-
-        $environment->addEventListener(DocumentParsedEvent::class, new ColspanProcessor());
     }
 }

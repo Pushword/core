@@ -5,7 +5,6 @@ namespace Pushword\Core\Router;
 use Exception;
 use Pushword\Core\Entity\Page;
 use Pushword\Core\Repository\PageRepository;
-use Pushword\Core\Site\SiteRegistry;
 use Twig\Attribute\AsTwigFunction;
 
 final readonly class RouterTwigExtension
@@ -13,7 +12,6 @@ final readonly class RouterTwigExtension
     public function __construct(
         private PushwordRouteGenerator $router,
         private PageRepository $pageRepository,
-        private SiteRegistry $siteRegistry,
     ) {
     }
 
@@ -48,39 +46,22 @@ final readonly class RouterTwigExtension
         $arg4 = $args[3] ?? null;
         $host ??= \is_string($arg4) ? $arg4 : null;
 
-        // Resolve host from the current site when not explicitly provided so the
-        // repository can warm its lightweight URI cache. Without this, the
-        // empty-host sentinel would short-circuit the redirect lookups below.
-        $host ??= $this->siteRegistry->getMainHost() ?? '';
+        $page = $slug instanceof Page ? $slug : $this->pageRepository->getPageBySlug($slug, $host ?? '');
 
-        // Page instance: everything is already hydrated, no DB access required.
-        if ($slug instanceof Page) {
-            if ($slug->hasRedirection()) {
-                return $this->resolveRedirection($slug->getRedirectionUrl(), $host, $canonical, $pager);
+        if (null !== $page && $page->hasRedirection()) {
+            $redirectionUrl = $page->getRedirectionUrl();
+            if (str_starts_with($redirectionUrl, '/')) {
+                $targetSlug = ltrim($redirectionUrl, '/');
+                $targetPage = $this->pageRepository->getPageBySlug($targetSlug, $page->host);
+                if (null !== $targetPage) {
+                    return $this->router->generate($targetPage, $canonical, $pager, $host);
+                }
             }
 
-            return $this->router->generate($slug, $canonical, $pager, $host);
-        }
-
-        // String slug: only the redirect map is consulted on the hot path.
-        $redirect = $this->pageRepository->getRedirectFor($slug, $host);
-        if (null !== $redirect) {
-            return $this->resolveRedirection($redirect['url'], $host, $canonical, $pager);
+            return $redirectionUrl;
         }
 
         return $this->router->generate($slug, $canonical, $pager, $host);
-    }
-
-    private function resolveRedirection(string $redirectionUrl, string $host, bool $canonical, ?int $pager): string
-    {
-        if (str_starts_with($redirectionUrl, '/')) {
-            $targetSlug = ltrim($redirectionUrl, '/');
-            if ($this->pageRepository->hasSlug($targetSlug, $host)) {
-                return $this->router->generate($targetSlug, $canonical, $pager, $host);
-            }
-        }
-
-        return $redirectionUrl;
     }
 
     #[AsTwigFunction('is_current_page')]

@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 use Pushword\Core\Site\SiteRegistry;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
     $containerConfigurator->extension('twig', [
@@ -15,9 +19,9 @@ return static function (ContainerConfigurator $containerConfigurator): void {
             '%kernel.project_dir%/public' => null,
         ],
         'globals' => [
-            'apps' => ['type' => 'service', 'id' => SiteRegistry::class],
-            'twig' => ['type' => 'service', 'id' => 'twig'],
-            'unprose' => ['value' => 'not-prose lg:-mx-40 my-6 md:-mx-20'],
+            'apps' => service(SiteRegistry::class),
+            'twig' => service('twig'),
+            'unprose' => 'not-prose lg:-mx-40 my-6 md:-mx-20',
         ],
         'form_themes' => [
             'bootstrap_5_layout.html.twig',

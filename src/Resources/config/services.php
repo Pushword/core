@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use PiedWeb\RenderAttributes\TwigExtension;
 use Pushword\Core\BackgroundTask\MessengerBackgroundTaskDispatcher;
@@ -11,7 +13,6 @@ use Pushword\Core\PushwordCoreBundle;
 use Pushword\Core\Repository\MediaRepository;
 use Pushword\Core\Repository\UserRepository;
 use Pushword\Core\Router\PushwordRouteGenerator;
-use Pushword\Core\Scheduler\CronScheduleProvider;
 use Pushword\Core\Service\Email\NotificationEmailSender;
 use Pushword\Core\Service\MediaStorageAdapter;
 use Pushword\Core\Service\VichUploadPropertyNamer;
@@ -28,7 +29,6 @@ use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_it
 
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Scheduler\ScheduleProviderInterface;
 use Twig\Extension\StringLoaderExtension;
 
 return static function (ContainerConfigurator $containerConfigurator): void {
@@ -49,8 +49,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->bind('$imageDriver', '%pw.image_driver%')
         ->bind('$pdfPreset', '%pw.pdf_preset%')
         ->bind('$pdfLinearize', '%pw.pdf_linearize%')
-        ->bind('$enablePasswordReset', '%pw.enable_password_reset%')
-        ->bind('$scheduledCommands', '%pw.scheduled_commands%');
+        ->bind('$enablePasswordReset', '%pw.enable_password_reset%');
 
     $services->load('Pushword\Core\\', __DIR__.'/../../../src/*')
         ->exclude([
@@ -123,11 +122,6 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     if (interface_exists(MessageBusInterface::class)) {
         $services->set(MessengerBackgroundTaskDispatcher::class);
         $services->set(RunCommandHandler::class);
-    }
-
-    // Scheduler - only register if symfony/scheduler is installed
-    if (interface_exists(ScheduleProviderInterface::class)) {
-        $services->set(CronScheduleProvider::class);
     }
 
     // OAuth Extension - only register if KnpU OAuth2 Client Bundle is installed

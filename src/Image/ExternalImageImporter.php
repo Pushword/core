@@ -16,7 +16,7 @@ final readonly class ExternalImageImporter
 
     public function __construct(
         private MediaStorageAdapter $mediaStorage,
-        private ImageCacheGenerator $imageCacheGenerator,
+        private ThumbnailGenerator $thumbnailGenerator,
         private string $mediaDir,
         private string $projectDir,
         private Filesystem $filesystem = new Filesystem(),
@@ -117,6 +117,6 @@ final readonly class ExternalImageImporter
             fclose($stream);
         }
 
-        $this->imageCacheGenerator->generateCache($media);
+        $this->thumbnailGenerator->generateCache($media);
     }
 }

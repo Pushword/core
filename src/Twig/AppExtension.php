@@ -76,13 +76,7 @@ final class AppExtension
     public function containsLinkTo(string $slug, ?string $content = null): bool
     {
         if (null === $content) {
-            $stashed = $this->apps->stash('content');
-            $content = '' !== $stashed ? $stashed : ($this->apps->getCurrentPage()?->getMainContent() ?? '');
-        }
-
-        $currentPage = $this->apps->getCurrentPage();
-        if (null !== $currentPage && $currentPage->getRealSlug() === $slug) {
-            return true;
+            $content = $this->apps->getCurrentPage()?->getMainContent() ?? '';
         }
 
         $path = $this->router->generate($slug);

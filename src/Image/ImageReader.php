@@ -6,8 +6,8 @@ use Exception;
 use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 use Intervention\Image\Drivers\Imagick\Driver as ImagickDriver;
 use Intervention\Image\Drivers\Vips\Core as VipsCore;
-use Intervention\Image\Drivers\Vips\Driver as VipsDriver;
 use Intervention\Image\ImageManager as InterventionImageManager;
+use Intervention\Image\Interfaces\DriverInterface;
 use Intervention\Image\Interfaces\ImageInterface;
 use Pushword\Core\Entity\Media;
 use Pushword\Core\Service\MediaStorageAdapter;
@@ -23,61 +23,58 @@ final readonly class ImageReader
         private MediaStorageAdapter $mediaStorage,
         private string $imageDriver = 'auto',
     ) {
-        [$this->resolvedDriver, $driverClass] = $this->resolveDriver();
-        $this->interventionManager = new InterventionImageManager($driverClass, decodeAnimation: false);
+        [$this->resolvedDriver, $driver] = $this->resolveDriver();
+        $this->interventionManager = new InterventionImageManager($driver, decodeAnimation: false);
     }
 
     /**
-     * @return array{string, class-string}
+     * @return array{string, DriverInterface}
      */
     private function resolveDriver(): array
     {
         if ('auto' !== $this->imageDriver) {
-            return [$this->imageDriver, $this->driverClassFromName($this->imageDriver)];
+            return [$this->imageDriver, $this->createDriver($this->imageDriver)];
         }
 
         if ($this->isVipsClassAvailable()) {
             try {
-                $driver = new VipsDriver();
+                $driver = new \Intervention\Image\Drivers\Vips\Driver();
                 $driver->checkHealth();
 
                 // Verify multi-format encoding works (ensureInMemory uses VipsArea gtype)
-                $mgr = new InterventionImageManager(VipsDriver::class, decodeAnimation: false);
-                $encoded = $mgr->createImage(1, 1)->encodeUsingFileExtension('jpg');
-                $testImage = $mgr->decode($encoded->toString());
+                $mgr = new InterventionImageManager($driver, decodeAnimation: false);
+                $encoded = $mgr->create(1, 1)->encodeByExtension('jpg');
+                $testImage = $mgr->read($encoded->toString());
                 VipsCore::ensureInMemory($testImage->core());
 
-                return ['vips', VipsDriver::class];
+                return ['vips', $driver];
             } catch (Throwable) {
                 // vips not usable (e.g. ffi.enable=preload, broken gtype), fall through
             }
         }
 
         if (\extension_loaded('imagick')) {
-            return ['imagick', ImagickDriver::class];
+            return ['imagick', new ImagickDriver()];
         }
 
-        return ['gd', GdDriver::class];
+        return ['gd', new GdDriver()];
     }
 
     private function isVipsClassAvailable(): bool
     {
         return \extension_loaded('ffi')
-            && class_exists(VipsDriver::class);
+            && class_exists(\Intervention\Image\Drivers\Vips\Driver::class);
     }
 
-    /**
-     * @return class-string
-     */
-    private function driverClassFromName(string $name): string
+    private function createDriver(string $name): DriverInterface
     {
         if ('vips' === $name && $this->isVipsClassAvailable()) {
-            return VipsDriver::class;
+            return new \Intervention\Image\Drivers\Vips\Driver();
         }
 
         return match ($name) {
-            'imagick' => ImagickDriver::class,
-            default => GdDriver::class,
+            'imagick' => new ImagickDriver(),
+            default => new GdDriver(),
         };
     }
 
@@ -88,7 +85,7 @@ final readonly class ImageReader
             : $media;
 
         try {
-            $image = $this->interventionManager->decode($path);
+            $image = $this->interventionManager->read($path);
         } catch (Exception) {
             throw new Exception($this->resolvedDriver.' cannot read image `'.$path.'`');
         }

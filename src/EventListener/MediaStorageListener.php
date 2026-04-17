@@ -6,8 +6,8 @@ use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Exception;
 use LogicException;
 use Pushword\Core\Entity\Media;
-use Pushword\Core\Image\ImageCacheGenerator;
 use Pushword\Core\Image\ImageCacheManager;
+use Pushword\Core\Image\ThumbnailGenerator;
 use Pushword\Core\Service\MediaConflictResolver;
 use Pushword\Core\Service\MediaStorageAdapter;
 use Pushword\Core\Service\PdfOptimizer;
@@ -27,7 +27,7 @@ final readonly class MediaStorageListener
     public function __construct(
         private string $projectDir,
         private MediaStorageAdapter $mediaStorage,
-        private ImageCacheGenerator $imageCacheGenerator,
+        private ThumbnailGenerator $thumbnailGenerator,
         private ImageCacheManager $imageCacheManager,
         private PdfOptimizer $pdfOptimizer,
         private MediaConflictResolver $conflictResolver,
@@ -78,8 +78,8 @@ final readonly class MediaStorageListener
             $this->imageCacheManager->remove($oldFileName);
             $media->setFileNameBeforeUpdate('');
 
-            $this->imageCacheGenerator->generateQuickPreview($media);
-            $this->imageCacheGenerator->runBackgroundCacheGeneration($newFileName);
+            $this->thumbnailGenerator->generateQuickThumb($media);
+            $this->thumbnailGenerator->runBackgroundCacheGeneration($newFileName);
         }
 
         if ($preUpdateEventArgs->hasChangedField('hash')) {
@@ -105,8 +105,8 @@ final readonly class MediaStorageListener
 
         if ($media->isImage()) {
             $this->imageCacheManager->remove($media);
-            $this->imageCacheGenerator->generateQuickPreview($media);
-            $this->imageCacheGenerator->runBackgroundCacheGeneration($media->getFileName());
+            $this->thumbnailGenerator->generateQuickThumb($media);
+            $this->thumbnailGenerator->runBackgroundCacheGeneration($media->getFileName());
 
             return;
         }

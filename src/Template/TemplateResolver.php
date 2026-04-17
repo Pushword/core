@@ -10,22 +10,17 @@ use Twig\Error\LoaderError;
 
 final readonly class TemplateResolver
 {
-    public function __construct(private Twig $twig, private CacheInterface $cache)
-    {
+    public function __construct(
+        private Twig $twig,
+        private CacheInterface $cache,
+    ) {
     }
 
-    public function resolve(
-        SiteConfig $site,
-        ?string $path = null,
-        string $fallback = '@Pushword',
-    ): string {
-        $cacheKey =
-          'pushword.view.'.md5($site->getMainHost().'|'.$path.'|'.$fallback);
+    public function resolve(SiteConfig $site, ?string $path = null, string $fallback = '@Pushword'): string
+    {
+        $cacheKey = 'pushword.view.'.md5($site->getMainHost().'|'.$path.'|'.$fallback);
 
-        return $this->cache->get(
-            $cacheKey,
-            fn (): string => $this->doResolve($site, $path, $fallback),
-        );
+        return $this->cache->get($cacheKey, fn (): string => $this->doResolve($site, $path, $fallback));
     }
 
     private function doResolve(SiteConfig $site, ?string $path, string $fallback): string

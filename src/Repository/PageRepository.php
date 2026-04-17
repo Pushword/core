@@ -3,7 +3,6 @@
 namespace Pushword\Core\Repository;
 
 use DateTime;
-use DateTimeInterface;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Selectable;
@@ -15,7 +14,6 @@ use LogicException;
 use Pushword\Admin\Controller\PageCheatSheetCrudController;
 use Pushword\Core\Entity\Media;
 use Pushword\Core\Entity\Page;
-use Pushword\Core\Entity\ValueObject\PageRedirection;
 use RuntimeException;
 
 /**
@@ -36,27 +34,6 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
 
     /** @var array<string, true> */
     private array $warmedHosts = [];
-
-    /**
-     * Slug-existence set per host. Used by the page() Twig function to decide
-     * whether an internal redirect target is a known page (in which case the
-     * router generates a URL) or an external URL (returned as-is).
-     *
-     * @var array<string, array<string, true>>
-     */
-    private array $slugSets = [];
-
-    /**
-     * Redirect map per host. Only rows whose main_content starts with
-     * "Location:" are kept — on a typical site this is a handful of entries
-     * regardless of total page count.
-     *
-     * @var array<string, array<string, array{url: string, code: int}>>
-     */
-    private array $redirectMaps = [];
-
-    /** @var array<string, true> */
-    private array $warmedLightHosts = [];
 
     public function __construct(
         ManagerRegistry $registry,
@@ -87,22 +64,27 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
     }
 
     /**
-     * Get a page by slug with per-slug caching. Does NOT auto-warm the full-entity
-     * cache: callers that need to preload an entire host should call warmupSlugCache()
-     * explicitly (static generation, page scanning). The hot render path goes through
-     * resolvePageUriTarget() instead, which uses a scalar light cache.
+     * Get a page by slug with caching support.
+     * Uses the warmed cache if available, otherwise falls back to single query.
      */
     public function getPageBySlug(string $slug, string $host): ?Page
     {
+        // Check if host is warmed up - use cache
         if (isset($this->warmedHosts[$host])) {
             return $this->slugCache[$host][$slug] ?? null;
         }
 
+        // Check if this specific slug is cached
         if (isset($this->slugCache[$host][$slug])) {
             return $this->slugCache[$host][$slug];
         }
 
+        // Fallback to single query and cache the result
         $page = $this->findOneBy(['slug' => $slug, 'host' => $host]);
+
+        if (! isset($this->slugCache[$host])) {
+            $this->slugCache[$host] = [];
+        }
 
         if (null !== $page) {
             $this->slugCache[$host][$slug] = $page;
@@ -112,95 +94,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
     }
 
     /**
-     * Populate the lightweight URI cache for a host with a single scalar query.
-     * Builds two structures: a slug-existence set (used to detect internal
-     * redirect targets) and a redirect map keyed by slug. The redirect map is
-     * typically a handful of entries even on large sites.
-     */
-    public function warmupSlugCacheLight(string $host): void
-    {
-        if (isset($this->warmedLightHosts[$host])) {
-            return;
-        }
-
-        $meta = $this->getClassMetadata();
-        $table = $meta->getTableName();
-        $slugCol = $meta->getColumnName('slug');
-        $hostCol = $meta->getColumnName('host');
-        $contentCol = $meta->getColumnName('mainContent');
-
-        $sql = sprintf('SELECT %s AS slug,', $slugCol)
-            .sprintf(" CASE WHEN %s LIKE 'Location:%%' THEN %s ELSE NULL END AS redirect_content", $contentCol, $contentCol)
-            .sprintf(' FROM %s WHERE %s = ?', $table, $hostCol);
-
-        /** @var list<array{slug: string, redirect_content: ?string}> $rows */
-        $rows = $this->getEntityManager()->getConnection()->fetchAllAssociative($sql, [$host]);
-
-        $slugSet = [];
-        $redirects = [];
-        foreach ($rows as $row) {
-            $slug = $row['slug'];
-            $slugSet[$slug] = true;
-
-            $redirectContent = $row['redirect_content'];
-            if (null === $redirectContent) {
-                continue;
-            }
-
-            $redirection = PageRedirection::fromContent($redirectContent);
-            if (null === $redirection) {
-                continue;
-            }
-
-            $redirects[$slug] = ['url' => $redirection->url, 'code' => $redirection->code];
-        }
-
-        $this->slugSets[$host] = $slugSet;
-        $this->redirectMaps[$host] = $redirects;
-        $this->warmedLightHosts[$host] = true;
-    }
-
-    /**
-     * Whether a slug exists for the given host (by scalar light cache).
-     * Used by the page() Twig function to decide whether an internal redirect
-     * target can be handed to the router. First call per host triggers the
-     * warmup; subsequent calls are plain array reads. Returns false for the
-     * empty-host sentinel (caller resolves via SiteRegistry::getMainHost()).
-     */
-    public function hasSlug(string $slug, string $host): bool
-    {
-        if ('' === $host) {
-            return false;
-        }
-
-        if (! isset($this->warmedLightHosts[$host])) {
-            $this->warmupSlugCacheLight($host);
-        }
-
-        return isset($this->slugSets[$host][$slug]);
-    }
-
-    /**
-     * Return the redirect target for a slug, or null if the slug is unknown
-     * or not a redirect. Triggers warmup on first call per host.
-     *
-     * @return ?array{url: string, code: int}
-     */
-    public function getRedirectFor(string $slug, string $host): ?array
-    {
-        if ('' === $host) {
-            return null;
-        }
-
-        if (! isset($this->warmedLightHosts[$host])) {
-            $this->warmupSlugCacheLight($host);
-        }
-
-        return $this->redirectMaps[$host][$slug] ?? null;
-    }
-
-    /**
-     * Check if a host's full Page entities are loaded in cache.
+     * Check if a host's pages are fully loaded in cache.
      */
     public function isHostWarmed(string $host): bool
     {
@@ -208,24 +102,13 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
     }
 
     /**
-     * Check if a host's lightweight URI cache is populated.
-     */
-    public function isHostLightWarmed(string $host): bool
-    {
-        return isset($this->warmedLightHosts[$host]);
-    }
-
-    /**
-     * Clear all internal slug caches.
+     * Clear the internal slug cache.
      * Called automatically when EntityManager::clear() is invoked.
      */
     public function onClear(): void
     {
         $this->slugCache = [];
         $this->warmedHosts = [];
-        $this->slugSets = [];
-        $this->redirectMaps = [];
-        $this->warmedLightHosts = [];
     }
 
     public function create(string $host): Page
@@ -298,19 +181,6 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
             ->setParameter('now', new DateTime(), 'datetime')
             ->andWhere($alias.'.slug <> :cheatsheet')
             ->setParameter('cheatsheet', PageCheatSheetCrudController::CHEATSHEET_SLUG);
-    }
-
-    /** @return Page[] */
-    public function findNewlyPublishedSince(DateTimeInterface $since): array
-    {
-        return $this->createQueryBuilder('p')
-            ->where('p.publishedAt IS NOT NULL')
-            ->andWhere('p.publishedAt > :since')
-            ->andWhere('p.publishedAt <= :now')
-            ->setParameter('since', $since, 'datetime')
-            ->setParameter('now', new DateTime(), 'datetime')
-            ->getQuery()
-            ->getResult();
     }
 
     /**
@@ -507,7 +377,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
                 ->setParameter('locale', $locale);
     }
 
-    public function andIndexable(QueryBuilder $queryBuilder): QueryBuilder
+    protected function andIndexable(QueryBuilder $queryBuilder): QueryBuilder
     {
         $alias = $this->getRootAlias($queryBuilder);
 
@@ -515,7 +385,7 @@ class PageRepository extends ServiceEntityRepository implements ObjectRepository
             ->setParameter('noi2', '%noindex%');
     }
 
-    public function andNotRedirection(QueryBuilder $queryBuilder): QueryBuilder
+    protected function andNotRedirection(QueryBuilder $queryBuilder): QueryBuilder
     {
         $alias = $this->getRootAlias($queryBuilder);
 

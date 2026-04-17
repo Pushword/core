@@ -107,16 +107,13 @@ class MediaCacheGeneratorCommandTest extends KernelTestCase
         $this->waitForLockRelease();
         $commandTester->execute(['--parallel' => '1', '--force' => true]);
 
-        // Parallel run should pre-filter and detect cached images
+        // Parallel run should pre-filter and skip all
         $this->waitForLockRelease();
         $commandTester->execute(['--parallel' => '2']);
 
         $output = $commandTester->getDisplay();
-        // The summary line always appears and includes the skipped count.
-        // In parallel CI, other ParaTest workers may invalidate cache between
-        // runs, so we can't guarantee skipped > 0 — just verify the pre-filter
-        // code path ran by checking the summary format.
-        self::assertMatchesRegularExpression('/\d+ processed, \d+ skipped/', $output);
+        self::assertStringContainsString('already cached', $output);
+        self::assertStringContainsString('0 to process', $output);
     }
 
     public function testDisplaysImageDriver(): void
