@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\BackgroundTask;
 
 use PHPUnit\Framework\TestCase;
@@ -8,7 +10,7 @@ use Pushword\Core\Service\BackgroundProcessManager;
 use Pushword\Core\Service\ProcessAlreadyRunningException;
 use RuntimeException;
 
-class ProcessBackgroundTaskDispatcherTest extends TestCase
+final class ProcessBackgroundTaskDispatcherTest extends TestCase
 {
     public function testAlreadyRunningIsSilenced(): void
     {

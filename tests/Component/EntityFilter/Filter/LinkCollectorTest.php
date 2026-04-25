@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Component\EntityFilter\Filter;
 
 use PHPUnit\Framework\Attributes\Group;
@@ -11,7 +13,7 @@ use Pushword\Core\Service\LinkCollectorService;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 #[Group('integration')]
-class LinkCollectorTest extends KernelTestCase
+final class LinkCollectorTest extends KernelTestCase
 {
     public function testCollectMarkdownLinks(): void
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Command;
 
 use PHPUnit\Framework\TestCase;
@@ -9,7 +11,7 @@ use Pushword\Core\Repository\UserRepository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\BufferedOutput;
 
-class UserTokenCommandTest extends TestCase
+final class UserTokenCommandTest extends TestCase
 {
     public function testOutputsRawToken(): void
     {

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Service;
 
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\Entity\Page;
 use Pushword\Core\Service\LinkCollectorService;
 
-class LinkCollectorServiceTest extends TestCase
+final class LinkCollectorServiceTest extends TestCase
 {
     public function testRegisterSlug(): void
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Controller;
 
 use PHPUnit\Framework\Attributes\Group;
@@ -8,7 +10,7 @@ use Pushword\Core\Tests\PathTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 #[Group('integration')]
-class MediaControllerTest extends KernelTestCase
+final class MediaControllerTest extends KernelTestCase
 {
     use PathTrait;
 

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Utils;
 
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\Entity\Media;
 use Pushword\Core\Utils\MediaRenamer;
 
-class MediaRenamerTest extends TestCase
+final class MediaRenamerTest extends TestCase
 {
     public function testRenameAppendsIteration(): void
     {

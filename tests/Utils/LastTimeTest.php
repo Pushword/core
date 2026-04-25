@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Utils;
 
 use DateInterval;
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\Utils\LastTime;
 
-class LastTimeTest extends TestCase
+final class LastTimeTest extends TestCase
 {
     private string $tmpFile;
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -54,12 +56,10 @@ final class MediaApiControllerTest extends WebTestCase
         $this->em->flush();
     }
 
-    #[Override]
     protected function tearDown(): void
     {
         $container = $this->client->getContainer();
         $this->em = $container->get('doctrine.orm.default_entity_manager');
-
         $mediaRepo = $this->em->getRepository(Media::class);
         foreach ($this->createdMediaFileNames as $fileName) {
             $media = $mediaRepo->findOneByFileNameOrHistory($fileName);
@@ -78,11 +78,9 @@ final class MediaApiControllerTest extends WebTestCase
         }
 
         $this->em->flush();
-
         $this->createdMediaFileNames = [];
         $this->testUser = null;
         $this->testUserEmail = '';
-
         parent::tearDown();
     }
 

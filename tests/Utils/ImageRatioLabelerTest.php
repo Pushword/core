@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Utils;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\Utils\ImageRatioLabeler;
 
-class ImageRatioLabelerTest extends TestCase
+final class ImageRatioLabelerTest extends TestCase
 {
     #[DataProvider('provideInvalidDimensions')]
     public function testReturnEmptyLabelWhenDimensionsMissing(?int $width, ?int $height): void

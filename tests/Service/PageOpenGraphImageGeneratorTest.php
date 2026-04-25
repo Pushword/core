@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Service;
 
 use Imagine\Image\ImagineInterface;
@@ -14,7 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Filesystem\Filesystem;
 
 #[Group('integration')]
-class PageOpenGraphImageGeneratorTest extends KernelTestCase
+final class PageOpenGraphImageGeneratorTest extends KernelTestCase
 {
     private function buildGenerator(?LoggerInterface $logger = null): PageOpenGraphImageGenerator
     {

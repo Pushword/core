@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Utils;
 
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\Entity\Page;
 use Pushword\Core\Utils\MarkdownUtils;
 
-class MarkdownUtilsTest extends TestCase
+final class MarkdownUtilsTest extends TestCase
 {
     public function testAddAnchorToHeader(): void
     {

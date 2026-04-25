@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\DependencyInjection;
 
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\DependencyInjection\Configuration;
 use Symfony\Component\Config\Definition\Processor;
 
-class ConfigurationImageFilterTest extends TestCase
+final class ConfigurationImageFilterTest extends TestCase
 {
     public function testDefaultImageFilterSetsHasNoThumb(): void
     {

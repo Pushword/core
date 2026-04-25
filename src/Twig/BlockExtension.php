@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Twig;
 
 use Doctrine\Common\Collections\Collection;
@@ -49,14 +51,12 @@ class BlockExtension
 
         $template = $this->apps->get()->getView('/component/attaches.html.twig');
 
-        $html = $this->twig->render($template, [
+        return $this->twig->render($template, [
             'id' => $id,
             'title' => $title,
             'url' => $url,
             'size' => $size,
         ]);
-
-        return $html;
     }
 
     /**

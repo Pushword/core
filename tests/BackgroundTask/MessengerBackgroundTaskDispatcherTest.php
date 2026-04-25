@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\BackgroundTask;
 
 use PHPUnit\Framework\TestCase;
@@ -9,7 +11,7 @@ use Pushword\Core\Service\BackgroundProcessManager;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class MessengerBackgroundTaskDispatcherTest extends TestCase
+final class MessengerBackgroundTaskDispatcherTest extends TestCase
 {
     public function testDispatchSendsMessageToBus(): void
     {

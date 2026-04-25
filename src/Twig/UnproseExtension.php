@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Twig;
 
 use Pushword\Core\Site\SiteRegistry;
@@ -17,7 +19,6 @@ final class UnproseExtension
     #[AsTwigFilter('unprose', needsEnvironment: false, isSafe: ['html'])]
     public function unprose(string $html): string
     {
-        /** @var Twig */
         $twig = $this->twig;
         $unproseClass = $this->apps->get()->get('unprose') ?? $twig->getGlobals()['unprose'] ?? '';
 

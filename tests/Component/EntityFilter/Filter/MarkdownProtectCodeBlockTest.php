@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Component\EntityFilter\Filter;
 
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\Component\EntityFilter\Filter\MarkdownProtectCodeBlock;
 
-class MarkdownProtectCodeBlockTest extends TestCase
+final class MarkdownProtectCodeBlockTest extends TestCase
 {
     private function splitAndRestore(MarkdownProtectCodeBlock $filter, string $protected): string
     {

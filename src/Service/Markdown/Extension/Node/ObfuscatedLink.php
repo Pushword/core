@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Service\Markdown\Extension\Node;
 
 use League\CommonMark\Extension\CommonMark\Node\Inline\Link;
@@ -15,11 +17,6 @@ class ObfuscatedLink extends Link
 
     /** @var array<string, string> */
     private array $attributes = [];
-
-    public function __construct(string $url, ?string $label = null, ?string $title = null)
-    {
-        parent::__construct($url, $label, $title);
-    }
 
     public function setAttributeClass(?string $class): void
     {

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Entity;
 
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\Entity\Media;
 
-class MediaTest extends TestCase
+final class MediaTest extends TestCase
 {
     public function testBasic(): void
     {

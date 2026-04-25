@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Component\EntityFilter\Filter;
 
 use PHPUnit\Framework\TestCase;
@@ -8,7 +10,7 @@ use Pushword\Core\Component\EntityFilter\Manager;
 use Pushword\Core\Entity\Page;
 use ReflectionClass;
 
-class ElseH1Test extends TestCase
+final class ElseH1Test extends TestCase
 {
     private function createManagerStub(): Manager
     {

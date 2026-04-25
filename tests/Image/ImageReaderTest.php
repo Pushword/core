@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Image;
 
 use Intervention\Image\Drivers\Vips\Driver;
@@ -11,7 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Throwable;
 
 #[Group('integration')]
-class ImageReaderTest extends KernelTestCase
+final class ImageReaderTest extends KernelTestCase
 {
     use PathTrait;
 

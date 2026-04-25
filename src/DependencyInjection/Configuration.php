@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\DependencyInjection;
 
 use Pushword\Core\Component\EntityFilter\Filter\Date;
@@ -20,9 +22,6 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 final class Configuration implements ConfigurationInterface
 {
-    /**
-     * @var string
-     */
     public const string DEFAULT_TEMPLATE = '@Pushword';
 
     /**
@@ -46,9 +45,6 @@ final class Configuration implements ConfigurationInterface
         'notification_email_to',
     ];
 
-    /**
-     * @var bool
-     */
     public const bool DEFAULT_ENTITY_CAN_OVERRIDE_FILTERS = true;
 
     /**

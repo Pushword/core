@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Twig;
 
 use PHPUnit\Framework\Attributes\Group;
@@ -7,7 +9,7 @@ use Pushword\Core\Twig\BlockExtension;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 #[Group('integration')]
-class BlockExtensionTest extends KernelTestCase
+final class BlockExtensionTest extends KernelTestCase
 {
     /** @return BlockExtension<object> */
     private function getBlockExtension(): BlockExtension

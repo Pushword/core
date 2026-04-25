@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
@@ -10,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 #[Group('integration')]
-class MediaRepositoryTest extends KernelTestCase
+final class MediaRepositoryTest extends KernelTestCase
 {
     public function testFindDuplicate(): void
     {
@@ -145,7 +147,7 @@ class MediaRepositoryTest extends KernelTestCase
     public function testPersistentCacheHitAcrossInstances(): void
     {
         self::bootKernel();
-        $em = self::getContainer()->get('doctrine.orm.default_entity_manager');
+        self::getContainer()->get('doctrine.orm.default_entity_manager');
         $registry = self::getContainer()->get(ManagerRegistry::class);
         $cache = new ArrayAdapter();
 

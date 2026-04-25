@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Controller;
 
 use DateTime;
@@ -8,7 +10,7 @@ use Pushword\Core\Entity\Page;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 #[Group('integration')]
-class PageRepositoryTest extends KernelTestCase
+final class PageRepositoryTest extends KernelTestCase
 {
     public function testPageRepo(): void
     {
@@ -30,7 +32,7 @@ class PageRepositoryTest extends KernelTestCase
             1
         );
 
-        self::assertSame($pages[0]->getSlug(), 'homepage');
+        self::assertSame('homepage', $pages[0]->getSlug());
     }
 
     public function testNumericSlugDoesNotFallbackToId(): void

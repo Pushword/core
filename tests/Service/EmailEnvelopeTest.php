@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Service;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\Service\Email\EmailEnvelope;
 
-class EmailEnvelopeTest extends TestCase
+final class EmailEnvelopeTest extends TestCase
 {
     /**
      * @param string[] $to

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Controller;
 
 use Pushword\Core\Repository\PageRepository;
@@ -28,7 +30,7 @@ final class SitemapController extends AbstractPushwordController
     #[Route('/{host}/{_locale}sitemap.{_format}', name: 'custom_host_pushword_page_sitemap', requirements: ['_locale' => RoutePatterns::LOCALE, '_format' => 'xml|txt', 'host' => RoutePatterns::HOST], methods: ['GET', 'HEAD'], priority: -11)]
     public function show(Request $request, string $_format): Response
     {
-        $pages = $this->getPages($request, null);
+        $pages = $this->getPages($request);
 
         if (! \is_array($pages) || ! isset($pages[0])) {
             throw $this->createNotFoundException();

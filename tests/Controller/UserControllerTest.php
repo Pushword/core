@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Controller;
 
 use Doctrine\ORM\EntityManager;
@@ -12,13 +14,13 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
 
 #[Group('integration')]
-class UserControllerTest extends WebTestCase
+final class UserControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
 
     protected function setUp(): void
     {
-        $this->client = static::createClient();
+        $this->client = self::createClient();
     }
 
     public function testLoginPageShowsEmailStep(): void
@@ -51,7 +53,7 @@ class UserControllerTest extends WebTestCase
         $this->client->submit($form);
 
         self::assertResponseRedirects('/login?step=password');
-        $crawler = $this->client->followRedirect();
+        $this->client->followRedirect();
 
         // Should now show password field
         self::assertSelectorExists('input[name="password"]');

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Twig;
 
 use PHPUnit\Framework\Attributes\Group;
@@ -9,7 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Twig\Environment;
 
 #[Group('integration')]
-class ImageTemplateTest extends KernelTestCase
+final class ImageTemplateTest extends KernelTestCase
 {
     private function getTwig(): Environment
     {

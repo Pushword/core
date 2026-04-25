@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Entity;
 
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\Entity\LoginToken;
 use Pushword\Core\Entity\User;
 
-class LoginTokenTest extends TestCase
+final class LoginTokenTest extends TestCase
 {
     public function testTokenCreation(): void
     {

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Entity\ValueObject;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\Entity\ValueObject\PageRedirection;
 
-class PageRedirectionTest extends TestCase
+final class PageRedirectionTest extends TestCase
 {
     #[DataProvider('provideValidRedirections')]
     public function testFromContentReturnsRedirection(string $content, string $expectedUrl, int $expectedCode): void

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Image;
 
 use PHPUnit\Framework\Attributes\Group;
@@ -14,7 +16,7 @@ use Pushword\Core\Tests\PathTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 #[Group('integration')]
-class ExternalImageImporterTest extends KernelTestCase
+final class ExternalImageImporterTest extends KernelTestCase
 {
     use PathTrait;
 

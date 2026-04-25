@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Security;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -20,9 +22,6 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
-    /**
-     * @var string
-     */
     final public const string LOGIN_ROUTE = 'pushword_login';
 
     public function __construct(private readonly UrlGeneratorInterface $urlGenerator)

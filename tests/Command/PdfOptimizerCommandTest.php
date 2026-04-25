@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Command;
 
 use PHPUnit\Framework\Attributes\Group;
@@ -9,7 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
 #[Group('integration')]
-class PdfOptimizerCommandTest extends KernelTestCase
+final class PdfOptimizerCommandTest extends KernelTestCase
 {
     use PathTrait;
 
@@ -21,21 +23,21 @@ class PdfOptimizerCommandTest extends KernelTestCase
 
     public function testExecuteWithNoPdfs(): void
     {
-        $kernel = static::createKernel();
+        $kernel = self::createKernel();
         $application = new Application($kernel);
 
         $command = $application->find('pw:pdf:optimize');
         $commandTester = new CommandTester($command);
         $commandTester->execute([]);
 
-        $output = $commandTester->getDisplay();
+        $commandTester->getDisplay();
         // Either "No PDF files" or shows progress (if PDFs exist in DB)
         self::assertSame(0, $commandTester->getStatusCode());
     }
 
     public function testExecuteWithSpecificPdf(): void
     {
-        $kernel = static::createKernel();
+        $kernel = self::createKernel();
         $application = new Application($kernel);
 
         $command = $application->find('pw:pdf:optimize');
@@ -50,7 +52,7 @@ class PdfOptimizerCommandTest extends KernelTestCase
 
     public function testCommandDescription(): void
     {
-        $kernel = static::createKernel();
+        $kernel = self::createKernel();
         $application = new Application($kernel);
 
         $command = $application->find('pw:pdf:optimize');

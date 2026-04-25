@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Utils;
 
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\Utils\SafeMediaMimeType;
 
-class SafeMediaMimeTypeTest extends TestCase
+final class SafeMediaMimeTypeTest extends TestCase
 {
     public function testGetReturnsConstantKeys(): void
     {
