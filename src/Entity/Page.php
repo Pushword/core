@@ -12,6 +12,7 @@ use Exception;
 use LogicException;
 use Pushword\Core\Entity\PageTrait\PageI18nTrait;
 use Pushword\Core\Entity\PageTrait\PageParentTrait;
+use Pushword\Core\Entity\SharedTrait\CustomPropertiesInterface;
 use Pushword\Core\Entity\SharedTrait\ExtensiblePropertiesTrait;
 use Pushword\Core\Entity\SharedTrait\HostTrait;
 use Pushword\Core\Entity\SharedTrait\IdInterface;
@@ -44,7 +45,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 #[ORM\Table(name: 'page')]
 #[ORM\UniqueConstraint(name: 'unique_slug_host', columns: ['slug', 'host'])]
 #[ORM\Index(name: 'idx_page_host', columns: ['host'])]
-class Page implements IdInterface, Taggable, Stringable, Weightable
+class Page implements IdInterface, Taggable, Stringable, Weightable, CustomPropertiesInterface
 {
     use IdTrait;
 
@@ -74,20 +75,6 @@ class Page implements IdInterface, Taggable, Stringable, Weightable
     public string $editMessage = '' {
         set(?string $value) => $this->editMessage = (string) $value;
     }
-
-    // --- Editorial workflow properties ---
-
-    /** Editorial state backing the page_editorial workflow (places are config-driven). */
-    #[ORM\Column(type: Types::STRING, length: 50, options: ['default' => 'draft'])]
-    public string $workflowState = 'draft' {
-        set(?string $value) => $this->workflowState = $value ?? 'draft';
-    }
-
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    public ?User $reviewedBy = null;
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    public ?DateTimeInterface $reviewedAt = null;
 
     // --- Extended page (inlined from PageExtendedTrait) ---
 
@@ -270,18 +257,6 @@ class Page implements IdInterface, Taggable, Stringable, Weightable
     public function getEditMessage(): string
     {
         return $this->editMessage;
-    }
-
-    public function getWorkflowState(): string
-    {
-        return $this->workflowState;
-    }
-
-    public function setWorkflowState(?string $workflowState): self
-    {
-        $this->workflowState = $workflowState;
-
-        return $this;
     }
 
     public function getRealSlug(): string
