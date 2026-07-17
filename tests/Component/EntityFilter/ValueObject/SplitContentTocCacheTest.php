@@ -5,7 +5,9 @@ namespace Pushword\Core\Tests\Component\EntityFilter\ValueObject;
 use PHPUnit\Framework\TestCase;
 use Pushword\Core\Component\EntityFilter\ValueObject\SplitContent;
 use Pushword\Core\Entity\Page;
+use RuntimeException;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\CacheItem;
 
 /**
  * The heading-fix + TOC-extraction step is cached by content hash: a hit must
@@ -39,5 +41,26 @@ final class SplitContentTocCacheTest extends TestCase
         self::assertStringContainsString('#first-title', $toc);
         self::assertStringNotContainsString('#hidden-title', $toc);
         self::assertStringContainsString('id="hidden-title"', $hit->getBody());
+    }
+
+    public function testBrokenCacheBackendNeverBreaksRendering(): void
+    {
+        $page = new Page();
+        $page->host = 'localhost';
+        $page->setCustomProperty('toc', true);
+
+        $brokenPool = new class extends ArrayAdapter {
+            public function getItem(mixed $key): CacheItem
+            {
+                throw new RuntimeException('backend down');
+            }
+        };
+
+        $splitContent = new SplitContent('<h2>My Title</h2><p>text</p>', $page, $brokenPool);
+
+        $toc = $splitContent->getToc();
+        self::assertIsString($toc);
+        self::assertStringContainsString('#my-title', $toc);
+        self::assertStringContainsString('id="my-title"', $splitContent->getBody());
     }
 }

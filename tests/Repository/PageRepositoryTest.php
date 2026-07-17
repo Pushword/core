@@ -3,6 +3,7 @@
 namespace Pushword\Core\Tests\Controller;
 
 use DateTime;
+use Doctrine\ORM\PersistentCollection;
 use PHPUnit\Framework\Attributes\Group;
 use Pushword\Core\Entity\Page;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -298,5 +299,68 @@ final class PageRepositoryTest extends KernelTestCase
             $pageRepo->getPublishedPageQueryBuilder('', $where)->getDQL(),
             $pageRepo->getPublishedPageQueryBuilder('', $where)->getDQL(),
         );
+    }
+
+    /**
+     * Several conditions — including a param-less IS NOT NULL between two valued
+     * ones — must each bind their own value: a parameter-name collision would
+     * silently overwrite the first value with the second.
+     */
+    public function testWhereFilterBindsEachConditionSeparately(): void
+    {
+        self::bootKernel();
+
+        $em = self::getContainer()->get('doctrine.orm.default_entity_manager');
+        $pageRepo = $em->getRepository(Page::class);
+
+        $pages = $pageRepo->getPublishedPages('', [
+            ['key' => 'slug', 'operator' => 'LIKE', 'value' => 'home%'],
+            ['key' => 'parentPage', 'operator' => 'IS', 'value' => null],
+            ['key' => 'slug', 'operator' => '!=', 'value' => 'homepage-draft'],
+        ]);
+
+        self::assertNotSame([], $pages);
+        foreach ($pages as $page) {
+            self::assertStringStartsWith('home', $page->getSlug());
+            self::assertNotSame('homepage-draft', $page->getSlug());
+        }
+    }
+
+    public function testPreloadTranslationsInitializesEveryCollectionAtOnce(): void
+    {
+        self::bootKernel();
+
+        $em = self::getContainer()->get('doctrine.orm.default_entity_manager');
+        $pageRepo = $em->getRepository(Page::class);
+        $em->clear();
+
+        $pages = $pageRepo->getPublishedPages('');
+        $homepage = array_find($pages, static fn (Page $page): bool => 'homepage' === $page->getSlug());
+
+        self::assertInstanceOf(Page::class, $homepage);
+        $fresh = $homepage->getTranslations();
+        self::assertInstanceOf(PersistentCollection::class, $fresh);
+        self::assertFalse($fresh->isInitialized(), 'A fresh load must not have initialized the collection yet.');
+
+        $pageRepo->preloadTranslations([]); // no pages, no query, no error
+
+        $pageRepo->preloadTranslations($pages);
+        $pageRepo->preloadTranslations($pages); // idempotent on initialized collections
+
+        foreach ($pages as $page) {
+            $collection = $page->getTranslations();
+            self::assertInstanceOf(PersistentCollection::class, $collection);
+            self::assertTrue($collection->isInitialized(), 'Not preloaded: '.$page->getSlug());
+        }
+
+        // The preloaded rows are the real data (AppFixtures links homepage → fr)…
+        $locales = array_map(static fn (Page $page): string => $page->locale, $homepage->getTranslations()->toArray());
+        self::assertContains('fr', $locales);
+
+        // …and stay initialized across the EM clear the build loop does every few pages.
+        $em->clear();
+        $afterClear = $homepage->getTranslations();
+        self::assertInstanceOf(PersistentCollection::class, $afterClear);
+        self::assertTrue($afterClear->isInitialized());
     }
 }
