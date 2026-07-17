@@ -64,7 +64,15 @@ class SVGExtension
             return $this->svgCache[$cacheKey];
         }
 
-        $file = $this->resolveFile($name, $dirs);
+        $file = null;
+        foreach ($dirs as $d) {
+            $file = $d.'/'.$name.'.svg';
+            if (file_exists($file)) {
+                break;
+            }
+
+            $file = null;
+        }
 
         if (null === $file) {
             if ($retryWithFontAwesome5IconsRenamed) {
@@ -82,23 +90,6 @@ class SVGExtension
         }
 
         return $this->svgCache[$cacheKey] = $svg;
-    }
-
-    /**
-     * First directory holding the icon wins.
-     *
-     * @param string[] $dirs
-     */
-    private function resolveFile(string $name, array $dirs): ?string
-    {
-        foreach ($dirs as $dir) {
-            $file = $dir.'/'.$name.'.svg';
-            if (file_exists($file)) {
-                return $file;
-            }
-        }
-
-        return null;
     }
 
     private function replaceOnce(string $needle, string $replace, string $haystack): string
