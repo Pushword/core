@@ -61,8 +61,8 @@ final class PageListener implements ResetInterface
     {
         // method_exists($page, 'getChildrenPages') &&
         if ($page->hasChildrenPages()) {
-            foreach ($page->getChildrenPages() as $childrenPage) {
-                $childrenPage->setParentPage(null);
+            foreach ($page->childrenPages as $childrenPage) {
+                $childrenPage->parentPage = null;
             }
         }
 
@@ -92,7 +92,7 @@ final class PageListener implements ResetInterface
 
     public function preUpdate(Page $page, PreUpdateEventArgs $event): void
     {
-        if (! $page->getSkipAutoTimestamp()) {
+        if (! $page->skipAutoTimestamp) {
             $page->updatedAt = new DateTime();
         }
 
@@ -158,7 +158,7 @@ final class PageListener implements ResetInterface
             return;
         }
 
-        $page->locale = $this->apps->get($page->host)->getLocale();
+        $page->locale = $this->apps->get($page->host)->locale;
     }
 
     private function detectSlugChange(Page $page, PreUpdateEventArgs $event): void

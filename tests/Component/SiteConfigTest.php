@@ -215,6 +215,19 @@ final class SiteConfigTest extends TestCase
         self::assertSame('https://localhost.dev', $site->get('base_url'));
     }
 
+    /**
+     * Regression: normalizePropertyName() used to lowercase 'baseUrl' to 'baseurl',
+     * which only resolved while a getter existed (method_exists is case-insensitive,
+     * property_exists is not). The router asks for the camelCase key.
+     */
+    public function testGetResolvesCamelCaseKey(): void
+    {
+        $site = $this->createSiteConfig('localhost.dev', $this->tempDir.'/templates');
+
+        self::assertSame('https://localhost.dev', $site->get('baseUrl'));
+        self::assertSame('https://localhost.dev', $site->getStr('baseUrl', ''));
+    }
+
     public function testGetResolvesCustomProperty(): void
     {
         $site = $this->createSiteConfig('localhost.dev', $this->tempDir.'/templates');
@@ -351,12 +364,12 @@ final class SiteConfigTest extends TestCase
         $live = $this->createSiteConfig('localhost.dev', $this->tempDir.'/templates');
         $live->setStatic(true);
         $live->resetStatic();
-        self::assertFalse($live->isStatic(), 'an unpinned flag must not survive a reset');
+        self::assertFalse($live->isStatic, 'an unpinned flag must not survive a reset');
 
         $renderKernel = $this->createSiteConfig('localhost.dev', $this->tempDir.'/templates');
         $renderKernel->setStatic(true, pin: true);
         $renderKernel->resetStatic();
-        self::assertTrue($renderKernel->isStatic(), 'the generator pins the flag on its render kernel');
+        self::assertTrue($renderKernel->isStatic, 'the generator pins the flag on its render kernel');
     }
 
     private function createTemplateResolver(): TemplateResolver
