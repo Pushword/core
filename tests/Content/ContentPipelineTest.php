@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 use Pushword\Core\Component\EntityFilter\Filter\FilterInterface;
 use Pushword\Core\Component\EntityFilter\FilterRegistry;
 use Pushword\Core\Component\EntityFilter\Manager;
-use Pushword\Core\Component\EntityFilter\ManagerPool;
 use Pushword\Core\Content\ContentPipeline;
 use Pushword\Core\Content\ContentPipelineFactory;
 use Pushword\Core\Entity\Page;
@@ -51,8 +50,7 @@ final class ContentPipelineTest extends TestCase
 
         $siteRegistry->get('localhost')->filters = $siteFilters;
 
-        $managerPool = new ManagerPool($siteRegistry, $eventDispatcher, $filterRegistry);
-        $factory = new ContentPipelineFactory($siteRegistry, $eventDispatcher, $filterRegistry, $managerPool);
+        $factory = new ContentPipelineFactory($siteRegistry, $eventDispatcher, $filterRegistry);
 
         return new ContentPipeline($factory, $eventDispatcher, $filterRegistry, $page, $siteRegistry);
     }
@@ -65,6 +63,47 @@ final class ContentPipelineTest extends TestCase
         $pipeline = $this->createPipeline($page);
 
         self::assertSame('Hello World', $pipeline->getTitle());
+    }
+
+    public function testAMethodWinsOverThePropertyItWraps(): void
+    {
+        $page = new Page();
+        $page->setMainContent('  from the getter  ');
+
+        $pipeline = $this->createPipeline($page);
+
+        // mainContent is a protected column read through getMainContent(), which is
+        // also where the trimming setMainContent() applied has to survive.
+        self::assertSame('from the getter', $pipeline->getMainContent());
+    }
+
+    public function testAPropertyWithNoAccessorIsStillFiltered(): void
+    {
+        $filter = new class implements FilterInterface {
+            public function apply(mixed $propertyValue, Page $page, Manager $manager, string $property = ''): mixed
+            {
+                \assert(\is_string($propertyValue));
+
+                return '['.$propertyValue.']';
+            }
+        };
+
+        $page = new Page();
+        $page->h1 = 'Hooked, accessorless';
+
+        $pipeline = $this->createPipeline($page, new FilterRegistry([$filter]), ['h1' => $filter::class]);
+
+        self::assertSame('[Hooked, accessorless]', $pipeline->getFilteredProperty('H1'));
+    }
+
+    public function testAnUnknownPropertyFallsBackToTheCustomPropertyBag(): void
+    {
+        $page = new Page();
+        $page->setCustomProperty('subtitle', 'From the bag');
+
+        $pipeline = $this->createPipeline($page);
+
+        self::assertSame('From the bag', $pipeline->getFilteredProperty('Subtitle'));
     }
 
     public function testGetFilteredPropertyCachesResult(): void
