@@ -41,6 +41,7 @@ final class Configuration implements ConfigurationInterface
         'filters',
         'assets',
         'custom_properties',
+        'page_properties',
         'svg_dir',
         'notification_email_from',
         'notification_email_to',
@@ -146,6 +147,11 @@ final class Configuration implements ConfigurationInterface
           ->cannotBeEmpty()
           ->info('Runtime state dir (page-scan result caches, background process output/status). Overridden per worker in tests.')
           ->end()
+          ->scalarNode('render_epoch_dir')
+          ->defaultValue('%kernel.cache_dir%/pw_render_epoch')
+          ->cannotBeEmpty()
+          ->info('Render-epoch storage. Must be shared by web and CLI of one env (cache.app cannot be trusted for that: APCu is per-process and absent on CLI) and die with cache:clear so a deploy invalidates every generated page. Overridden per worker in tests.')
+          ->end()
           ->scalarNode('media_dir')
           ->defaultValue('%kernel.project_dir%/media')
           ->cannotBeEmpty()
@@ -228,6 +234,12 @@ final class Configuration implements ConfigurationInterface
           // The following is a garbage, useful for quick new extension not well designed (no check for conf values)
           ->variableNode('custom_properties')
           ->defaultValue(self::DEFAULT_CUSTOM_PROPERTIES)
+          ->end()
+          ->variableNode('page_properties')
+          ->defaultValue([])
+          ->info(
+              'Declared page custom properties: name => {type, required, constraints}. Merged root -> app; `name: ~` un-declares. Validated at container build.',
+          )
           ->end()
           ->variableNode('apps')
           ->defaultValue([[]])
