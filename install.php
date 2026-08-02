@@ -43,7 +43,8 @@ PostInstall::mirror('vendor/pushword/dev-app/media~', 'media');
 $freshInstall = ! file_exists('var/app.db');
 $commands = 'php bin/console doctrine:schema:update --force -q';
 if ($freshInstall) {
-    $commands .= ' && php bin/console doctrine:fixtures:load --no-interaction -q';
+    $commands .= ' && php bin/console doctrine:fixtures:load --no-interaction -q'
+        .' && php bin/console pw:user:create admin@example.tld p@ssword ROLE_SUPER_ADMIN -q';
 }
 
 $commands .= ' && php bin/console pw:image:cache -q';
@@ -52,6 +53,11 @@ echo '~~ Symlinking assets'.chr(10);
 $commands .= ' && php bin/console assets:install --symlink --relative -q';
 exec($commands);
 PostInstall::dumpFile('public/build/manifest.json', '{}');
+
+if ($freshInstall) {
+    echo '~~ Super admin created: admin@example.tld / p@ssword'.chr(10);
+    echo '~~ Log in on /admin and change these credentials.'.chr(10);
+}
 
 echo '~~ Copy assets file in ./assets'.chr(10);
 PostInstall::remove(['package.json', 'webpack.config.js', 'assets']);
@@ -67,6 +73,13 @@ $defaultConfig = 'pushword:'.chr(10)
     .'    # https://github.com/Pushword/Pushword/blob/main/packages/dev-app/config/packages/pushword.php'.chr(10);
 
 PostInstall::dumpFile('config/packages/pushword.yaml', $defaultConfig);
+
+// pushword/new ships AGENTS.md; Claude Code reads CLAUDE.md. Symlink one to the other,
+// as the monorepo does, so both agents get the same file. Composer's zip extraction does
+// not preserve symlinks, hence creating it here rather than shipping it.
+if (file_exists('AGENTS.md') && ! file_exists('CLAUDE.md')) {
+    symlink('AGENTS.md', 'CLAUDE.md');
+}
 
 // Install phpstan
 // ---------------
