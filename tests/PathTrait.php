@@ -12,14 +12,27 @@ trait PathTrait
 
     private string $publicMediaDir = 'media';
 
+    /**
+     * Both dirs are per worker, and the bootstrap is the one that decides where:
+     * read what it exported rather than rebuilding its layout here. The fallbacks
+     * are the defaults it uses when a run has no id.
+     */
+    private function testDir(string $variable, string $default): string
+    {
+        $dir = getenv($variable);
+
+        return \is_string($dir) && '' !== $dir ? $dir : $default;
+    }
+
     private function getMediaDir(): string
     {
-        $runId = \is_string($_ENV['TEST_RUN_ID'] ?? null) ? $_ENV['TEST_RUN_ID'] : (\is_string($_SERVER['TEST_RUN_ID'] ?? null) ? $_SERVER['TEST_RUN_ID'] : '');
-        if ('' !== $runId) {
-            return sys_get_temp_dir().'/com.github.pushword.pushword/tests/'.$runId.'/media';
-        }
+        return $this->testDir('PUSHWORD_TEST_MEDIA_DIR', $this->projectDir.'/media');
+    }
 
-        return __DIR__.'/../../dev-app/media';
+    /** Where derivatives are written, so nothing lands in the dev-app's own public/media. */
+    private function getMediaCacheDir(): string
+    {
+        return $this->testDir('PUSHWORD_TEST_MEDIA_CACHE_DIR', $this->publicDir.'/'.$this->publicMediaDir);
     }
 
     protected function ensureMediaFileExists(string $fileName = 'piedweb-logo.png'): void

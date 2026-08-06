@@ -24,7 +24,7 @@ final class ImageCacheManagerTest extends KernelTestCase
      */
     private function createManager(array $filterSets = []): ImageCacheManager
     {
-        return new ImageCacheManager($filterSets, $this->publicDir, $this->publicMediaDir, $this->createMediaStorageAdapter());
+        return new ImageCacheManager($filterSets, $this->publicMediaDir, $this->getMediaCacheDir(), $this->createMediaStorageAdapter());
     }
 
     private function createMediaStorageAdapter(): MediaStorageAdapter
@@ -46,8 +46,8 @@ final class ImageCacheManagerTest extends KernelTestCase
         // With checkFileExists=true and no files, falls back to original
         self::assertSame('/'.$this->publicMediaDir.'/default/test.png', $manager->getBrowserPath('test.png', checkFileExists: true));
         // getFilterPath always returns the requested path (doesn't check file existence)
-        self::assertSame($this->publicDir.'/'.$this->publicMediaDir.'/default/test.png', $manager->getFilterPath('test.png', 'default'));
-        self::assertSame($this->publicDir.'/'.$this->publicMediaDir.'/default/test.webp', $manager->getFilterPath('test.png', 'default', 'webp'));
+        self::assertSame($this->getMediaCacheDir().'/default/test.png', $manager->getFilterPath('test.png', 'default'));
+        self::assertSame($this->getMediaCacheDir().'/default/test.webp', $manager->getFilterPath('test.png', 'default', 'webp'));
     }
 
     public function testBrowserPathFirstAvailableFormat(): void
@@ -77,7 +77,7 @@ final class ImageCacheManagerTest extends KernelTestCase
         $manager = $this->createManager($filters);
         $manager->remove($probe);
 
-        $mdDir = $this->publicDir.'/'.$this->publicMediaDir.'/md';
+        $mdDir = $this->getMediaCacheDir().'/md';
         $fs->mkdir($mdDir);
         // Valid original preview beside a transient 0-byte webp (the production failure mode).
         $fs->dumpFile($mdDir.'/'.$slug.'.jpg', 'non-empty-jpeg-preview');
@@ -96,6 +96,29 @@ final class ImageCacheManagerTest extends KernelTestCase
         self::assertFalse($manager->isFilterCacheFresh($media, 'md'));
 
         $manager->remove($probe);
+        $fs->remove($this->getMediaDir().'/'.$probe);
+    }
+
+    public function testDimensionsComeFromTheSourceWhileTheVariantIsNotCachedYet(): void
+    {
+        $fs = new Filesystem();
+
+        // A cold cache is the normal state right after a deploy — and the state every
+        // test worker starts in. Reading dimensions must not take the render down:
+        // `image.html.twig` asks for them whenever a media carries none of its own.
+        $probe = 'cold-cache-probe-'.getmypid().'.jpg';
+        $fs->copy(__DIR__.'/../Service/blank.jpg', $this->getMediaDir().'/'.$probe, true);
+
+        $manager = $this->createManager(['xs' => ['quality' => 85, 'filters' => ['scaleDown' => [576]]]]);
+        $manager->remove($probe);
+
+        $source = getimagesize($this->getMediaDir().'/'.$probe);
+        self::assertNotFalse($source);
+
+        $dimensions = $manager->getDimensions($probe);
+        self::assertSame($source[0], $dimensions->width);
+        self::assertSame($source[1], $dimensions->height);
+
         $fs->remove($this->getMediaDir().'/'.$probe);
     }
 
@@ -222,7 +245,7 @@ final class ImageCacheManagerTest extends KernelTestCase
     public function testRemoveDeletesRootPublicSymlink(): void
     {
         $manager = $this->createManager(['default' => []]);
-        $publicMediaPath = $this->publicDir.'/'.$this->publicMediaDir;
+        $publicMediaPath = $this->getMediaCacheDir();
         new Filesystem()->mkdir($publicMediaPath);
 
         // Create a symlink like ensurePublicSymlink does
@@ -254,7 +277,7 @@ final class ImageCacheManagerTest extends KernelTestCase
         // Generate the default filter cache first
         $generator->generateFilteredCache($image, ['default' => $filters['default']]);
 
-        $defaultWebp = $this->publicDir.'/'.$this->publicMediaDir.'/default/blank.webp';
+        $defaultWebp = $this->getMediaCacheDir().'/default/blank.webp';
         self::assertFileExists($defaultWebp);
 
         // Create symlink for xl -> default
@@ -263,7 +286,7 @@ final class ImageCacheManagerTest extends KernelTestCase
 
         $manager->symlinkFilterToDefault($media, 'xl');
 
-        $xlWebp = $this->publicDir.'/'.$this->publicMediaDir.'/xl/blank.webp';
+        $xlWebp = $this->getMediaCacheDir().'/xl/blank.webp';
         self::assertTrue(is_link($xlWebp));
         self::assertFileExists($xlWebp);
 

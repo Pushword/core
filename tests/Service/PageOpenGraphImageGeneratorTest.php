@@ -16,16 +16,57 @@ use Symfony\Component\Filesystem\Filesystem;
 #[Group('integration')]
 final class PageOpenGraphImageGeneratorTest extends KernelTestCase
 {
-    private function buildGenerator(?LoggerInterface $logger = null): PageOpenGraphImageGenerator
+    private function buildGenerator(?LoggerInterface $logger = null, ?string $mediaCacheDir = null): PageOpenGraphImageGenerator
     {
+        $siteRegistry = self::getContainer()->get(SiteRegistry::class);
+
+        // These tests exercise generation itself, so they have to ask for it: the test
+        // env ships `generated_og_image` off (config/packages/test/og_image.yaml), which
+        // otherwise makes generatePreviewImage() return before doing anything.
+        $siteRegistry->get()->setCustomProperty('generated_og_image', true);
+
         return new PageOpenGraphImageGenerator(
-            self::getContainer()->get(SiteRegistry::class),
+            $siteRegistry,
             self::getContainer()->get('twig'),
             new Filesystem(),
-            sys_get_temp_dir(),
             'media',
+            $mediaCacheDir ?? sys_get_temp_dir().'/media',
             logger: $logger,
         );
+    }
+
+    /**
+     * The one place the real Imagick path runs.
+     *
+     * Every other test here replaces the Imagine driver, and the listener tests mock the
+     * generator outright, so without this nothing would ever draw an actual image: fonts,
+     * logo lookup and save would break silently. It used to be covered only by accident,
+     * by the ~845 renders a suite run triggered through page saves.
+     */
+    public function testItDrawsAndSavesARealPng(): void
+    {
+        self::bootKernel();
+
+        $mediaCacheDir = sys_get_temp_dir().'/pushword-og-render-'.getmypid();
+        $filesystem = new Filesystem();
+        $filesystem->remove($mediaCacheDir);
+
+        $generator = $this->buildGenerator(mediaCacheDir: $mediaCacheDir);
+
+        $page = new Page();
+        $page->slug = 'og-real-render';
+        $page->h1 = 'A heading long enough that the drawer has to wrap it across lines';
+
+        $generator->setPage($page)->generatePreviewImage();
+
+        $path = $generator->getPath();
+        self::assertFileExists($path);
+
+        $size = getimagesize($path);
+        self::assertNotFalse($size);
+        self::assertSame([1200, 600, \IMAGETYPE_PNG], [$size[0], $size[1], $size[2]]);
+
+        $filesystem->remove($mediaCacheDir);
     }
 
     public function testSkipsWhenPageHasMainImage(): void
