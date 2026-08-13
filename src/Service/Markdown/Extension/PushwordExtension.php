@@ -61,7 +61,7 @@ final readonly class PushwordExtension implements ExtensionInterface
 
         $environment->addRenderer(
             Image::class,
-            new ImageRenderer($this->mediaExtension),
+            new ImageRenderer($this->mediaExtension, $this->apps),
             10
         );
 

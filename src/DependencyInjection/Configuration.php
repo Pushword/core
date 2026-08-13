@@ -43,6 +43,7 @@ final class Configuration implements ConfigurationInterface
         'assets',
         'custom_properties',
         'page_properties',
+        'body_image_sizes',
         'svg_dir',
         'notification_email_from',
         'notification_email_to',
@@ -228,6 +229,12 @@ final class Configuration implements ConfigurationInterface
           ->defaultValue('auto')
           ->info(
               'Image driver: auto (vips if available, else imagick, else gd), vips, imagick, or gd',
+          )
+          ->end()
+          ->scalarNode('body_image_sizes')
+          ->defaultNull()
+          ->info(
+              'The `sizes` markdown body images announce, eg `(max-width: 1023px) 100vw, 700px`. Overridable per app. Unset keeps the component default, 100vw, which over-serves any image narrower than the viewport. Declare the text column its real width — and keep every candidate it selects at twice the displayed width, or high-DPR screens go soft.',
           )
           ->end()
           ->scalarNode('template')

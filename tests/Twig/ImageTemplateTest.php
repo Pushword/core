@@ -94,6 +94,23 @@ final class ImageTemplateTest extends KernelTestCase
     }
 
     /**
+     * Every other test here renders the component directly, handing it a `sizes`
+     * variable — which passes even when `image()` itself has no parameter to carry
+     * one. A site upgrading found out the hard way: `Unknown argument "sizes" for
+     * function "image(...)"`, a 500 on every page with an image. This pins the
+     * argument name callers spell, and the wiring down to the attribute.
+     */
+    public function testImageFunctionTakesSizesAsANamedArgument(): void
+    {
+        $twig = $this->getTwig();
+
+        $html = $twig->createTemplate("{{ image(media, sizes: '(max-width: 767px) 100vw, 700px') }}")
+            ->render(['media' => $this->createMedia()]);
+
+        self::assertStringContainsString('sizes="(max-width: 767px) 100vw, 700px"', $html);
+    }
+
+    /**
      * The whole point of `sizes`: every browser that understands webp takes the
      * <source> and never looks at the <img>, so a `sizes` reaching only the <img>
      * is dead on arrival — which is what a caller passing it through image_attr used
@@ -196,8 +213,10 @@ final class ImageTemplateTest extends KernelTestCase
     /**
      * The <img> behind a webp <source> is only reached by a browser that supports none
      * of the offered formats. The ladder does not exist in the source format (xs/sm/lg/xl
-     * are webp-only), so it must not advertise one — it went out as a valueless `srcset`
-     * anyway, mergeAttr() dropping the macro's Twig\Markup as a non-scalar.
+     * are webp-only), so it must not advertise one. It used to be emitted and swallowed —
+     * mergeAttr() dropped the macro's Twig\Markup as a non-scalar — but since
+     * piedweb/render-html-attributes v0.1.947 stringifies Stringable, the same markup
+     * would now ship a srcset of URLs that 404.
      */
     public function testImgFallbackAdvertisesNoSrcsetBehindAModernSource(): void
     {
