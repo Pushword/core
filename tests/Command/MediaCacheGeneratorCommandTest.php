@@ -4,6 +4,7 @@ namespace Pushword\Core\Tests\Command;
 
 use PHPUnit\Framework\Attributes\Group;
 use Pushword\Core\Command\ImageManagerCommand;
+use Pushword\Core\Image\ImageScratchFile;
 use Pushword\Core\Tests\PathTrait;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -204,6 +205,74 @@ final class MediaCacheGeneratorCommandTest extends KernelTestCase
         self::assertContains($decoded['result'], ['passed', 'failed']);
         self::assertArrayHasKey('processed', $decoded);
         self::assertArrayHasKey('errors', $decoded);
+
+        // Emitted on every run, including the ones that sweep nothing: a counter
+        // that appears only when non-zero is a counter nobody can graph.
+        self::assertArrayHasKey('scratch_swept', $decoded);
+        self::assertArrayHasKey('scratch_empty', $decoded);
+    }
+
+    /**
+     * The sweep rides on the command every site already runs: a dedicated one would
+     * need a timer nobody installs, which is exactly how a production tree reached
+     * six weeks of orphans. Its counts ride in the agent JSON because agents are
+     * what runs this in bulk — and the empty count is the only surviving evidence
+     * that the encoder still emits blank payloads and the promotion guard eats them.
+     */
+    public function testSweepsStaleScratchFilesAndReportsTheCount(): void
+    {
+        $commandTester = $this->createCommandTester();
+
+        $stale = $this->writeStaleScratch('swept-by-the-run.webp.enc-4242.abcdef123456.tmp', '');
+
+        $this->waitForLockRelease();
+        $commandTester->execute(['media' => 'piedweb-logo.png', '--format' => 'agent']);
+
+        self::assertFileDoesNotExist($stale, 'A stale scratch file must not survive a run');
+
+        $decoded = json_decode(trim($commandTester->getDisplay()), true, 512, \JSON_THROW_ON_ERROR);
+        self::assertIsArray($decoded);
+        self::assertGreaterThanOrEqual(1, $decoded['scratch_swept']);
+        self::assertGreaterThanOrEqual(1, $decoded['scratch_empty']);
+    }
+
+    /**
+     * A human is told what was taken, and told nothing when nothing was: this
+     * command runs on every deploy, and a line reporting zero on each of them is
+     * the noise that teaches everyone to stop reading its output.
+     */
+    public function testTextOutputReportsTheSweepOnlyWhenItTookSomething(): void
+    {
+        $commandTester = $this->createCommandTester();
+
+        $this->waitForLockRelease();
+        $commandTester->execute(['media' => 'piedweb-logo.png', '--format' => 'text']);
+
+        self::assertStringNotContainsString('scratch file', $commandTester->getDisplay(), 'A run with nothing to sweep says nothing');
+
+        $this->writeStaleScratch('reported-in-text.webp.enc-4242.abcdef12345a.tmp', 'half-written');
+
+        $this->waitForLockRelease();
+        $commandTester->execute(['media' => 'piedweb-logo.png', '--format' => 'text']);
+
+        self::assertStringContainsString('Swept 1 stale scratch file(s), 0 empty.', $commandTester->getDisplay());
+    }
+
+    /**
+     * A worker must not repeat the walk: it runs with --no-lock, and N workers
+     * sweeping the same tree burn it N times over for one run's worth of orphans.
+     */
+    public function testWorkerModeDoesNotSweep(): void
+    {
+        $commandTester = $this->createCommandTester();
+
+        $stale = $this->writeStaleScratch('left-by-the-worker.webp.enc-4242.abcdef123457.tmp', 'half-written');
+
+        $commandTester->execute(['media' => 'piedweb-logo.png', '--no-lock' => true, '--format' => 'text']);
+
+        self::assertFileExists($stale, 'Only the lock holder sweeps');
+
+        unlink($stale);
     }
 
     /**
@@ -244,6 +313,26 @@ final class MediaCacheGeneratorCommandTest extends KernelTestCase
         $application = new Application($kernel);
 
         return new CommandTester($application->find('pw:image:cache'));
+    }
+
+    /**
+     * A scratch file old enough that no live writer could own it, in the tree the
+     * derivatives really live in — per worker under test, hence read from the container.
+     *
+     * @return string its path
+     */
+    private function writeStaleScratch(string $name, string $content): string
+    {
+        $mediaCacheDir = self::getContainer()->getParameter('pw.media_cache_dir');
+        if (! is_dir($mediaCacheDir)) {
+            mkdir($mediaCacheDir, 0o777, true);
+        }
+
+        $path = $mediaCacheDir.'/'.$name;
+        file_put_contents($path, $content);
+        touch($path, time() - ImageScratchFile::MAX_AGE - 60);
+
+        return $path;
     }
 
     private function waitForLockRelease(): void
