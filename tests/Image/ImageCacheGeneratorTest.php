@@ -36,11 +36,11 @@ final class ImageCacheGeneratorTest extends KernelTestCase
     /**
      * @param array<string, array<string, mixed>> $filterSets
      */
-    private function createGenerator(array $filterSets = []): ImageCacheGenerator
+    private function createGenerator(array $filterSets = [], string $imageDriver = 'auto'): ImageCacheGenerator
     {
         self::bootKernel();
         $mediaStorage = $this->createMediaStorageAdapter();
-        $imageReader = new ImageReader($mediaStorage);
+        $imageReader = new ImageReader($mediaStorage, $imageDriver);
         $imageEncoder = new ImageEncoder();
         $imageCacheManager = new ImageCacheManager($filterSets, $this->publicMediaDir, $this->tmpPublicDir.'/'.$this->publicMediaDir, $mediaStorage);
 
@@ -118,6 +118,107 @@ final class ImageCacheGeneratorTest extends KernelTestCase
 
         self::assertNotNull($media->getMainColor());
         self::assertMatchesRegularExpression('/^#[0-9a-f]{6}$/i', $media->getMainColor());
+    }
+
+    /**
+     * A gd decode is one allocation of width × height × 4 bytes, counted against
+     * memory_limit — overrunning it is a fatal no catch survives, and in production it
+     * killed the flush that had already renamed the file on disk. Anything that does not
+     * fit must be declined before the decode, not after.
+     */
+    public function testDecodeFitsInOnlyAcceptsWhatIsLeftOfTheLimit(): void
+    {
+        // 48 Mpx (the production master) needs ~230 MB with headroom.
+        self::assertFalse(ImageCacheGenerator::decodeFitsIn(9237, 5195, 512 * 1024 ** 2, 420 * 1024 ** 2));
+        self::assertTrue(ImageCacheGenerator::decodeFitsIn(9237, 5195, 512 * 1024 ** 2, 40 * 1024 ** 2));
+
+        // No limit: nothing to overrun.
+        self::assertTrue(ImageCacheGenerator::decodeFitsIn(9237, 5195, null, 420 * 1024 ** 2));
+
+        // The bitmap alone fitting is not enough — the 1.2 headroom decides.
+        self::assertFalse(ImageCacheGenerator::decodeFitsIn(1000, 1000, 4_500_000, 0));
+        self::assertTrue(ImageCacheGenerator::decodeFitsIn(1000, 1000, 5_000_000, 0));
+    }
+
+    public function testMemoryLimitInBytesReadsTheShorthand(): void
+    {
+        $initial = ini_get('memory_limit');
+
+        try {
+            ini_set('memory_limit', '512M');
+            self::assertSame(512 * 1024 ** 2, ImageCacheGenerator::memoryLimitInBytes());
+
+            ini_set('memory_limit', '1G');
+            self::assertSame(1024 ** 3, ImageCacheGenerator::memoryLimitInBytes());
+
+            ini_set('memory_limit', '536870912'); // plain bytes, what a php.ini often holds
+            self::assertSame(536870912, ImageCacheGenerator::memoryLimitInBytes());
+
+            ini_set('memory_limit', '-1');
+            self::assertNull(ImageCacheGenerator::memoryLimitInBytes());
+        } finally {
+            ini_set('memory_limit', '' === $initial ? '-1' : $initial);
+        }
+    }
+
+    public function testQuickPreviewCopiesTheOriginalAndFillsMetadata(): void
+    {
+        $generator = $this->createGenerator(['md' => ['quality' => 80, 'filters' => ['scaleDown' => [992]]]]);
+        $mediaStorage = $this->createMediaStorageAdapter();
+
+        $probe = 'quick-preview-probe-'.getmypid().'.png';
+        $probePath = $mediaStorage->getLocalPath($probe);
+        $gd = imagecreatetruecolor(40, 20);
+        imagepng($gd, $probePath);
+
+        $media = new Media();
+        $media->setFileName($probe);
+
+        try {
+            self::assertNotNull($generator->generateQuickPreview($media));
+            self::assertFileExists($this->tmpPublicDir.'/'.$this->publicMediaDir.'/md/'.$probe);
+            self::assertSame(40, $media->getWidth());
+            self::assertSame(20, $media->getHeight());
+            self::assertMatchesRegularExpression('/^#[0-9a-f]{6}$/i', (string) $media->getMainColor());
+        } finally {
+            @unlink($probePath);
+        }
+    }
+
+    /**
+     * The decode is declined, not attempted and caught: overrunning the limit is a fatal.
+     * The preview copy is still written, and the metadata is left to `pw:image:cache`.
+     */
+    public function testQuickPreviewDeclinesADecodeThatWouldNotFit(): void
+    {
+        $generator = $this->createGenerator(['md' => ['quality' => 80, 'filters' => ['scaleDown' => [992]]]], 'gd');
+        $mediaStorage = $this->createMediaStorageAdapter();
+
+        // 16 Mpx: a 64 MB bitmap, but a few KB on disk — the file never has to be big.
+        $probe = 'oversized-probe-'.getmypid().'.png';
+        $probePath = $mediaStorage->getLocalPath($probe);
+        imagepng(imagecreatetruecolor(4000, 4000), $probePath);
+
+        $media = new Media();
+        $media->setFileName($probe);
+
+        $initial = ini_get('memory_limit');
+
+        try {
+            // Headroom the assertions can live in, far below the 76 MB the decode would ask for.
+            ini_set('memory_limit', (string) (memory_get_usage(true) + 32 * 1024 ** 2));
+
+            self::assertNull($generator->generateQuickPreview($media), 'a decode that does not fit must be declined');
+            self::assertNull($media->getWidth(), 'metadata is left to the background pw:image:cache');
+        } finally {
+            ini_set('memory_limit', $initial);
+            @unlink($probePath);
+        }
+
+        self::assertFileExists(
+            $this->tmpPublicDir.'/'.$this->publicMediaDir.'/md/'.$probe,
+            'the preview copy is a file copy, it does not depend on decoding',
+        );
     }
 
     public function testHeightAndCropFiltersDeriveFromSourceNotChain(): void
