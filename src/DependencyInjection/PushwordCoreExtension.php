@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\DependencyInjection;
 
 use LogicException;
@@ -43,6 +45,13 @@ final class PushwordCoreExtension extends ConfigurableExtension implements Prepe
 
     private function setPathParameters(ContainerBuilder $containerBuilder): void
     {
+        if (file_exists($containerBuilder->getParameter('kernel.project_dir').'/vendor/pushword/pushword/packages/core')) {
+            $containerBuilder->setParameter('pw.package_dir', '%kernel.project_dir%/vendor/pushword/pushword/packages');
+            $containerBuilder->setParameter('vendor_dir', '%kernel.project_dir%/vendor');
+
+            return;
+        }
+
         if (file_exists($containerBuilder->getParameter('kernel.project_dir').'/vendor/pushword')) {
             // false !== strpos(__DIR__, '/vendor/')) {
             $containerBuilder->setParameter('pw.package_dir', '%kernel.project_dir%/vendor/pushword');

@@ -1,0 +1,219 @@
+{
+    "measured_at": "2026-09-12T22:59:21+00:00",
+    "cpu_affinity": "2",
+    "php": "8.5.9",
+    "icu": "77.1",
+    "binary_sha256": "8e6d7e54f02bf3c08eef421012c73ac95109ce06f04c1e3544a9c032e6b4c838",
+    "cargo_lock_sha256": "6bfe4500d2a8f75eda4dba77524224edc8f7cf9b8e129bd5afe2739d94424007",
+    "methodology": "Five shuffled samples of five documents after warmup. All SplitContent string\/list accessors, including HTML TOC and both paragraph views. Rust includes reused-worker IPC, PHP slugging\/menu rendering and validation. Caches are in-memory ArrayAdapter. No Markdown\/Twig, SQL, HTTP or file publication is timed.",
+    "workloads": {
+        "short": {
+            "html_bytes": 421,
+            "html_sha256": "6d786d3c0736d2c8fa453057da3f9f76c1e7517401ceb19d7fb2815c604e3112",
+            "median_ms_per_document": {
+                "rust_uncached": 0.0808344,
+                "rust_cache_hit": 0.0052396,
+                "php_uncached": 0.3792656,
+                "php_toc_cache_hit": 0.1697216,
+                "rust_batch": 0.0601398
+            },
+            "samples_ms_per_document": {
+                "rust_uncached": [
+                    0.085397,
+                    0.0808344,
+                    0.065578,
+                    0.06653980000000001,
+                    0.08774119999999999
+                ],
+                "rust_cache_hit": [
+                    0.0079328,
+                    0.005376000000000001,
+                    0.0040936,
+                    0.0045284,
+                    0.0052396
+                ],
+                "php_uncached": [
+                    0.40001420000000004,
+                    0.3751818,
+                    0.3777206,
+                    0.3792656,
+                    0.390733
+                ],
+                "php_toc_cache_hit": [
+                    0.1697216,
+                    0.176348,
+                    0.1782576,
+                    0.1691766,
+                    0.1680306
+                ],
+                "rust_batch": [
+                    0.082255,
+                    0.0493738,
+                    0.0604204,
+                    0.048949,
+                    0.0601398
+                ]
+            }
+        },
+        "article": {
+            "html_bytes": 15935,
+            "html_sha256": "62ce0e2932b2ad8de032c54feba8350cb6d3b5e712706936ce5a9d88ee10f0cc",
+            "median_ms_per_document": {
+                "rust_uncached": 1.5291848,
+                "php_toc_cache_hit": 4.9341692,
+                "rust_batch": 1.5226868,
+                "php_uncached": 10.620147,
+                "rust_cache_hit": 0.015296399999999998
+            },
+            "samples_ms_per_document": {
+                "rust_uncached": [
+                    1.5291848,
+                    1.5697704,
+                    1.4610020000000001,
+                    1.4781338,
+                    1.5760619999999999
+                ],
+                "php_toc_cache_hit": [
+                    5.0058966,
+                    4.9211852,
+                    4.9341692,
+                    4.9317848,
+                    5.011403
+                ],
+                "rust_batch": [
+                    1.5614328,
+                    1.498624,
+                    1.5226868,
+                    1.5160824,
+                    1.5310162
+                ],
+                "php_uncached": [
+                    10.716508399999999,
+                    10.5679638,
+                    10.5798,
+                    10.620147,
+                    10.649181
+                ],
+                "rust_cache_hit": [
+                    0.0157814,
+                    0.015296399999999998,
+                    0.0142846,
+                    0.015252199999999999,
+                    0.0174526
+                ]
+            }
+        },
+        "long": {
+            "html_bytes": 159915,
+            "html_sha256": "6dae4b0031467c2c7917d6864d47ea90a62ed192edd9093bb2d7b9b3157960aa",
+            "median_ms_per_document": {
+                "rust_cache_hit": 0.0740938,
+                "rust_uncached": 17.5829202,
+                "rust_batch": 17.7141322,
+                "php_uncached": 107.54022119999999,
+                "php_toc_cache_hit": 52.0107314
+            },
+            "samples_ms_per_document": {
+                "rust_cache_hit": [
+                    0.08886340000000001,
+                    0.0681828,
+                    0.0740938,
+                    0.0801612,
+                    0.0695394
+                ],
+                "rust_uncached": [
+                    18.4657364,
+                    18.670525599999998,
+                    17.5829202,
+                    17.4310416,
+                    17.1399082
+                ],
+                "rust_batch": [
+                    17.713397,
+                    18.4290382,
+                    17.302188,
+                    17.7141322,
+                    17.770857799999998
+                ],
+                "php_uncached": [
+                    106.46469640000001,
+                    107.52238,
+                    107.60218239999999,
+                    108.048661,
+                    107.54022119999999
+                ],
+                "php_toc_cache_hit": [
+                    51.385376199999996,
+                    52.408195,
+                    51.430510000000005,
+                    52.0107314,
+                    52.16045820000001
+                ]
+            }
+        },
+        "duplicate_headings": {
+            "html_bytes": 160825,
+            "html_sha256": "c3290ae9fdcd728b74f1bfede6b6dedb9eb0301dd2a6878eb12f18c000be16af",
+            "median_ms_per_document": {
+                "rust_batch": 16.782417000000002,
+                "rust_uncached": 16.592263199999998,
+                "php_uncached": 106.12969720000001,
+                "rust_cache_hit": 0.08712600000000001,
+                "php_toc_cache_hit": 51.5251802
+            },
+            "samples_ms_per_document": {
+                "rust_batch": [
+                    15.7792208,
+                    16.220704,
+                    16.782417000000002,
+                    17.4130082,
+                    17.0617606
+                ],
+                "rust_uncached": [
+                    16.3779524,
+                    16.463814199999998,
+                    16.592263199999998,
+                    17.132382,
+                    16.9816818
+                ],
+                "php_uncached": [
+                    105.9708736,
+                    106.28380380000002,
+                    106.12969720000001,
+                    105.4627864,
+                    107.808238
+                ],
+                "rust_cache_hit": [
+                    0.0778828,
+                    0.08712600000000001,
+                    0.0933076,
+                    0.07951,
+                    0.092993
+                ],
+                "php_toc_cache_hit": [
+                    51.5251802,
+                    52.4340052,
+                    51.484470599999995,
+                    51.115989,
+                    51.6646578
+                ]
+            }
+        }
+    },
+    "slugging_800_duplicates_ms": {
+        "upstream": [
+            154.908773,
+            150.723677,
+            152.530638,
+            152.103615,
+            152.304448
+        ],
+        "indexed": [
+            0.143247,
+            0.08075,
+            0.081271,
+            0.08052,
+            0.079848
+        ]
+    }
+}

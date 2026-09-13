@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Twig;
 
 use Psr\Cache\CacheItemPoolInterface;
 use Pushword\Core\Component\EntityFilter\ValueObject\SplitContent;
 use Pushword\Core\Content\ContentPipelineFactory;
 use Pushword\Core\Entity\Page;
+use Pushword\Core\Service\ContentSplitter;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\Service\ResetInterface;
 use Twig\Attribute\AsTwigFunction;
@@ -19,6 +22,7 @@ final class ContentExtension implements ResetInterface
         private readonly ContentPipelineFactory $pipelineFactory,
         #[Autowire(service: 'cache.pushword_markdown')]
         private readonly ?CacheItemPoolInterface $tocCache = null,
+        private readonly ?ContentSplitter $splitter = null,
     ) {
     }
 
@@ -45,7 +49,7 @@ final class ContentExtension implements ResetInterface
 
         $processedContent = $this->pipelineFactory->get($page)->getMainContent();
 
-        $this->cache[$id] = new SplitContent($processedContent, $page, $this->tocCache);
+        $this->cache[$id] = $this->splitter?->split($processedContent, $page) ?? new SplitContent($processedContent, $page, $this->tocCache);
 
         return $this->cache[$id];
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\DependencyInjection;
 
 use Pushword\Core\Component\EntityFilter\Filter\Date;
@@ -137,6 +139,9 @@ final class Configuration implements ConfigurationInterface
         $treeBuilder
           ->getRootNode()
           ->children()
+          ->scalarNode('native_content_analyzer')->defaultNull()->end()
+          ->floatNode('native_content_analyzer_timeout')->defaultValue(5.0)->min(0.001)->end()
+          ->scalarNode('native_markdown_renderer')->defaultNull()->end()
           ->variableNode('app_fallback_properties')
           ->defaultValue(self::DEFAULT_APP_FALLBACK)
           ->cannotBeEmpty()

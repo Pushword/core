@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Pushword\Core\PushwordCoreBundle;
 use Pushword\Installer\PostInstall;
 use Pushword\Installer\SystemCheck;
@@ -35,7 +37,7 @@ PostInstall::replace('config/bundles.php', 'return [', 'return [
 // The starter content, not dev-app's fixtures: those are the test suite's rig, they
 // reference pages and bundles a fresh install does not have.
 @unlink('src/DataFixtures/AppFixtures.php');
-PostInstall::mirror('vendor/pushword/core/starter', 'src/DataFixtures');
+PostInstall::mirror(PostInstall::packagePath('core').'/starter', 'src/DataFixtures');
 
 // At the end: the catch-all page route must come after every other bundle's.
 echo '~~ Adding Puswhord Routes'.chr(10);

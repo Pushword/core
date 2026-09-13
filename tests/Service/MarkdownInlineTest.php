@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Pushword\Core\Tests\Service;
 
 use PHPUnit\Framework\Attributes\Group;
@@ -26,6 +28,11 @@ final class MarkdownInlineTest extends KernelTestCase
             'détaillés dans l\'<a href="#intro">article complet</a>.',
             $this->getMarkdownParser()->transformInline('détaillés dans l\'[article complet](#intro).')
         );
+    }
+
+    public function testEmptyInlineSource(): void
+    {
+        self::assertSame('', $this->getMarkdownParser()->transformInline(''));
     }
 
     public function testEmphasisAndCode(): void
