@@ -18,6 +18,7 @@ use Pushword\Core\Entity\MediaUsage;
 use Pushword\Core\Utils\SearchNormalizer;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\Service\Attribute\Required;
+use Symfony\Contracts\Service\ResetInterface;
 
 /**
  * @extends ServiceEntityRepository<Media>
@@ -28,7 +29,7 @@ use Symfony\Contracts\Service\Attribute\Required;
  * @method Media[] findAll()
  */
 #[AsDoctrineListener(event: Events::onClear)]
-class MediaRepository extends ServiceEntityRepository implements ObjectRepository, Selectable
+class MediaRepository extends ServiceEntityRepository implements ObjectRepository, Selectable, ResetInterface
 {
     use TagsRepositoryTrait;
 
@@ -63,7 +64,13 @@ class MediaRepository extends ServiceEntityRepository implements ObjectRepositor
      */
     private ?array $fileNameToId = null;
 
+    /** @var array<string, int>|null First matching owner of each former filename. */
+    private ?array $historicalFileNameToId = null;
+
     private bool $warmedLight = false;
+
+    /** @var array<array-key, Media[]> */
+    private array $searchResults = [];
 
     public function __construct(
         ManagerRegistry $registry,
@@ -146,6 +153,7 @@ class MediaRepository extends ServiceEntityRepository implements ObjectRepositor
         $this->indexVersion = $version;
         $this->warmedLight = true;
         $this->fileNameToId = null;
+        $this->historicalFileNameToId = null;
     }
 
     /**
@@ -246,10 +254,12 @@ class MediaRepository extends ServiceEntityRepository implements ObjectRepositor
 
     public function resetFileNameIndexLight(): void
     {
+        $this->reset();
         $this->fileNameIndexLight = null;
         $this->indexVersion = null;
         $this->warmedLight = false;
         $this->fileNameToId = null;
+        $this->historicalFileNameToId = null;
     }
 
     public function isWarmedLight(): bool
@@ -266,7 +276,13 @@ class MediaRepository extends ServiceEntityRepository implements ObjectRepositor
      */
     public function onClear(): void
     {
+        $this->reset();
         $this->warmedLight = false;
+    }
+
+    public function reset(): void
+    {
+        $this->searchResults = [];
     }
 
     public function loadMedias(): void
@@ -303,13 +319,18 @@ class MediaRepository extends ServiceEntityRepository implements ObjectRepositor
             return $this->resolveIndexedId($entry['id'], $fileName);
         }
 
-        foreach ($this->fileNameIndexLight ?? [] as $candidate) {
-            if (\in_array($fileName, $candidate['fileNameHistory'], true)) {
-                return $this->find($candidate['id']);
+        if (null === $this->historicalFileNameToId) {
+            $this->historicalFileNameToId = [];
+            foreach ($this->fileNameIndexLight ?? [] as $candidate) {
+                foreach ($candidate['fileNameHistory'] as $oldName) {
+                    $this->historicalFileNameToId[$oldName] ??= $candidate['id'];
+                }
             }
         }
 
-        return null;
+        $id = $this->historicalFileNameToId[$fileName] ?? null;
+
+        return null === $id ? null : $this->find($id);
     }
 
     /**
@@ -608,12 +629,18 @@ class MediaRepository extends ServiceEntityRepository implements ObjectRepositor
      */
     public function findBySearch(string $search): array
     {
+        if (isset($this->searchResults[$search])) {
+            return $this->searchResults[$search];
+        }
+
         $exp = $this->getExprToFilterMedia('m', $search);
 
-        return $this->createQueryBuilder('m')
+        $results = $this->createQueryBuilder('m')
             ->where($exp)
             ->getQuery()
             ->getResult();
+
+        return $this->searchResults[$search] = $results;
     }
 
     /**
