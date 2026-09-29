@@ -511,6 +511,41 @@ fn apply_block_attributes(root: Node<'_>) {
         let Some(first) = paragraph.first_child() else {
             continue;
         };
+        let same_line_attributes = {
+            let ast = first.data();
+            if let NodeValue::Text(text) = &ast.value {
+                parse_link_attributes(text, false).and_then(|(attrs, consumed)| {
+                    let following = &text[consumed..];
+                    let content = following.trim_start_matches([' ', '\t']);
+                    (content.len() < following.len()
+                        && (!content.is_empty() || first.next_sibling().is_some()))
+                    .then(|| (attrs, content.to_owned()))
+                })
+            } else {
+                None
+            }
+        };
+        if let Some((attributes, content)) = same_line_attributes
+            && !paragraph
+                .parent()
+                .is_some_and(|parent| matches!(parent.data().value, NodeValue::Item(_)))
+        {
+            if content.is_empty() {
+                if let Some(next) = first.next_sibling()
+                    && matches!(
+                        next.data().value,
+                        NodeValue::SoftBreak | NodeValue::LineBreak
+                    )
+                {
+                    next.detach();
+                }
+                first.detach();
+            } else if let NodeValue::Text(text) = &mut first.data_mut().value {
+                *text = Cow::Owned(content);
+            }
+            apply_attributes(paragraph, attributes);
+            continue;
+        }
         let attributes = {
             let ast = first.data();
             match &ast.value {
@@ -1126,6 +1161,41 @@ mod tests {
             "<h2>Café 🦀</h2>\n<p>Hello <strong>world</strong>.</p>\n"
         );
         assert_eq!(markdown("", ""), "");
+    }
+
+    #[test]
+    fn same_line_block_attributes_render_directly() {
+        assert_eq!(
+            markdown_if_supported("{.ico-tip} See the **photos**.", ""),
+            Some("<p class=\"ico-tip\">See the <strong>photos</strong>.</p>\n".into())
+        );
+        assert_eq!(
+            markdown_if_supported("{data-role=\"note\"} A *tip*.", ""),
+            Some("<p data-role=\"note\">A <em>tip</em>.</p>\n".into())
+        );
+        assert_eq!(
+            markdown_if_supported("{.tip #more} The **details**.", ""),
+            Some("<p class=\"tip\" id=\"more\">The <strong>details</strong>.</p>\n".into())
+        );
+        assert_eq!(
+            markdown_if_supported("{.ico-tip} **photos**", ""),
+            Some("<p class=\"ico-tip\"><strong>photos</strong></p>\n".into())
+        );
+        assert_eq!(
+            markdown_if_supported("{.ico-tip} Les **photos**.\nEncore *plus*.", ""),
+            Some(
+                "<p class=\"ico-tip\">Les <strong>photos</strong>.\nEncore <em>plus</em>.</p>\n"
+                    .into()
+            )
+        );
+        assert_eq!(
+            markdown_if_supported("{.ico-tip} # Titre", ""),
+            Some("<p class=\"ico-tip\"># Titre</p>\n".into())
+        );
+        assert_eq!(
+            markdown_if_supported("{.ico-tip}\nSee the **photos**.", ""),
+            Some("<p class=\"ico-tip\">See the <strong>photos</strong>.</p>\n".into())
+        );
     }
 
     #[test]
