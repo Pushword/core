@@ -62,6 +62,17 @@ final class TempestMarkdownRendererIntegrationTest extends KernelTestCase
         yield 'leading heading class only' => ["{.ico-star}\n## Avis"];
         yield 'same-line paragraph class' => ['{.ico-tip} Les **photos**.'];
         yield 'same-line paragraph class with soft wrap' => ["{.ico-tip} Les **photos**.\nEncore *plus*."];
+        yield 'same-line paragraph id' => ['{#photos} Les **images**.'];
+        yield 'same-line paragraph named id' => ['{id=photos} Les images.'];
+        yield 'same-line class before emphasis' => ['{.ico-tip} **photos**'];
+        yield 'same-line class before inline code' => ['{.ico-tip} `code` après'];
+        yield 'same-line class before link attributes' => ['{.a} [lien](/x){.b}'];
+        yield 'same-line class before a heading line' => ["{.ico-tip} Les photos.\n## Suite"];
+        yield 'same-line class in a blockquote' => ['> {.a} Une citation.'];
+        yield 'same-line class starting with a dash' => ['{.-a} Les photos.'];
+        yield 'same-line class starting with an underscore' => ['{._a} Les photos.'];
+        yield 'same-line id starting with a digit' => ['{#1abc} Les photos.'];
+        yield 'same-line class keeps a brace inside a line' => ['{.a} Suivez {gh:example} ici.'];
         yield 'leading table class' => ["{.table-sticky-header}\n| A | B |\n|---|---|\n| 1 | 2 |"];
         yield 'aligned table' => ["| A | B | C |\n| :--- | :--: | ---: |\n| 1 | 2 | 3 |"];
         yield 'task list' => ["- [x] Done\n- [ ] Pending"];

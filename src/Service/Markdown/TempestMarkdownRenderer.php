@@ -21,6 +21,8 @@ final readonly class TempestMarkdownRenderer
         '/\{#[^}\n]*[^\x00-\x7F][^}\n]*\}/',
         '/^#{1,6} [^\n]+\n\{[.#][^}\n]+\}$/m',
         '/(?!\A)\{(?:[.#]|[a-z][a-z0-9_-]*=)[^}\n]*\s+[^}\n]*\}/i',
+        // An attribute line followed by a line opening with `{`: CommonMark may apply both to the block.
+        '/^\{[^{}\n]+\}\n\{/m',
     ];
 
     private TempestStandaloneRenderer $standalone;
@@ -45,16 +47,7 @@ final readonly class TempestMarkdownRenderer
         }
 
         if (1 === preg_match('/\A\{(?:[.#]|[a-z][a-z0-9_-]*=)[^{}\r\n]+\}[ \t]+\S/i', $source)) {
-            if (1 === preg_match('/\A\{(?<type>\.|#|id=)(?<value>[\p{L}\p{N}_-]+)\}[ \t]+(?<text>\S[\s\S]*)\z/Du', $source, $attribute)) {
-                $html = $this->render($attribute['text']);
-                if (null !== $html && str_starts_with($html, '<p>')) {
-                    $name = '.' === $attribute['type'] ? 'class' : 'id';
-
-                    return '<p '.$name.'="'.htmlspecialchars($attribute['value'], \ENT_QUOTES | \ENT_SUBSTITUTE).'">'.substr($html, 3);
-                }
-            }
-
-            return null;
+            return $this->renderSameLineAttribute($source);
         }
 
         $standalone = $this->standalone->tryRender($source);
@@ -128,5 +121,30 @@ final readonly class TempestMarkdownRenderer
         }
 
         return htmlspecialchars($literalPrefix, \ENT_QUOTES | \ENT_SUBSTITUTE).substr($html, 3, -5);
+    }
+
+    /**
+     * Renders a paragraph opened by a single `{.class}` or `{#id}`; anything else is left to CommonMark.
+     * The class must start like a CommonMark class name, `-?[_a-zA-Z]`: CommonMark keeps any other marker as text.
+     */
+    private function renderSameLineAttribute(string $source): ?string
+    {
+        if (1 !== preg_match('/\A\{(?<type>\.(?=-?[_a-zA-Z])|#|id=)(?<value>[\p{L}\p{N}_-]+)\}[ \t]+(?<text>\S[\s\S]*)\z/Du', $source, $attribute)) {
+            return null;
+        }
+
+        // CommonMark would also apply to the paragraph any other attribute opening a line or following a space.
+        if (1 === preg_match('/(?:^|[ \t])\{:?(?:[.#]|[a-z_:][\w.:-]*=)[^{}\n]*\}/im', $attribute['text'])) {
+            return null;
+        }
+
+        $html = $this->render($attribute['text']);
+        if (null === $html || ! str_starts_with($html, '<p>')) {
+            return null;
+        }
+
+        $name = '.' === $attribute['type'] ? 'class' : 'id';
+
+        return '<p '.$name.'="'.htmlspecialchars($attribute['value'], \ENT_QUOTES | \ENT_SUBSTITUTE).'">'.substr($html, 3);
     }
 }

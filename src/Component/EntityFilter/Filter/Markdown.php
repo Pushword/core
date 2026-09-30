@@ -125,9 +125,6 @@ class Markdown implements FilterInterface
     /** @return array{string, bool} */
     private function preparePart(string $text, Manager $manager): array
     {
-        $sameLineAttribute = 1 === preg_match('/^(\{(?:[.#]|[a-z][a-z0-9_-]*=)[^{}\n]+\})[ \t]+(?=\S)/i', $text, $leadingAttribute)
-            && MarkdownUtils::startWithAttribute($leadingAttribute[1]);
-
         $lines = explode("\n", $text);
         $attribute = '';
         if (MarkdownUtils::startWithAttribute($lines[0])) {
@@ -137,6 +134,9 @@ class Markdown implements FilterInterface
         }
 
         $blockText = implode("\n", $lines);
+        // Set aside from Twig, like an attribute line: in `{#id} text`, `{#` would open a Twig comment.
+        $sameLineAttribute = $this->sameLineAttribute($blockText);
+        $blockText = substr($blockText, \strlen($sameLineAttribute));
 
         $textFiltered = null;
         if (! MarkdownUtils::isItCodeBlock($blockText)) {
@@ -157,7 +157,7 @@ class Markdown implements FilterInterface
         }
 
         if (null !== $textFiltered) {
-            if (MarkdownUtils::isItRawBlock($blockText) && ! $sameLineAttribute) {
+            if ('' === $sameLineAttribute && MarkdownUtils::isItRawBlock($blockText)) {
                 return [$textFiltered, false];
             }
 
@@ -166,9 +166,23 @@ class Markdown implements FilterInterface
             $blockText = $textFiltered;
         }
 
-        $blockText = $this->fixTypo($blockText);
+        $blockText = $this->fixTypo($sameLineAttribute.$blockText);
 
         return [trim($attribute."\n".$blockText), true];
+    }
+
+    /**
+     * The `{.class} ` prefix of a `{.class} text` paragraph, or '' when the text has none.
+     * Such a block starts with a brace, yet it is a Markdown paragraph, not a raw block.
+     */
+    private function sameLineAttribute(string $text): string
+    {
+        if (1 !== preg_match('/^(\{(?:[.#]|[a-z][a-z0-9_-]*=)[^{}\n]+\})[ \t]+(?=\S)/i', $text, $leadingAttribute)
+            || ! MarkdownUtils::startWithAttribute($leadingAttribute[1])) {
+            return '';
+        }
+
+        return $leadingAttribute[0];
     }
 
     private function fixTypo(string $text): string
