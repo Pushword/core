@@ -257,6 +257,17 @@ final class MagicLoginControllerTest extends WebTestCase
         self::assertResponseRedirects();
     }
 
+    public function testCodeRequestsCountAnIpv6NetworkAsOneClient(): void
+    {
+        $this->markUsed();
+        self::getContainer()->get('limiter.login_email')->create('2001:db8:7:1::')->consume(20);
+        $this->client->setServerParameter('REMOTE_ADDR', '2001:db8:7:1::99');
+        $crawler = $this->client->request('GET', $this->url);
+        $this->client->submit($crawler->filter('button[value="request_code"]')->form());
+        self::assertResponseStatusCodeSame(429);
+        self::assertEmailCount(0);
+    }
+
     public function testCodeRequestsAlsoUseTheIpLimit(): void
     {
         $this->markUsed();
@@ -365,6 +376,42 @@ final class MagicLoginControllerTest extends WebTestCase
         self::assertNull($this->token->loginCodeHash);
     }
 
+    public function testCodeRecoveryStillWorksJustInsideTheWindow(): void
+    {
+        $this->sentAgo(LoginToken::RECOVERY_TTL_SECONDS - 60);
+        $code = $this->requestCode();
+        $this->submitCode($this->client->getCrawler(), $code);
+        self::assertResponseRedirects();
+        self::assertSame(1, $this->reload()->sessionVersion);
+    }
+
+    public function testJustPastTheWindowTheLinkCannotRequestACode(): void
+    {
+        $this->sentAgo(LoginToken::RECOVERY_TTL_SECONDS + 1);
+        $this->client->request('GET', $this->url);
+        $this->assertSentBackToRequestANewLink();
+
+        $this->sentAgo(LoginToken::RECOVERY_TTL_SECONDS - 60);
+        $crawler = $this->client->request('GET', $this->url);
+        $this->sentAgo(LoginToken::RECOVERY_TTL_SECONDS + 1);
+        $this->client->submit($crawler->filter('button[value="request_code"]')->form());
+        $this->assertSentBackToRequestANewLink();
+        self::assertEmailCount(0);
+        self::assertNull($this->reload()->loginCodeHash);
+    }
+
+    public function testJustPastTheWindowAnIssuedCodeCannotSignIn(): void
+    {
+        $this->sentAgo(LoginToken::RECOVERY_TTL_SECONDS - 60);
+        $code = $this->requestCode();
+        $this->sentAgo(LoginToken::RECOVERY_TTL_SECONDS + 1);
+        $this->submitCode($this->client->getCrawler(), $code);
+        $this->assertSentBackToRequestANewLink();
+        self::assertSame(0, $this->reload()->sessionVersion);
+        $this->client->request('GET', '/_pushword/auth-check');
+        self::assertResponseStatusCodeSame(401);
+    }
+
     public function testUnknownAndWrongPurposeTokensCannotSendCodes(): void
     {
         $this->token->type = LoginToken::TYPE_SET_PASSWORD;
@@ -383,6 +430,22 @@ final class MagicLoginControllerTest extends WebTestCase
         $this->em->refresh($token);
 
         return $this->token = $token;
+    }
+
+    private function sentAgo(int $seconds): void
+    {
+        $token = $this->reload();
+        $token->createdAt = new DateTimeImmutable('-'.$seconds.' seconds');
+        $token->expiresAt = $token->createdAt->modify('+'.LoginToken::TTL_SECONDS.' seconds');
+
+        $this->em->flush();
+    }
+
+    private function assertSentBackToRequestANewLink(): void
+    {
+        self::assertResponseRedirects('/login');
+        $this->client->followRedirect();
+        self::assertSelectorTextContains('#login-error', 'This link has expired or has already been used.');
     }
 
     private function markUsed(): void
